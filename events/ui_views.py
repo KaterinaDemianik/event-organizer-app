@@ -16,6 +16,7 @@ from .specifications import (
     EventByLocationSpecification,
     apply_specifications,
 )
+from .strategies import get_sort_strategy, get_sort_choices
 from tickets.models import RSVP
 
 
@@ -64,8 +65,13 @@ class EventListView(ListView):
         if location:
             specs.append(EventByLocationSpecification(location))
         
-        # Застосовуємо всі специфікації
-        return apply_specifications(qs, *specs)
+        filtered_qs = apply_specifications(qs, *specs)
+
+        # Застосовуємо стратегію сортування
+        sort_slug = self.request.GET.get("sort", "date")
+        strategy = get_sort_strategy(sort_slug)
+        self._current_sort = strategy.slug
+        return strategy.sort(filtered_qs)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -73,6 +79,8 @@ class EventListView(ListView):
         ctx["status"] = self.request.GET.get("status", "")
         ctx["location"] = self.request.GET.get("location", "")
         ctx["view"] = self.request.GET.get("view", "all")
+        ctx["sort"] = getattr(self, "_current_sort", self.request.GET.get("sort", "date"))
+        ctx["sort_choices"] = get_sort_choices()
         ctx["status_choices"] = [
             (Event.DRAFT, "Чернетка"),
             (Event.PUBLISHED, "Опубліковано"),

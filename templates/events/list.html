@@ -14,7 +14,7 @@
   </div>
 
   <div class="filters-card card">
-    <form class="filters {% if q or status %}has-reset{% endif %}" method="get">
+    <form class="filters {% if q or status or sort != 'date' %}has-reset{% endif %}" method="get">
       <input type="hidden" name="view" value="{{ view }}" />
       <input type="search" name="q" value="{{ q }}" placeholder="Пошук подій..." />
       <select name="status">
@@ -23,8 +23,15 @@
           <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
       </select>
+      <select name="sort" aria-label="Сортування" title="Сортування">
+        {% for option in sort_choices %}
+          <option value="{{ option.slug }}" {% if sort == option.slug %}selected{% endif %}>{{ option.label }}</option>
+        {% endfor %}
+      </select>
       <button type="submit">Фільтрувати</button>
-      {% if q or status %}<a role="button" class="secondary" href="/?view={{ view }}" style="height:40px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;">Скинути</a>{% endif %}
+      {% if q or status or sort != 'date' %}
+        <a role="button" class="secondary" href="/?view={{ view }}" style="height:40px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;">Скинути</a>
+      {% endif %}
     </form>
   </div>
 
@@ -65,15 +72,15 @@
     <nav class="pagination" aria-label="Pagination">
       <ul>
         {% if page_obj.has_previous %}
-          <li><a href="?page=1{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}">&laquo; Перша</a></li>
-          <li><a href="?page={{ page_obj.previous_page_number }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}">← Попередня</a></li>
+          <li><a href="?page=1{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">&laquo; Перша</a></li>
+          <li><a href="?page={{ page_obj.previous_page_number }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">← Попередня</a></li>
         {% endif %}
         
         <li class="current">Сторінка {{ page_obj.number }} з {{ page_obj.paginator.num_pages }}</li>
         
         {% if page_obj.has_next %}
-          <li><a href="?page={{ page_obj.next_page_number }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}">Наступна →</a></li>
-          <li><a href="?page={{ page_obj.paginator.num_pages }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}">Остання &raquo;</a></li>
+          <li><a href="?page={{ page_obj.next_page_number }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">Наступна →</a></li>
+          <li><a href="?page={{ page_obj.paginator.num_pages }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">Остання &raquo;</a></li>
         {% endif %}
       </ul>
     </nav>
