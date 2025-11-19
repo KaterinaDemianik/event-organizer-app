@@ -1,0 +1,49 @@
+"""
+URL configuration for event_organizer project.
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/5.2/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+
+from django.contrib import admin
+from django.urls import path, include
+from django.contrib.auth import views as auth_views
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from django.views.generic.base import RedirectView
+
+urlpatterns = [
+    # UI routes
+    path("", include("events.ui_urls")),
+    # Custom auth views (login, signup, profile)
+    path("accounts/", include("users.urls")),
+    # Django auth views (logout, password reset, etc.) - без login
+    path("accounts/logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("accounts/password_change/", auth_views.PasswordChangeView.as_view(), name="password_change"),
+    path("accounts/password_change/done/", auth_views.PasswordChangeDoneView.as_view(), name="password_change_done"),
+    path("accounts/password_reset/", auth_views.PasswordResetView.as_view(), name="password_reset"),
+    path("accounts/password_reset/done/", auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
+    path("accounts/reset/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
+    path("accounts/reset/done/", auth_views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
+    path("admin/", admin.site.urls),
+    # API schema and docs
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    # App routes
+    path("api/users/", include("users.urls")),
+    path("api/events/", include("events.urls")),
+    path("api/tickets/", include("tickets.urls")),
+    path("api/orders/", include("orders.urls")),
+    path("api/notifications/", include("notifications.urls")),
+    path("api/catalog/", include("catalog.urls")),
+]
