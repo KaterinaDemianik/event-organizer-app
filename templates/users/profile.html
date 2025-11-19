@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Профіль · Event Organizer{% endblock %}
+{% block content %}
+  <h1>Профіль</h1>
+  <article class="card">
+    <h3>{{ user_obj.username }}</h3>
+    <p class="muted">RSVP: {{ rsvp_count }} · Мої події: {{ my_events_count }}</p>
+  </article>
+
+  <div class="grid" style="margin-top: 12px;">
+    <article class="card">
+      <h4>Останні RSVP</h4>
+      <ul>
+        {% for r in recent_rsvps %}
+          <li><a href="/events/{{ r.event.id }}/">{{ r.event.title }}</a> — {{ r.created_at }}</li>
+        {% empty %}
+          <li class="muted">Немає</li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <article class="card">
+      <h4>Останні створені події</h4>
+      <ul>
+        {% for e in recent_events %}
+          <li><a href="/events/{{ e.id }}/">{{ e.title }}</a> — {{ e.created_at }}</li>
+        {% empty %}
+          <li class="muted">Немає</li>
+        {% endfor %}
+      </ul>
+    </article>
+  </div>
+{% endblock %}
