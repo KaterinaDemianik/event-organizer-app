@@ -84,36 +84,72 @@
     <div style="margin-bottom: 16px;">
       <a role="button" href="/events/create/">➕ Створити подію</a>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Назва</th>
-          <th>Організатор</th>
-          <th>Статус</th>
-          <th>RSVP</th>
-          <th>Дата</th>
-          <th>Дії</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for event in recent_events %}
+    
+    <!-- Фільтри -->
+    <div class="filters-card card">
+      <form class="filters" method="get">
+        <input type="hidden" name="tab" value="events" />
+        <input type="search" name="q" value="{{ q }}" placeholder="Пошук подій..." />
+        <select name="status">
+          <option value="">Статус: всі</option>
+          <option value="draft" {% if status == 'draft' %}selected{% endif %}>Чернетка</option>
+          <option value="published" {% if status == 'published' %}selected{% endif %}>Опубліковано</option>
+          <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Скасовано</option>
+          <option value="archived" {% if status == 'archived' %}selected{% endif %}>Архів</option>
+        </select>
+        <select name="organizer">
+          <option value="">Всі організатори</option>
+          {% for user in all_users %}
+            <option value="{{ user.id }}" {% if organizer == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit">Фільтрувати</button>
+        {% if q or status or organizer %}
+          <a role="button" class="secondary" href="/?tab=events">Скинути</a>
+        {% endif %}
+      </form>
+    </div>
+    
+    {% if q or status or organizer %}
+      <p style="margin: 12px 0; color: var(--muted);">Знайдено подій: <strong>{{ events_count }}</strong></p>
+    {% endif %}
+    
+    {% if recent_events %}
+      <table>
+        <thead>
           <tr>
-            <td><a href="/events/{{ event.id }}/">{{ event.title }}</a></td>
-            <td>{{ event.organizer.username }}</td>
-            <td><span class="badge {{ event.status }}">{{ event.get_status_display }}</span></td>
-            <td><strong>{{ event.rsvp_count|default:0 }}</strong></td>
-            <td>{{ event.starts_at|date:"d.m.Y H:i" }}</td>
-            <td>
-              <a href="/events/{{ event.id }}/participants/">👥</a>
-              <a href="/events/{{ event.id }}/edit/">✏️</a>
-              {% if event.status != 'cancelled' %}
-                <a href="/events/{{ event.id }}/cancel/" onclick="return confirm('Скасувати?')">🚫</a>
-              {% endif %}
-            </td>
+            <th>Назва</th>
+            <th>Організатор</th>
+            <th>Статус</th>
+            <th>RSVP</th>
+            <th>Дата</th>
+            <th>Дії</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for event in recent_events %}
+            <tr>
+              <td><a href="/events/{{ event.id }}/">{{ event.title }}</a></td>
+              <td>{{ event.organizer.username }}</td>
+              <td><span class="badge {{ event.status }}">{{ event.get_status_display }}</span></td>
+              <td><strong>{{ event.rsvp_count|default:0 }}</strong></td>
+              <td>{{ event.starts_at|date:"d.m.Y H:i" }}</td>
+              <td>
+                <a href="/events/{{ event.id }}/participants/">👥</a>
+                <a href="/events/{{ event.id }}/edit/">✏️</a>
+                {% if event.status != 'cancelled' %}
+                  <a href="/events/{{ event.id }}/cancel/" onclick="return confirm('Скасувати?')">🚫</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="flash info" style="margin: 20px 0;">
+        Подій не знайдено. Спробуйте змінити фільтри або <a href="/?tab=events">скинути</a> їх.
+      </div>
+    {% endif %}
   </div>
   {% endif %}
 

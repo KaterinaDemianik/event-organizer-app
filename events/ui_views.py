@@ -51,18 +51,45 @@ def home_view(request):
         
         tab = request.GET.get('tab', 'stats')
         
+        # Параметри фільтрації для вкладки "Події"
+        q = request.GET.get('q', '')
+        status_filter = request.GET.get('status', '')
+        organizer_filter = request.GET.get('organizer', '')
+        
+        # Фільтруємо події для вкладки "Події"
+        events_qs = Event.objects.annotate(rsvp_count=Count('rsvps'))
+        if tab == 'events':
+            if q:
+                events_qs = events_qs.filter(
+                    Q(title__icontains=q) | 
+                    Q(description__icontains=q) | 
+                    Q(location__icontains=q)
+                )
+            if status_filter:
+                events_qs = events_qs.filter(status=status_filter)
+            if organizer_filter:
+                events_qs = events_qs.filter(organizer_id=organizer_filter)
+        
+        events_count = events_qs.count()
+        recent_events = events_qs.order_by('-created_at')[:100]
+        
         top_events = Event.objects.annotate(rsvp_count=Count('rsvps')).order_by('-rsvp_count')[:5]
-        recent_events = Event.objects.annotate(rsvp_count=Count('rsvps')).order_by('-created_at')[:50]
         recent_users = User.objects.order_by('-date_joined')[:50]
         recent_rsvps = RSVP.objects.select_related('user', 'event').order_by('-created_at')[:50]
+        all_users = User.objects.all().order_by('username')
         
         context = {
             'tab': tab,
             'stats': stats,
             'top_events': top_events,
             'recent_events': recent_events,
+            'events_count': events_count,
             'recent_users': recent_users,
             'recent_rsvps': recent_rsvps,
+            'all_users': all_users,
+            'q': q,
+            'status': status_filter,
+            'organizer': organizer_filter,
         }
         
         return render(request, 'admin_home.html', context)
