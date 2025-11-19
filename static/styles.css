@@ -99,6 +99,12 @@ button.primary:hover, [role="button"].primary:hover {
 .flash.warning { background:#fff7e6; color:#7a4a00; border:1px solid #ffe2ad; }
 
 /* Header */
+header.container { 
+  max-width: var(--content-width) !important;
+  padding-left: 16px !important; 
+  padding-right: 16px !important;
+  margin: 0 auto !important;
+}
 .topbar { 
   display: flex; 
   justify-content: space-between; 
@@ -107,7 +113,7 @@ button.primary:hover, [role="button"].primary:hover {
 }
 .topbar ul { 
   display: flex; 
-  gap: 20px; 
+  gap: 16px; 
   list-style: none; 
   margin: 0; 
   padding: 0; 
@@ -128,8 +134,8 @@ button.primary:hover, [role="button"].primary:hover {
   white-space: nowrap;
 }
 .topbar a:hover { color: var(--link); }
-.topbar .brand { font-weight: 700; font-size: 18px; }
-.topbar .nav-link { font-size: 14px; }
+.topbar .brand { font-weight: 700; font-size: 20px; }
+.topbar .nav-link { font-size: 15px; }
 .topbar .nav-link.active { color: var(--link); font-weight: 600; }
 .topbar .muted { 
   font-size: 13px; 

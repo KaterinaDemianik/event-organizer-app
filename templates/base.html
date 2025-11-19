@@ -8,8 +8,8 @@
   <link rel="icon" type="image/png" href="/static/favicon.png" />
   <meta name="theme-color" content="#1158c7" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
-  <link rel="stylesheet" href="/static/styles.css" />
-  <script defer src="/static/app.js"></script>
+  <link rel="stylesheet" href="/static/styles.css?v=7" />
+  <script defer src="/static/app.js?v=2"></script>
 </head>
 <body>
   <header class="container">
@@ -21,12 +21,12 @@
         {% if user.is_authenticated %}
           <li><a class="nav-link {% if request.path == '/accounts/profile/' %}active{% endif %}" href="/accounts/profile/">Профіль</a></li>
         {% endif %}
+      </ul>
+      <ul>
         {% if user.is_staff %}
           <li><a class="nav-link {% if '/api/docs' in request.path %}active{% endif %}" href="/api/docs/" target="_blank">API Docs</a></li>
           <li><a class="nav-link" href="/admin/" target="_blank">Admin</a></li>
         {% endif %}
-      </ul>
-      <ul>
         {% if user.is_authenticated %}
           <li class="muted">Ви увійшли як {{ user.username }}</li>
           <li><a href="#" onclick="document.getElementById('logout-form').submit(); return false;">Вийти</a></li>
