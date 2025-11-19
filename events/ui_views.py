@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.db.models import Count, Q
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
-from datetime import timedelta
+from datetime import timedelta, date
 
 from .models import Event
 from .forms import EventForm
@@ -55,23 +55,75 @@ def home_view(request):
         q = request.GET.get('q', '')
         status_filter = request.GET.get('status', '')
         organizer_filter = request.GET.get('organizer', '')
+        date_filter = request.GET.get('date_filter', '')
+        popularity_filter = request.GET.get('popularity', '')
+        sort_by = request.GET.get('sort', 'date_desc')
         
         # Фільтруємо події для вкладки "Події"
         events_qs = Event.objects.annotate(rsvp_count=Count('rsvps'))
         if tab == 'events':
+            # Пошук
             if q:
                 events_qs = events_qs.filter(
                     Q(title__icontains=q) | 
                     Q(description__icontains=q) | 
                     Q(location__icontains=q)
                 )
+            # Статус
             if status_filter:
                 events_qs = events_qs.filter(status=status_filter)
+            # Організатор
             if organizer_filter:
                 events_qs = events_qs.filter(organizer_id=organizer_filter)
+            
+            # Фільтр по даті
+            if date_filter:
+                today = timezone.now().date()
+                
+                if date_filter == 'upcoming':
+                    events_qs = events_qs.filter(starts_at__gte=timezone.now())
+                elif date_filter == 'today':
+                    events_qs = events_qs.filter(
+                        starts_at__date=today
+                    )
+                elif date_filter == 'past':
+                    events_qs = events_qs.filter(ends_at__lt=timezone.now())
+                elif date_filter == 'this_week':
+                    week_start = today - timedelta(days=today.weekday())
+                    week_end = week_start + timedelta(days=7)
+                    events_qs = events_qs.filter(
+                        starts_at__date__gte=week_start,
+                        starts_at__date__lt=week_end
+                    )
+                elif date_filter == 'this_month':
+                    events_qs = events_qs.filter(
+                        starts_at__year=today.year,
+                        starts_at__month=today.month
+                    )
+            
+            # Фільтр по популярності
+            if popularity_filter:
+                if popularity_filter == 'popular':
+                    events_qs = events_qs.filter(rsvp_count__gte=5)
+                elif popularity_filter == 'medium':
+                    events_qs = events_qs.filter(rsvp_count__gte=1, rsvp_count__lt=5)
+                elif popularity_filter == 'none':
+                    events_qs = events_qs.filter(rsvp_count=0)
+            
+            # Сортування
+            if sort_by == 'date_desc':
+                events_qs = events_qs.order_by('-created_at')
+            elif sort_by == 'date_asc':
+                events_qs = events_qs.order_by('created_at')
+            elif sort_by == 'popular':
+                events_qs = events_qs.order_by('-rsvp_count', '-created_at')
+            elif sort_by == 'alphabet':
+                events_qs = events_qs.order_by('title')
+            elif sort_by == 'event_date':
+                events_qs = events_qs.order_by('starts_at')
         
         events_count = events_qs.count()
-        recent_events = events_qs.order_by('-created_at')[:100]
+        recent_events = events_qs[:100]
         
         top_events = Event.objects.annotate(rsvp_count=Count('rsvps')).order_by('-rsvp_count')[:5]
         recent_users = User.objects.order_by('-date_joined')[:50]
@@ -90,6 +142,9 @@ def home_view(request):
             'q': q,
             'status': status_filter,
             'organizer': organizer_filter,
+            'date_filter': date_filter,
+            'popularity': popularity_filter,
+            'sort': sort_by,
         }
         
         return render(request, 'admin_home.html', context)
@@ -144,9 +199,52 @@ class EventListView(ListView):
             specs.append(EventByLocationSpecification(location))
         
         filtered_qs = apply_specifications(qs, *specs)
+        
+        # Фільтр по даті
+        date_filter = self.request.GET.get("date_filter")
+        if date_filter:
+            today = timezone.now().date()
+            
+            if date_filter == 'upcoming':
+                filtered_qs = filtered_qs.filter(starts_at__gte=timezone.now())
+            elif date_filter == 'today':
+                filtered_qs = filtered_qs.filter(starts_at__date=today)
+            elif date_filter == 'this_week':
+                week_start = today - timedelta(days=today.weekday())
+                week_end = week_start + timedelta(days=7)
+                filtered_qs = filtered_qs.filter(
+                    starts_at__date__gte=week_start,
+                    starts_at__date__lt=week_end
+                )
+            elif date_filter == 'this_month':
+                filtered_qs = filtered_qs.filter(
+                    starts_at__year=today.year,
+                    starts_at__month=today.month
+                )
+        
+        # Фільтр по популярності
+        popularity = self.request.GET.get("popularity")
+        if popularity:
+            if popularity == 'popular':
+                filtered_qs = filtered_qs.filter(rsvp_count__gte=5)
+            elif popularity == 'medium':
+                filtered_qs = filtered_qs.filter(rsvp_count__gte=1, rsvp_count__lt=5)
+            elif popularity == 'none':
+                filtered_qs = filtered_qs.filter(rsvp_count=0)
 
         # Застосовуємо стратегію сортування
         sort_slug = self.request.GET.get("sort", "date")
+        
+        # Додаткові варіанти сортування
+        if sort_slug == "popular":
+            return filtered_qs.order_by('-rsvp_count', '-created_at')
+        elif sort_slug == "alphabet":
+            return filtered_qs.order_by('title')
+        elif sort_slug == "event_date":
+            return filtered_qs.order_by('starts_at')
+        elif sort_slug == "rsvp_count":
+            return filtered_qs.order_by('-rsvp_count')
+        
         strategy = get_sort_strategy(sort_slug)
         self._current_sort = strategy.slug
         return strategy.sort(filtered_qs)
@@ -157,6 +255,8 @@ class EventListView(ListView):
         ctx["status"] = self.request.GET.get("status", "")
         ctx["location"] = self.request.GET.get("location", "")
         ctx["view"] = self.request.GET.get("view", "all")
+        ctx["date_filter"] = self.request.GET.get("date_filter", "")
+        ctx["popularity"] = self.request.GET.get("popularity", "")
         ctx["sort"] = getattr(self, "_current_sort", self.request.GET.get("sort", "date"))
         ctx["sort_choices"] = get_sort_choices()
         ctx["status_choices"] = [

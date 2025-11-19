@@ -274,6 +274,24 @@ input[type="search"]::-webkit-search-results-decoration { -webkit-appearance: no
 .pagination a:hover { background:var(--link); color:#fff; border-color:var(--link); }
 .pagination .current { padding:6px 12px; color:var(--muted); font-size:14px; }
 
+/* Filters alignment */
+.filters-card input[type="search"],
+.filters-card select,
+.filters-card button,
+.filters-card a[role="button"] {
+  min-height: 48px;
+  height: auto;
+  box-sizing: border-box;
+}
+
+.filters-card button,
+.filters-card a[role="button"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+}
+
 /* Admin Dashboard */
 .stats-grid {
   display: grid;
@@ -330,6 +348,11 @@ input[type="search"]::-webkit-search-results-decoration { -webkit-appearance: no
   .filters { grid-template-columns: 1fr; max-width: none; margin: 0 auto; }
   .card-title { flex-direction: column; align-items: flex-start; gap: 6px; }
   .topbar .brand { margin-left: 0; font-size: 20px; margin-right: 12px; }
+  
+  /* Адаптивні фільтри */
+  .filters-card form > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 @media (max-width: 1024px) and (min-width: 641px) {

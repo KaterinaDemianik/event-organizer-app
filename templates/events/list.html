@@ -14,24 +14,66 @@
   </div>
 
   <div class="filters-card card">
-    <form class="filters {% if q or status or sort != 'date' %}has-reset{% endif %}" method="get">
+    <form method="get">
       <input type="hidden" name="view" value="{{ view }}" />
-      <input type="search" name="q" value="{{ q }}" placeholder="Пошук подій..." />
-      <select name="status">
-        <option value="">Статус: всі</option>
-        {% for val,label in status_choices %}
-          <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-      <select name="sort" aria-label="Сортування" title="Сортування">
-        {% for option in sort_choices %}
-          <option value="{{ option.slug }}" {% if sort == option.slug %}selected{% endif %}>{{ option.label }}</option>
-        {% endfor %}
-      </select>
-      <button type="submit">Фільтрувати</button>
-      {% if q or status or sort != 'date' %}
-        <a role="button" class="secondary" href="/?view={{ view }}" style="height:40px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;">Скинути</a>
-      {% endif %}
+      
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; align-items: end;">
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🔍 Пошук</label>
+          <input type="search" name="q" value="{{ q }}" placeholder="Пошук..." />
+        </div>
+        
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📊 Статус</label>
+          <select name="status">
+            <option value="">Всі</option>
+            {% for val,label in status_choices %}
+              <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📅 Дата</label>
+          <select name="date_filter">
+            <option value="">Всі</option>
+            <option value="upcoming" {% if date_filter == 'upcoming' %}selected{% endif %}>Майбутні</option>
+            <option value="today" {% if date_filter == 'today' %}selected{% endif %}>Сьогодні</option>
+            <option value="this_week" {% if date_filter == 'this_week' %}selected{% endif %}>Цей тиждень</option>
+            <option value="this_month" {% if date_filter == 'this_month' %}selected{% endif %}>Цей місяць</option>
+          </select>
+        </div>
+        
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📈 Популярність</label>
+          <select name="popularity">
+            <option value="">Всі</option>
+            <option value="popular" {% if popularity == 'popular' %}selected{% endif %}>Популярні (5+)</option>
+            <option value="medium" {% if popularity == 'medium' %}selected{% endif %}>Середні (1-4)</option>
+            <option value="none" {% if popularity == 'none' %}selected{% endif %}>Без RSVP</option>
+          </select>
+        </div>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px;">
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🔄 Сортування</label>
+          <select name="sort">
+            <option value="date" {% if sort == 'date' or not sort %}selected{% endif %}>За датою створення</option>
+            <option value="popular" {% if sort == 'popular' %}selected{% endif %}>По популярності</option>
+            <option value="alphabet" {% if sort == 'alphabet' %}selected{% endif %}>За алфавітом</option>
+            <option value="event_date" {% if sort == 'event_date' %}selected{% endif %}>По даті події</option>
+            <option value="rsvp_count" {% if sort == 'rsvp_count' %}selected{% endif %}>По кількості RSVP</option>
+          </select>
+        </div>
+        
+        <div style="display: flex; gap: 8px; padding-top: 26px;">
+          <button type="submit">Застосувати</button>
+          {% if q or status or date_filter or popularity or sort != 'date' %}
+            <a role="button" class="secondary" href="/events/?view={{ view }}">Скинути</a>
+          {% endif %}
+        </div>
+      </div>
     </form>
   </div>
 

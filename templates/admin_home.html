@@ -87,31 +87,95 @@
     
     <!-- Фільтри -->
     <div class="filters-card card">
-      <form class="filters" method="get">
+      <form method="get">
         <input type="hidden" name="tab" value="events" />
-        <input type="search" name="q" value="{{ q }}" placeholder="Пошук подій..." />
-        <select name="status">
-          <option value="">Статус: всі</option>
-          <option value="draft" {% if status == 'draft' %}selected{% endif %}>Чернетка</option>
-          <option value="published" {% if status == 'published' %}selected{% endif %}>Опубліковано</option>
-          <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Скасовано</option>
-          <option value="archived" {% if status == 'archived' %}selected{% endif %}>Архів</option>
-        </select>
-        <select name="organizer">
-          <option value="">Всі організатори</option>
-          {% for user in all_users %}
-            <option value="{{ user.id }}" {% if organizer == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
-          {% endfor %}
-        </select>
-        <button type="submit">Фільтрувати</button>
-        {% if q or status or organizer %}
-          <a role="button" class="secondary" href="/?tab=events">Скинути</a>
-        {% endif %}
+        
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 12px; align-items: end;">
+          <div>
+            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🔍 Пошук</label>
+            <input type="search" name="q" value="{{ q }}" placeholder="Пошук..." />
+          </div>
+          
+          <div>
+            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📊 Статус</label>
+            <select name="status">
+              <option value="">Всі</option>
+              <option value="draft" {% if status == 'draft' %}selected{% endif %}>Чернетка</option>
+              <option value="published" {% if status == 'published' %}selected{% endif %}>Опубліковано</option>
+              <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Скасовано</option>
+              <option value="archived" {% if status == 'archived' %}selected{% endif %}>Архів</option>
+            </select>
+          </div>
+          
+          <div>
+            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">👤 Організатор</label>
+            <select name="organizer">
+              <option value="">Всі</option>
+              {% for user in all_users %}
+                <option value="{{ user.id }}" {% if organizer == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div>
+            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📅 Дата</label>
+            <select name="date_filter">
+              <option value="">Всі</option>
+              <option value="upcoming" {% if date_filter == 'upcoming' %}selected{% endif %}>Майбутні</option>
+              <option value="today" {% if date_filter == 'today' %}selected{% endif %}>Сьогодні</option>
+              <option value="past" {% if date_filter == 'past' %}selected{% endif %}>Минулі</option>
+              <option value="this_week" {% if date_filter == 'this_week' %}selected{% endif %}>Цей тиждень</option>
+              <option value="this_month" {% if date_filter == 'this_month' %}selected{% endif %}>Цей місяць</option>
+            </select>
+          </div>
+          
+          <div>
+            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📈 Популярність</label>
+            <select name="popularity">
+              <option value="">Всі</option>
+              <option value="popular" {% if popularity == 'popular' %}selected{% endif %}>Популярні (5+)</option>
+              <option value="medium" {% if popularity == 'medium' %}selected{% endif %}>Середні (1-4)</option>
+              <option value="none" {% if popularity == 'none' %}selected{% endif %}>Без RSVP</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px;">
+          <div>
+            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🔄 Сортування</label>
+            <select name="sort">
+              <option value="date_desc" {% if sort == 'date_desc' or not sort %}selected{% endif %}>Найновіші</option>
+              <option value="date_asc" {% if sort == 'date_asc' %}selected{% endif %}>Найстаріші</option>
+              <option value="popular" {% if sort == 'popular' %}selected{% endif %}>По популярності</option>
+              <option value="alphabet" {% if sort == 'alphabet' %}selected{% endif %}>За алфавітом</option>
+              <option value="event_date" {% if sort == 'event_date' %}selected{% endif %}>По даті події</option>
+            </select>
+          </div>
+          
+          <div style="display: flex; gap: 8px; padding-top: 26px;">
+            <button type="submit">Застосувати</button>
+            {% if q or status or organizer or date_filter or popularity or sort %}
+              <a role="button" class="secondary" href="/?tab=events">Скинути</a>
+            {% endif %}
+          </div>
+        </div>
       </form>
     </div>
     
-    {% if q or status or organizer %}
-      <p style="margin: 12px 0; color: var(--muted);">Знайдено подій: <strong>{{ events_count }}</strong></p>
+    {% if q or status or organizer or date_filter or popularity or sort %}
+      <p style="margin: 12px 0; color: var(--muted);">
+        Знайдено подій: <strong>{{ events_count }}</strong>
+        {% if sort %}
+          <span style="margin-left: 12px;">
+            Сортування: 
+            {% if sort == 'date_desc' %}Найновіші{% endif %}
+            {% if sort == 'date_asc' %}Найстаріші{% endif %}
+            {% if sort == 'popular' %}По популярності{% endif %}
+            {% if sort == 'alphabet' %}За алфавітом{% endif %}
+            {% if sort == 'event_date' %}По даті події{% endif %}
+          </span>
+        {% endif %}
+      </p>
     {% endif %}
     
     {% if recent_events %}
