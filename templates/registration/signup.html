@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Реєстрація · Event Organizer{% endblock %}
+{% block content %}
+  <section class="auth-wrap">
+    <article class="card">
+      <h1>Реєстрація</h1>
+      
+      {% if form.errors %}
+        <div class="flash error">
+          <strong>❌ Помилка реєстрації</strong>
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <p style="margin:4px 0 0;">{{ error }}</p>
+            {% endfor %}
+          {% endfor %}
+        </div>
+      {% endif %}
+      
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="primary">Створити обліковий запис</button>
+        <p class="muted">Вже маєте акаунт? <a href="/accounts/login/">Увійти</a></p>
+      </form>
+    </article>
+  </section>
+{% endblock %}

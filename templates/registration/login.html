@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Вхід · Event Organizer{% endblock %}
+{% block content %}
+  <section class="auth-wrap">
+    <article class="card">
+      <h1>Вхід</h1>
+      
+      {% if form.errors %}
+        <div class="flash error" style="background:#ffe6e6; color:#7a0b0b; border:1px solid #ffbfbf; padding:12px; border-radius:8px; margin-bottom:16px;">
+          <strong>❌ Помилка входу</strong>
+          <p style="margin:4px 0 0;">Невірний логін або пароль. Перевірте дані та спробуйте ще раз.</p>
+        </div>
+      {% endif %}
+      
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+        
+        <label for="id_username">Логін</label>
+        <input type="text" name="username" required id="id_username" placeholder="username" value="{{ form.username.value|default:'' }}" autofocus />
+        
+        <label for="id_password">Пароль</label>
+        <input type="password" name="password" required id="id_password" placeholder="••••••••" />
+        
+        <button type="submit" class="primary">Увійти</button>
+        <p class="muted">Немає акаунта? <a href="/accounts/signup/">Зареєструватися</a></p>
+      </form>
+    </article>
+  </section>
+{% endblock %}
