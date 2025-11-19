@@ -13,6 +13,62 @@
 
   {% if tab == 'stats' or not tab %}
   <!-- Статистика -->
+  
+  <!-- Фільтр періоду -->
+  <div class="filters-card card" style="margin-bottom: 24px;">
+    <form method="get">
+      <input type="hidden" name="tab" value="stats" />
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px;">
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📅 Швидкий вибір</label>
+          <select name="period" id="period-select">
+            <option value="all" {% if period == 'all' or not period %}selected{% endif %}>За весь час</option>
+            <option value="today" {% if period == 'today' %}selected{% endif %}>Сьогодні</option>
+            <option value="week" {% if period == 'week' %}selected{% endif %}>За тиждень</option>
+            <option value="month" {% if period == 'month' %}selected{% endif %}>За місяць</option>
+            <option value="quarter" {% if period == 'quarter' %}selected{% endif %}>За квартал</option>
+            <option value="year" {% if period == 'year' %}selected{% endif %}>За рік</option>
+            <option value="custom" {% if period == 'custom' %}selected{% endif %}>Власний період</option>
+          </select>
+        </div>
+        
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📆 Від</label>
+          <input type="date" name="date_from" value="{{ date_from }}" id="date-from" />
+        </div>
+        
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📆 До</label>
+          <input type="date" name="date_to" value="{{ date_to }}" id="date-to" />
+        </div>
+        
+        <div style="padding-top: 26px; display: flex; gap: 8px;">
+          <button type="submit">Оновити</button>
+          {% if date_from or date_to or period and period != 'all' %}
+            <a role="button" class="secondary" href="/?tab=stats">Скинути</a>
+          {% endif %}
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <script>
+    // Автоматично переключаємо на "Власний період" при зміні дат
+    document.getElementById('date-from')?.addEventListener('change', function() {
+      document.getElementById('period-select').value = 'custom';
+    });
+    document.getElementById('date-to')?.addEventListener('change', function() {
+      document.getElementById('period-select').value = 'custom';
+    });
+  </script>
+  
+  {% if period and period != 'all' %}
+    <p style="margin: 16px 0; color: var(--muted); text-align: center;">
+      Статистика <strong>{{ stats.period_label }}</strong>
+    </p>
+  {% endif %}
+  
   <div class="stats-grid">
     <div class="stat-card">
       <h3>🎫 Події</h3>

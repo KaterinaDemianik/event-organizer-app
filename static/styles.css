@@ -276,11 +276,11 @@ input[type="search"]::-webkit-search-results-decoration { -webkit-appearance: no
 
 /* Filters alignment */
 .filters-card input[type="search"],
+.filters-card input[type="date"],
 .filters-card select,
 .filters-card button,
 .filters-card a[role="button"] {
-  min-height: 48px;
-  height: auto;
+  height: 48px;
   box-sizing: border-box;
 }
 
@@ -289,7 +289,8 @@ input[type="search"]::-webkit-search-results-decoration { -webkit-appearance: no
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 20px;
+  padding: 0 20px;
+  white-space: nowrap;
 }
 
 /* Admin Dashboard */

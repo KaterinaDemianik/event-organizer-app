@@ -29,24 +29,92 @@ def home_view(request):
     """Головна сторінка - адмін панель для staff, список подій для користувачів"""
     
     if request.user.is_authenticated and request.user.is_staff:
-        # Адмін бачить статистику
+        # Статистика з фільтром по періоду
+        from django.utils import timezone
+        
         now = timezone.now()
+        today = now.date()
+        
+        # Отримуємо період фільтрації
+        period = request.GET.get('period', 'all')
+        date_from = request.GET.get('date_from', '')
+        date_to = request.GET.get('date_to', '')
+        
+        # Визначаємо дати для фільтрації
+        if period == 'custom' and date_from:
+            # Власний період
+            from datetime import datetime
+            try:
+                start_date = timezone.make_aware(datetime.strptime(date_from, '%Y-%m-%d'))
+                if date_to:
+                    end_date = timezone.make_aware(datetime.strptime(date_to, '%Y-%m-%d'))
+                    end_date = end_date.replace(hour=23, minute=59, second=59)
+                    period_label = f"з {date_from} по {date_to}"
+                else:
+                    end_date = now
+                    period_label = f"з {date_from}"
+            except ValueError:
+                start_date = None
+                end_date = None
+                period_label = "за весь час"
+        elif period == 'today':
+            start_date = timezone.make_aware(timezone.datetime.combine(today, timezone.datetime.min.time()))
+            end_date = now
+            period_label = "сьогодні"
+        elif period == 'week':
+            start_date = now - timedelta(days=7)
+            end_date = now
+            period_label = "за тиждень"
+        elif period == 'month':
+            start_date = now - timedelta(days=30)
+            end_date = now
+            period_label = "за місяць"
+        elif period == 'quarter':
+            start_date = now - timedelta(days=90)
+            end_date = now
+            period_label = "за квартал"
+        elif period == 'year':
+            start_date = now - timedelta(days=365)
+            end_date = now
+            period_label = "за рік"
+        else:  # 'all'
+            start_date = None
+            end_date = None
+            period_label = "за весь час"
+        
+        # Базові queryset'и з фільтрацією
+        if start_date:
+            events_qs = Event.objects.filter(created_at__gte=start_date)
+            users_qs = User.objects.filter(date_joined__gte=start_date)
+            rsvps_qs = RSVP.objects.filter(created_at__gte=start_date)
+            
+            if end_date:
+                events_qs = events_qs.filter(created_at__lte=end_date)
+                users_qs = users_qs.filter(date_joined__lte=end_date)
+                rsvps_qs = rsvps_qs.filter(created_at__lte=end_date)
+        else:
+            events_qs = Event.objects.all()
+            users_qs = User.objects.all()
+            rsvps_qs = RSVP.objects.all()
+        
         week_ago = now - timedelta(days=7)
         month_ago = now - timedelta(days=30)
         
         stats = {
-            'total_events': Event.objects.count(),
-            'published_events': Event.objects.filter(status=Event.PUBLISHED).count(),
-            'upcoming_events': Event.objects.filter(starts_at__gte=now, status=Event.PUBLISHED).count(),
-            'archived_events': Event.objects.filter(status=Event.ARCHIVED).count(),
+            'total_events': events_qs.count(),
+            'published_events': events_qs.filter(status=Event.PUBLISHED).count(),
+            'upcoming_events': events_qs.filter(starts_at__gte=now, status=Event.PUBLISHED).count(),
+            'archived_events': events_qs.filter(status=Event.ARCHIVED).count(),
             
-            'total_users': User.objects.count(),
-            'new_users_week': User.objects.filter(date_joined__gte=week_ago).count(),
-            'new_users_month': User.objects.filter(date_joined__gte=month_ago).count(),
+            'total_users': users_qs.count(),
+            'new_users_week': users_qs.filter(date_joined__gte=week_ago).count(),
+            'new_users_month': users_qs.filter(date_joined__gte=month_ago).count(),
             
-            'total_rsvps': RSVP.objects.count(),
-            'rsvps_week': RSVP.objects.filter(created_at__gte=week_ago).count(),
-            'rsvps_month': RSVP.objects.filter(created_at__gte=month_ago).count(),
+            'total_rsvps': rsvps_qs.count(),
+            'rsvps_week': rsvps_qs.filter(created_at__gte=week_ago).count(),
+            'rsvps_month': rsvps_qs.filter(created_at__gte=month_ago).count(),
+            
+            'period_label': period_label,
         }
         
         tab = request.GET.get('tab', 'stats')
@@ -125,7 +193,15 @@ def home_view(request):
         events_count = events_qs.count()
         recent_events = events_qs[:100]
         
-        top_events = Event.objects.annotate(rsvp_count=Count('rsvps')).order_by('-rsvp_count')[:5]
+        # Топ події - використовуємо фільтр періоду тільки на вкладці статистика
+        if (tab == 'stats' or not tab) and start_date:
+            top_events_qs = Event.objects.filter(created_at__gte=start_date)
+            if end_date:
+                top_events_qs = top_events_qs.filter(created_at__lte=end_date)
+            top_events = top_events_qs.annotate(rsvp_count=Count('rsvps')).order_by('-rsvp_count')[:5]
+        else:
+            top_events = Event.objects.annotate(rsvp_count=Count('rsvps')).order_by('-rsvp_count')[:5]
+        
         recent_users = User.objects.order_by('-date_joined')[:50]
         recent_rsvps = RSVP.objects.select_related('user', 'event').order_by('-created_at')[:50]
         all_users = User.objects.all().order_by('username')
@@ -133,6 +209,9 @@ def home_view(request):
         context = {
             'tab': tab,
             'stats': stats,
+            'period': period,
+            'date_from': date_from,
+            'date_to': date_to,
             'top_events': top_events,
             'recent_events': recent_events,
             'events_count': events_count,
