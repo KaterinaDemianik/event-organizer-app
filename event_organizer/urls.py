@@ -20,6 +20,22 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 from django.views.generic.base import RedirectView
+from users.admin_site import CustomAdminSite
+
+# Створюємо кастомний admin site
+admin_site = CustomAdminSite(name='custom_admin')
+
+# Реєструємо всі моделі
+from django.contrib.auth.models import User, Group
+from events.models import Event
+from tickets.models import RSVP
+from events.admin import EventAdmin
+from tickets.admin import RSVPAdmin
+
+admin_site.register(User, admin.ModelAdmin)
+admin_site.register(Group, admin.ModelAdmin)
+admin_site.register(Event, EventAdmin)
+admin_site.register(RSVP, RSVPAdmin)
 
 urlpatterns = [
     # UI routes
@@ -34,7 +50,7 @@ urlpatterns = [
     path("accounts/password_reset/done/", auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
     path("accounts/reset/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
     path("accounts/reset/done/", auth_views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
-    path("admin/", admin.site.urls),
+    path("admin/", admin_site.urls),
     # API schema and docs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),

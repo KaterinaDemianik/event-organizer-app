@@ -1,6 +1,9 @@
 from django import forms
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 from .models import Event
+
+User = get_user_model()
 
 
 class EventForm(forms.ModelForm):
@@ -23,6 +26,20 @@ class EventForm(forms.ModelForm):
             "ends_at",
             "status",
         ]
+    
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        # Якщо користувач - адмін, показуємо поле organizer
+        if user and user.is_staff:
+            self.fields['organizer'] = forms.ModelChoiceField(
+                queryset=User.objects.all(),
+                label="Організатор",
+                initial=user,
+                required=True
+            )
+            self.Meta.fields.insert(0, 'organizer')
     
     def clean_starts_at(self):
         starts_at = self.cleaned_data.get('starts_at')

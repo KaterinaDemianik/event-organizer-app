@@ -7,9 +7,11 @@
       {% if not user.is_authenticated %}
         <p>Потрібен вхід у систему. <a href="/accounts/login/?next=/events/create/">Увійти</a></p>
       {% else %}
-        <div class="flash info" style="margin-bottom: 16px;">
-          <strong>Організатор:</strong> {{ user.username }}
-        </div>
+        {% if not user.is_staff %}
+          <div class="flash info" style="margin-bottom: 16px;">
+            <strong>Організатор:</strong> {{ user.username }}
+          </div>
+        {% endif %}
         <form method="post">
           {% csrf_token %}
           <fieldset>

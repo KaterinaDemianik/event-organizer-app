@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Адмін панель · Event Organizer{% endblock %}
+{% block content %}
+  <h2> Адміністративна панель</h2>
+
+  <!-- Статистика -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3>🎫 Події</h3>
+      <div class="stat-number">{{ stats.total_events }}</div>
+      <div class="stat-details">
+        <span>Опубліковано: {{ stats.published_events }}</span>
+        <span>Майбутні: {{ stats.upcoming_events }}</span>
+        <span>В архіві: {{ stats.archived_events }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <h3>👥 Користувачі</h3>
+      <div class="stat-number">{{ stats.total_users }}</div>
+      <div class="stat-details">
+        <span>Новий за тиждень: +{{ stats.new_users_week }}</span>
+        <span>Новий за місяць: +{{ stats.new_users_month }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <h3>📝 Реєстрації (RSVP)</h3>
+      <div class="stat-number">{{ stats.total_rsvps }}</div>
+      <div class="stat-details">
+        <span>За тиждень: +{{ stats.rsvps_week }}</span>
+        <span>За місяць: +{{ stats.rsvps_month }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Швидкі дії -->
+  <div class="admin-actions">
+    <a role="button" href="/dashboard/events/">📋 Всі події</a>
+    <a role="button" href="/dashboard/users/">👥 Всі користувачі</a>
+    <a role="button" href="/dashboard/rsvps/">📝 Всі RSVP</a>
+    <a role="button" class="outline" href="/admin/" target="_blank">⚙️ Django Admin</a>
+  </div>
+
+  <!-- Топ події -->
+  <div class="admin-section">
+    <h2>🏆 Топ події по популярності</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Назва</th>
+          <th>Організатор</th>
+          <th>Статус</th>
+          <th>RSVP</th>
+          <th>Дата</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in top_events %}
+          <tr>
+            <td><a href="/events/{{ event.id }}/">{{ event.title }}</a></td>
+            <td>{{ event.organizer.username }}</td>
+            <td><span class="badge {{ event.status }}">{{ event.get_status_display }}</span></td>
+            <td><strong>{{ event.rsvp_count }}</strong></td>
+            <td>{{ event.starts_at|date:"d.m.Y" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Останні події -->
+  <div class="admin-section">
+    <h2>🆕 Останні події</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Назва</th>
+          <th>Організатор</th>
+          <th>Статус</th>
+          <th>Створено</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in recent_events %}
+          <tr>
+            <td><a href="/events/{{ event.id }}/">{{ event.title }}</a></td>
+            <td>{{ event.organizer.username }}</td>
+            <td><span class="badge {{ event.status }}">{{ event.get_status_display }}</span></td>
+            <td>{{ event.created_at|date:"d.m.Y H:i" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Останні користувачі -->
+  <div class="admin-section">
+    <h2>👥 Нові користувачі</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Дата реєстрації</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in recent_users %}
+          <tr>
+            <td><strong>{{ user.username }}</strong></td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.date_joined|date:"d.m.Y H:i" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Останні RSVP -->
+  <div class="admin-section">
+    <h2>📝 Останні реєстрації</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Користувач</th>
+          <th>Подія</th>
+          <th>Дата</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rsvp in recent_rsvps %}
+          <tr>
+            <td>{{ rsvp.user.username }}</td>
+            <td><a href="/events/{{ rsvp.event.id }}/">{{ rsvp.event.title }}</a></td>
+            <td>{{ rsvp.created_at|date:"d.m.Y H:i" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

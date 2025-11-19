@@ -4,9 +4,11 @@
   <div class="auth-wrap">
     <article class="card">
       <h1>Редагування події</h1>
-      <div class="flash info" style="margin-bottom: 16px;">
-        <strong>Організатор:</strong> {{ event.organizer.username }}
-      </div>
+      {% if not user.is_staff %}
+        <div class="flash info" style="margin-bottom: 16px;">
+          <strong>Організатор:</strong> {{ event.organizer.username }}
+        </div>
+      {% endif %}
       <form method="post">
         {% csrf_token %}
         <fieldset>

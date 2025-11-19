@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Всі користувачі · Адмін{% endblock %}
+{% block content %}
+  <h1>👥 Всі користувачі</h1>
+
+  <div style="margin-bottom: 20px;">
+    <a role="button" class="outline" href="/dashboard/">← Назад до панелі</a>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Події створено</th>
+        <th>RSVP</th>
+        <th>Дата реєстрації</th>
+        <th>Staff</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+        <tr>
+          <td>{{ user.id }}</td>
+          <td><strong>{{ user.username }}</strong></td>
+          <td>{{ user.email|default:"—" }}</td>
+          <td>{{ user.events_count }}</td>
+          <td>{{ user.rsvps_count }}</td>
+          <td>{{ user.date_joined|date:"d.m.Y H:i" }}</td>
+          <td>{% if user.is_staff %}✅{% else %}—{% endif %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

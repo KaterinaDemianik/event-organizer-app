@@ -30,8 +30,8 @@
     <p style="margin:16px 0;">{{ event.description|linebreaksbr }}</p>
     
     <div class="event-actions">
-      {% if user.is_authenticated and event.organizer == user %}
-        <!-- Організатор бачить кнопки редагування та скасування -->
+      {% if user.is_authenticated and (event.organizer == user or user.is_staff) %}
+        <!-- Організатор та адмін бачать кнопки редагування та скасування -->
         <a role="button" href="/events/{{ event.id }}/edit/">✏️ Редагувати подію</a>
         {% if event.status != 'cancelled' %}
           <form method="post" action="/events/{{ event.id }}/cancel/" style="display:inline; margin:0;" onsubmit="return confirm('Ви впевнені, що хочете скасувати цю подію?');">

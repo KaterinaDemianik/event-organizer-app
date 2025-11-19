@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Всі події · Адмін{% endblock %}
+{% block content %}
+  <h1>📋 Всі події</h1>
+
+  <div style="margin-bottom: 20px;">
+    <a role="button" class="outline" href="/dashboard/">← Назад до панелі</a>
+  </div>
+
+  <!-- Фільтр -->
+  <div class="filters-card card">
+    <form method="get" style="display: flex; gap: 12px; align-items: center;">
+      <select name="status">
+        <option value="">Всі статуси</option>
+        {% for val, label in status_choices %}
+          <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Фільтрувати</button>
+      {% if status_filter %}
+        <a role="button" class="secondary" href="/dashboard/events/">Скинути</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Таблиця -->
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Назва</th>
+        <th>Організатор</th>
+        <th>Локація</th>
+        <th>Дата початку</th>
+        <th>Статус</th>
+        <th>RSVP</th>
+        <th>Дії</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for event in events %}
+        <tr>
+          <td>{{ event.id }}</td>
+          <td><a href="/events/{{ event.id }}/">{{ event.title }}</a></td>
+          <td>{{ event.organizer.username }}</td>
+          <td>{{ event.location|default:"—" }}</td>
+          <td>{{ event.starts_at|date:"d.m.Y H:i" }}</td>
+          <td><span class="badge {{ event.status }}">{{ event.get_status_display }}</span></td>
+          <td><strong>{{ event.rsvp_count }}</strong></td>
+          <td>
+            <a href="/events/{{ event.id }}/edit/">✏️</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
