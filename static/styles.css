@@ -99,17 +99,45 @@ button.primary:hover, [role="button"].primary:hover {
 .flash.warning { background:#fff7e6; color:#7a4a00; border:1px solid #ffe2ad; }
 
 /* Header */
-.topbar { padding: 10px 0; font-size: 16px; gap: 14px; max-width: var(--content-width); margin: 0 auto; padding-left: 12px; padding-right: 12px; }
-.topbar a { text-decoration: none; color: var(--link); }
-.topbar a:hover { text-decoration: underline; }
-.topbar .brand { font-weight: 800; font-size: 28px; color: var(--brand); letter-spacing: .2px; margin-left: -12px; margin-right: 18px; }
-.topbar ul { margin: 0; padding-left: 0; display: flex; gap: 16px; align-items: center; }
-.topbar ul:first-child { gap: 20px; }
-.topbar ul:last-child { margin-left: auto; padding-right: 0; gap: 16px; justify-content: flex-end; }
-.topbar li { padding: 0; margin: 0; list-style: none; display: flex; align-items: center; }
-.topbar .muted { margin: 0; padding: 0; line-height: 1; }
-.topbar .nav-link.active { position: relative; font-weight: 600; }
-.topbar .nav-link.active::after { content:""; position:absolute; left:0; right:0; bottom:-8px; height:2px; background: var(--link); border-radius: 2px; }
+.topbar { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 12px 0; 
+}
+.topbar ul { 
+  display: flex; 
+  gap: 20px; 
+  list-style: none; 
+  margin: 0; 
+  padding: 0; 
+  align-items: center; 
+}
+.topbar li { 
+  margin: 0; 
+  padding: 0; 
+  display: flex; 
+  align-items: center; 
+}
+.topbar a { 
+  text-decoration: none; 
+  color: var(--text); 
+  transition: color .2s; 
+  padding: 0; 
+  margin: 0; 
+  white-space: nowrap;
+}
+.topbar a:hover { color: var(--link); }
+.topbar .brand { font-weight: 700; font-size: 18px; }
+.topbar .nav-link { font-size: 14px; }
+.topbar .nav-link.active { color: var(--link); font-weight: 600; }
+.topbar .muted { 
+  font-size: 13px; 
+  color: var(--muted); 
+  margin: 0; 
+  padding: 0; 
+  white-space: nowrap;
+}
 .theme-toggle { 
   border: 1px solid var(--border) !important; 
   background: var(--card) !important; 
