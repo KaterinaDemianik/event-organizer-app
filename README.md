@@ -57,9 +57,10 @@ python manage.py runserver
 
 ## 📚 Документація
 
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Архітектурні патерни (MVT, Layered, Service Layer)
+- [DESIGN_PATTERNS.md](DESIGN_PATTERNS.md) - Патерни проєктування (Specification, Strategy, Singleton)
+- [SECURITY.md](SECURITY.md) - Безпека та автентифікація (Argon2, Sessions, CSRF)
 - [DATABASE_SETUP.md](DATABASE_SETUP.md) - Налаштування MySQL
-- [DESIGN_PATTERNS.md](DESIGN_PATTERNS.md) - Використані патерни проєктування
-- [SECURITY.md](SECURITY.md) - Безпека та автентифікація
 - [ARCHIVE_INFO.md](ARCHIVE_INFO.md) - Система архівування подій
 
 ##  Патерни проєктування
