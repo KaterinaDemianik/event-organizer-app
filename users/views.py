@@ -1,10 +1,12 @@
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as DjangoLoginView
-from django.shortcuts import redirect
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import FormView, TemplateView
-from .forms import SignupForm
+from django.contrib import messages
+from .forms import SignupForm, AdminUserCreateForm
 from tickets.models import RSVP
 from events.models import Event
 
@@ -49,3 +51,18 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         ctx["recent_rsvps"] = RSVP.objects.filter(user=user).select_related("event").order_by("-created_at")[:5]
         ctx["recent_events"] = Event.objects.filter(organizer=user).order_by("-created_at")[:5]
         return ctx
+
+
+@staff_member_required
+def admin_create_user(request):
+    """Створення користувача адміном"""
+    if request.method == 'POST':
+        form = AdminUserCreateForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, f'Користувача {user.username} успішно створено!')
+            return redirect('/?tab=users')
+    else:
+        form = AdminUserCreateForm()
+    
+    return render(request, 'users/admin_create_user.html', {'form': form})

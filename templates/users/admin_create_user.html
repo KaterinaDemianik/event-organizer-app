@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Створити користувача · Event Organizer{% endblock %}
+{% block content %}
+  <div class="auth-wrap">
+    <article class="card">
+      <h1>Створення нового користувача</h1>
+      <p style="margin-bottom: 20px; color: var(--muted);">
+        Заповніть форму для створення нового користувача системи.
+      </p>
+      
+      <form method="post">
+        {% csrf_token %}
+        <fieldset>
+          {{ form.as_p }}
+        </fieldset>
+        <div style="display: flex; gap: 10px;">
+          <button type="submit">✅ Створити користувача</button>
+          <a role="button" class="outline" href="/?tab=users">Скасувати</a>
+        </div>
+      </form>
+    </article>
+  </div>
+{% endblock %}

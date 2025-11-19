@@ -30,17 +30,19 @@
     <p style="margin:16px 0;">{{ event.description|linebreaksbr }}</p>
     
     <div class="event-actions">
-      {% if user.is_authenticated and (event.organizer == user or user.is_staff) %}
-        <!-- Організатор та адмін бачать кнопки редагування та скасування -->
-        <a role="button" href="/events/{{ event.id }}/edit/">✏️ Редагувати подію</a>
-        {% if event.status != 'cancelled' %}
-          <form method="post" action="/events/{{ event.id }}/cancel/" style="display:inline; margin:0;" onsubmit="return confirm('Ви впевнені, що хочете скасувати цю подію?');">
-            {% csrf_token %}
-            <button type="submit" class="outline" style="background:#dc3545; border-color:#dc3545; color:#fff;">🚫 Скасувати подію</button>
-          </form>
-        {% endif %}
-        <a role="button" class="outline" href="/">← Назад</a>
-      {% elif user.is_authenticated %}
+      {% if user.is_authenticated %}
+        {% if event.organizer == user or user.is_staff %}
+          <!-- Організатор та адмін бачать кнопки редагування та скасування -->
+          <a role="button" href="/events/{{ event.id }}/participants/">👥 Учасники ({{ rsvp_count }})</a>
+          <a role="button" href="/events/{{ event.id }}/edit/">✏️ Редагувати подію</a>
+          {% if event.status != 'cancelled' %}
+            <form method="post" action="/events/{{ event.id }}/cancel/" style="display:inline; margin:0;" onsubmit="return confirm('Ви впевнені, що хочете скасувати цю подію?');">
+              {% csrf_token %}
+              <button type="submit" class="outline" style="background:#dc3545; border-color:#dc3545; color:#fff;">🚫 Скасувати подію</button>
+            </form>
+          {% endif %}
+          <a role="button" class="outline" href="/">← Назад</a>
+        {% else %}
         <!-- Звичайні користувачі бачать RSVP -->
         {% if event.status == 'cancelled' %}
           <p style="color: var(--muted);">Реєстрація недоступна - подію скасовано</p>
@@ -56,6 +58,7 @@
           <a role="button" href="/events/{{ event.id }}/rsvp/">📝 Зареєструватися</a>
         {% endif %}
         <a role="button" class="outline" href="/">← Назад</a>
+        {% endif %}
       {% else %}
         <!-- Неавторизовані користувачі -->
         <a role="button" href="/accounts/login/?next=/events/{{ event.id }}/">Увійти для реєстрації</a>

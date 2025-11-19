@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Учасники · {{ event.title }}{% endblock %}
+{% block content %}
+  <article class="card">
+    <h1>👥 Учасники події</h1>
+    <h2 style="margin-top: 8px; color: var(--muted);">{{ event.title }}</h2>
+    
+    <div style="margin: 20px 0;">
+      <strong>Організатор:</strong> {{ event.organizer.username }}<br>
+      <strong>Дата:</strong> {{ event.starts_at|date:"d.m.Y H:i" }}<br>
+      <strong>Статус:</strong> <span class="badge {{ event.status }}">{{ event.get_status_display }}</span><br>
+      <strong>Всього зареєстровано:</strong> {{ participants.count }} {{ participants.count|pluralize:"учасник,учасника,учасників" }}
+    </div>
+
+    {% if participants %}
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Користувач</th>
+            <th>Email</th>
+            <th>Дата реєстрації</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rsvp in participants %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td><strong>{{ rsvp.user.username }}</strong></td>
+              <td>{{ rsvp.user.email|default:"—" }}</td>
+              <td>{{ rsvp.created_at|date:"d.m.Y H:i" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="flash info" style="margin: 20px 0;">
+        На цю подію ще ніхто не зареєструвався.
+      </div>
+    {% endif %}
+
+    <div style="margin-top: 20px;">
+      <a role="button" class="outline" href="/events/{{ event.id }}/">← Назад до події</a>
+      <a role="button" class="outline" href="/">Головна</a>
+    </div>
+  </article>
+{% endblock %}

@@ -54,8 +54,10 @@
           <p>{{ e.description|truncatechars:160 }}</p>
           <footer class="card-actions">
             <a role="button" href="/events/{{ e.id }}/">Детальніше</a>
-            {% if user.is_authenticated and (e.organizer == user or user.is_staff) %}
-              <a role="button" class="outline" href="/events/{{ e.id }}/edit/">✏️ Редагувати</a>
+            {% if user.is_authenticated %}
+              {% if e.organizer == user or user.is_staff %}
+                <a role="button" class="outline" href="/events/{{ e.id }}/edit/">✏️ Редагувати</a>
+              {% endif %}
             {% endif %}
           </footer>
         </article>

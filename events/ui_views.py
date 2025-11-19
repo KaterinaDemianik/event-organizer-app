@@ -148,14 +148,18 @@ class EventDetailView(DetailView):
     
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        
         if self.request.user.is_authenticated:
-            from tickets.models import RSVP
             ctx["user_rsvp"] = RSVP.objects.filter(
                 event=self.object, 
                 user=self.request.user
             ).first()
         else:
             ctx["user_rsvp"] = None
+        
+        # Кількість учасників
+        ctx["rsvp_count"] = RSVP.objects.filter(event=self.object).count()
+        
         return ctx
 
 
@@ -249,3 +253,23 @@ def event_cancel_view(request, pk: int):
         return redirect("event_detail", pk=pk)
     
     return redirect("event_detail", pk=pk)
+
+
+@login_required
+def event_participants_view(request, pk: int):
+    """Список учасників події"""
+    event = get_object_or_404(Event, pk=pk)
+    
+    # Тільки організатор або адмін можуть бачити список
+    if event.organizer != request.user and not request.user.is_staff:
+        messages.error(request, "Ви не маєте доступу до списку учасників")
+        return redirect("event_detail", pk=pk)
+    
+    participants = RSVP.objects.filter(event=event).select_related('user').order_by('-created_at')
+    
+    context = {
+        'event': event,
+        'participants': participants,
+    }
+    
+    return render(request, 'events/participants.html', context)

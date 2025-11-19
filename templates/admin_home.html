@@ -87,7 +87,6 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
           <th>Назва</th>
           <th>Організатор</th>
           <th>Статус</th>
@@ -99,13 +98,13 @@
       <tbody>
         {% for event in recent_events %}
           <tr>
-            <td>{{ event.id }}</td>
             <td><a href="/events/{{ event.id }}/">{{ event.title }}</a></td>
             <td>{{ event.organizer.username }}</td>
             <td><span class="badge {{ event.status }}">{{ event.get_status_display }}</span></td>
             <td><strong>{{ event.rsvp_count|default:0 }}</strong></td>
             <td>{{ event.starts_at|date:"d.m.Y H:i" }}</td>
             <td>
+              <a href="/events/{{ event.id }}/participants/">👥</a>
               <a href="/events/{{ event.id }}/edit/">✏️</a>
               {% if event.status != 'cancelled' %}
                 <a href="/events/{{ event.id }}/cancel/" onclick="return confirm('Скасувати?')">🚫</a>
@@ -122,14 +121,16 @@
   <!-- Вкладка: Користувачі -->
   <div class="admin-section">
     <h2>👥 Управління користувачами</h2>
+    <div style="margin-bottom: 16px;">
+      <a role="button" href="/accounts/admin/create-user/">➕ Створити користувача</a>
+    </div>
     <table>
       <thead>
         <tr>
-          <th>ID</th>
           <th>Username</th>
           <th>Email</th>
-          <th>Події</th>
-          <th>RSVP</th>
+          <th>Події створено</th>
+          <th>RSVP зроблено</th>
           <th>Дата реєстрації</th>
           <th>Staff</th>
         </tr>
@@ -137,7 +138,6 @@
       <tbody>
         {% for user in recent_users %}
           <tr>
-            <td>{{ user.id }}</td>
             <td><strong>{{ user.username }}</strong></td>
             <td>{{ user.email|default:"—" }}</td>
             <td>{{ user.organized_events.count }}</td>
@@ -158,19 +158,19 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
           <th>Користувач</th>
           <th>Подія</th>
-          <th>Дата</th>
+          <th>Дата реєстрації</th>
+          <th>Дії</th>
         </tr>
       </thead>
       <tbody>
         {% for rsvp in recent_rsvps %}
           <tr>
-            <td>{{ rsvp.id }}</td>
-            <td>{{ rsvp.user.username }}</td>
+            <td><strong>{{ rsvp.user.username }}</strong></td>
             <td><a href="/events/{{ rsvp.event.id }}/">{{ rsvp.event.title }}</a></td>
             <td>{{ rsvp.created_at|date:"d.m.Y H:i" }}</td>
+            <td><a href="/events/{{ rsvp.event.id }}/participants/">👥 Учасники</a></td>
           </tr>
         {% endfor %}
       </tbody>
