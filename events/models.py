@@ -6,11 +6,13 @@ class Event(models.Model):
     DRAFT = "draft"
     PUBLISHED = "published"
     CANCELLED = "cancelled"
+    ARCHIVED = "archived"
 
     STATUS_CHOICES = [
         (DRAFT, "draft"),
         (PUBLISHED, "published"),
         (CANCELLED, "cancelled"),
+        (ARCHIVED, "archived"),
     ]
 
     title = models.CharField(max_length=200)

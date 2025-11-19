@@ -9,6 +9,7 @@
     {% if user.is_authenticated %}
       <a href="/?view=my" class="tab-link {% if view == 'my' %}active{% endif %}">Мої події</a>
       <a href="/?view=upcoming" class="tab-link {% if view == 'upcoming' %}active{% endif %}">Заплановані</a>
+      <a href="/?view=archived" class="tab-link {% if view == 'archived' %}active{% endif %}">Архів</a>
     {% endif %}
   </div>
 

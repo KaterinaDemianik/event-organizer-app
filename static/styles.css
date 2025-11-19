@@ -203,6 +203,7 @@ input[type="search"]::-webkit-search-results-decoration { -webkit-appearance: no
 .badge.draft { background:#fff7e6; color:#7a4a00; border-color:#ffe2ad; }
 .badge.published { background:#e6f7ff; color:#0b4c7a; border-color:#bfe5ff; }
 .badge.cancelled { background:#ffe6e6; color:#7a0b0b; border-color:#ffbfbf; }
+.badge.archived { background:#f0f0f0; color:#666; border-color:#d0d0d0; }
 
 /* Detail page */
 .event-meta { display:flex; gap:12px; flex-wrap:wrap; }

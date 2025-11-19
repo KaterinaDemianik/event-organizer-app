@@ -42,6 +42,9 @@ class EventListView(ListView):
                 starts_at__gte=now,
                 status=Event.PUBLISHED
             )
+        elif view == "archived" and self.request.user.is_authenticated:
+            # Архів - завершені події
+            qs = qs.filter(status=Event.ARCHIVED)
         # view == "all" - всі опубліковані події
         elif view == "all":
             qs = qs.filter(status=Event.PUBLISHED)
@@ -74,6 +77,7 @@ class EventListView(ListView):
             (Event.DRAFT, "Чернетка"),
             (Event.PUBLISHED, "Опубліковано"),
             (Event.CANCELLED, "Скасовано"),
+            (Event.ARCHIVED, "Архів"),
         ]
         return ctx
 
