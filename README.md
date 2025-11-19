@@ -55,10 +55,12 @@ python load_test_data.py
 python manage.py runserver
 ```
 
-##  Документація
+## 📚 Документація
 
 - [DATABASE_SETUP.md](DATABASE_SETUP.md) - Налаштування MySQL
 - [DESIGN_PATTERNS.md](DESIGN_PATTERNS.md) - Використані патерни проєктування
+- [SECURITY.md](SECURITY.md) - Безпека та автентифікація
+- [ARCHIVE_INFO.md](ARCHIVE_INFO.md) - Система архівування подій
 
 ##  Патерни проєктування
 

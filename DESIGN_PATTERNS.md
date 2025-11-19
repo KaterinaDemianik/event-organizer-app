@@ -358,9 +358,45 @@ def test_combined_specifications():
 
 ---
 
+### 9. **Decorator Pattern** (Патерн Декоратор)
+
+**Статус:** ✅ Реалізовано
+
+**Призначення:** Динамічно додає нову функціональність до об'єктів.
+
+**Файл:** `events/decorators.py`
+
+**Приклад:**
+```python
+@login_required
+@organizer_required
+def event_cancel_view(request, pk):
+    # Тільки організатор може скасувати подію
+    pass
+```
+
+---
+
+### 10. **Proxy Pattern** (Патерн Замісник)
+
+**Статус:** ✅ Реалізовано
+
+**Призначення:** Надає замінник для управління доступом до об'єкта.
+
+**Файл:** `users/session_manager.py`
+
+**Приклад:**
+```python
+session_mgr = SessionManager(request)
+session_mgr.add_to_history(event_id)
+```
+
+---
+
 ## Додаткові ресурси
 
 - [Specification Pattern](https://en.wikipedia.org/wiki/Specification_pattern)
 - [Repository Pattern](https://martinfowler.com/eaaCatalog/repository.html)
 - [Unit of Work Pattern](https://martinfowler.com/eaaCatalog/unitOfWork.html)
 - [Django Design Patterns](https://docs.djangoproject.com/en/stable/misc/design-philosophies/)
+- [SECURITY.md](SECURITY.md) - Детальна документація з безпеки

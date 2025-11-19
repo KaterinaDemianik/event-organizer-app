@@ -104,6 +104,15 @@ DATABASES = {
 }
 
 
+# Password hashing
+# Using Argon2 - winner of Password Hashing Competition 2015
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',  # Найкращий (рекомендовано OWASP)
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',  # Fallback для існуючих паролів
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+]
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -113,6 +122,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 8}
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -149,6 +159,26 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 LOGIN_URL = "login"
+
+# Security settings
+# Session configuration
+SESSION_COOKIE_AGE = 1209600  # 2 тижні
+SESSION_COOKIE_HTTPONLY = True  # Захист від XSS
+SESSION_COOKIE_SAMESITE = 'Lax'  # Захист від CSRF
+SESSION_SAVE_EVERY_REQUEST = False
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+# CSRF protection
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Strict'
+
+# Security headers
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+
+# Password validation (already configured above)
+# PBKDF2 with SHA256, 1,000,000 iterations
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
