@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Редагувати подію · Event Organizer{% endblock %}
+{% block content %}
+  <div class="auth-wrap">
+    <article class="card">
+      <h1>Редагування події</h1>
+      <div class="flash info" style="margin-bottom: 16px;">
+        <strong>Організатор:</strong> {{ event.organizer.username }}
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <fieldset>
+          {{ form.as_p }}
+        </fieldset>
+        <div style="display: flex; gap: 10px;">
+          <button type="submit">Зберегти зміни</button>
+          <a role="button" class="outline" href="/events/{{ event.id }}/">Скасувати</a>
+        </div>
+      </form>
+    </article>
+  </div>
+{% endblock %}

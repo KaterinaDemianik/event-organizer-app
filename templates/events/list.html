@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Події · Event Organizer{% endblock %}
+{% block content %}
+  <h1>Події</h1>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav">
+    <a href="/?view=all" class="tab-link {% if view == 'all' or not view %}active{% endif %}">Всі події</a>
+    {% if user.is_authenticated %}
+      <a href="/?view=my" class="tab-link {% if view == 'my' %}active{% endif %}">Мої події</a>
+      <a href="/?view=upcoming" class="tab-link {% if view == 'upcoming' %}active{% endif %}">Заплановані</a>
+    {% endif %}
+  </div>
+
+  <div class="filters-card card">
+    <form class="filters {% if q or status %}has-reset{% endif %}" method="get">
+      <input type="hidden" name="view" value="{{ view }}" />
+      <input type="search" name="q" value="{{ q }}" placeholder="Пошук подій..." />
+      <select name="status">
+        <option value="">Статус: всі</option>
+        {% for val,label in status_choices %}
+          <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Фільтрувати</button>
+      {% if q or status %}<a role="button" class="secondary" href="/?view={{ view }}" style="height:40px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;">Скинути</a>{% endif %}
+    </form>
+  </div>
+
+  {% if events %}
+    <div class="grid">
+      {% for e in events %}
+        <article class="card">
+          <header class="card-head">
+            <div class="card-title">
+              <h3><a href="/events/{{ e.id }}/">{{ e.title }}</a></h3>
+              <span class="badge {{ e.status }}">{{ e.get_status_display|default:e.status }}</span>
+            </div>
+            <small class="muted">{{ e.starts_at|date:"d.m.Y H:i" }} → {{ e.ends_at|date:"d.m.Y H:i" }}</small>
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+              {% if e.location %}<small class="muted">📍 {{ e.location }}</small>{% endif %}
+              <small class="muted">👤 {{ e.organizer.username }}</small>
+              <small class="muted">👥 {{ e.rsvp_count }} RSVP</small>
+            </div>
+          </header>
+          <p>{{ e.description|truncatechars:160 }}</p>
+          <footer class="card-actions">
+            <a role="button" href="/events/{{ e.id }}/">Детальніше</a>
+            {% if user.is_authenticated and e.organizer == user %}
+              <a role="button" class="outline" href="/events/{{ e.id }}/edit/">✏️ Редагувати</a>
+            {% endif %}
+          </footer>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <article class="empty">
+      <p>Поки що подій немає.</p>
+      <a role="button" href="/events/create/">Створити першу</a>
+    </article>
+  {% endif %}
+
+  {% if is_paginated %}
+    <nav class="pagination" aria-label="Pagination">
+      <ul>
+        {% if page_obj.has_previous %}
+          <li><a href="?page=1{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}">&laquo; Перша</a></li>
+          <li><a href="?page={{ page_obj.previous_page_number }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}">← Попередня</a></li>
+        {% endif %}
+        
+        <li class="current">Сторінка {{ page_obj.number }} з {{ page_obj.paginator.num_pages }}</li>
+        
+        {% if page_obj.has_next %}
+          <li><a href="?page={{ page_obj.next_page_number }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}">Наступна →</a></li>
+          <li><a href="?page={{ page_obj.paginator.num_pages }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}">Остання &raquo;</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+{% endblock %}
