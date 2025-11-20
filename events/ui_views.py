@@ -123,6 +123,7 @@ def home_view(request):
         q = request.GET.get('q', '')
         status_filter = request.GET.get('status', '')
         organizer_filter = request.GET.get('organizer', '')
+        category_filter = request.GET.get('category', '')
         date_filter = request.GET.get('date_filter', '')
         popularity_filter = request.GET.get('popularity', '')
         sort_by = request.GET.get('sort', 'date_desc')
@@ -143,6 +144,10 @@ def home_view(request):
             # Організатор
             if organizer_filter:
                 events_qs = events_qs.filter(organizer_id=organizer_filter)
+
+            # Категорія
+            if category_filter:
+                events_qs = events_qs.filter(category__icontains=category_filter)
             
             # Фільтр по даті
             if date_filter:
@@ -206,6 +211,14 @@ def home_view(request):
         recent_rsvps = RSVP.objects.select_related('user', 'event').order_by('-created_at')[:50]
         all_users = User.objects.all().order_by('username')
         
+        # Унікальні категорії для фільтрів (адмін)
+        category_options = (
+            Event.objects.exclude(category="")
+            .values_list("category", flat=True)
+            .distinct()
+            .order_by("category")
+        )
+
         context = {
             'tab': tab,
             'stats': stats,
@@ -221,9 +234,11 @@ def home_view(request):
             'q': q,
             'status': status_filter,
             'organizer': organizer_filter,
+            'category': category_filter,
             'date_filter': date_filter,
             'popularity': popularity_filter,
             'sort': sort_by,
+            'category_choices': category_options,
         }
         
         return render(request, 'admin_home.html', context)
@@ -278,6 +293,11 @@ class EventListView(ListView):
             specs.append(EventByLocationSpecification(location))
         
         filtered_qs = apply_specifications(qs, *specs)
+
+        # Категорія
+        category = self.request.GET.get("category")
+        if category:
+            filtered_qs = filtered_qs.filter(category__icontains=category)
         
         # Фільтр по даті
         date_filter = self.request.GET.get("date_filter")
@@ -338,11 +358,33 @@ class EventListView(ListView):
         ctx["popularity"] = self.request.GET.get("popularity", "")
         ctx["sort"] = getattr(self, "_current_sort", self.request.GET.get("sort", "date"))
         ctx["sort_choices"] = get_sort_choices()
+        ctx["category"] = self.request.GET.get("category", "")
+
+        # Всі доступні категорії для фільтрів (динамічно з БД)
+        ctx["category_choices"] = (
+            Event.objects.exclude(category="")
+            .values_list("category", flat=True)
+            .distinct()
+            .order_by("category")
+        )
         ctx["status_choices"] = [
             (Event.DRAFT, "Чернетка"),
             (Event.PUBLISHED, "Опубліковано"),
             (Event.CANCELLED, "Скасовано"),
             (Event.ARCHIVED, "Архів"),
+        ]
+
+        # Популярні теги (категорії) серед опублікованих подій
+        popular_tags_qs = (
+            Event.objects.filter(status=Event.PUBLISHED)
+            .exclude(category="")
+            .values("category")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+        ctx["popular_tags"] = [
+            {"slug": row["category"], "label": row["category"], "count": row["count"]}
+            for row in popular_tags_qs
         ]
         return ctx
 

@@ -25,6 +25,7 @@ class EventForm(forms.ModelForm):
             "starts_at",
             "ends_at",
             "status",
+            "category",
         ]
     
     def __init__(self, *args, **kwargs):

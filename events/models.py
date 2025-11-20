@@ -21,6 +21,11 @@ class Event(models.Model):
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=DRAFT)
+    category = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Тип події (вільний текст, наприклад: конференція, вебінар, воркшоп)",
+    )
     organizer = models.ForeignKey(
         get_user_model(), 
         on_delete=models.CASCADE, 

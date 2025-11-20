@@ -21,7 +21,7 @@
       
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px;">
         <div>
-          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📅 Швидкий вибір</label>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Швидкий вибір</label>
           <select name="period" id="period-select">
             <option value="all" {% if period == 'all' or not period %}selected{% endif %}>За весь час</option>
             <option value="today" {% if period == 'today' %}selected{% endif %}>Сьогодні</option>
@@ -34,12 +34,12 @@
         </div>
         
         <div>
-          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📆 Від</label>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Від</label>
           <input type="date" name="date_from" value="{{ date_from }}" id="date-from" />
         </div>
         
         <div>
-          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📆 До</label>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">До</label>
           <input type="date" name="date_to" value="{{ date_to }}" id="date-to" />
         </div>
         
@@ -146,7 +146,7 @@
       <form method="get">
         <input type="hidden" name="tab" value="events" />
         
-        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 12px; align-items: end;">
+        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 12px; align-items: end;">
           <div>
             <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🔍 Пошук</label>
             <input type="search" name="q" value="{{ q }}" placeholder="Пошук..." />
@@ -161,6 +161,11 @@
               <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Скасовано</option>
               <option value="archived" {% if status == 'archived' %}selected{% endif %}>Архів</option>
             </select>
+          </div>
+          
+          <div>
+            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🏷️ Категорія</label>
+            <input type="search" name="category" value="{{ category }}" placeholder="Наприклад: конференція, вебінар" />
           </div>
           
           <div>
@@ -210,7 +215,7 @@
           
           <div style="display: flex; gap: 8px; padding-top: 26px;">
             <button type="submit">Застосувати</button>
-            {% if q or status or organizer or date_filter or popularity or sort %}
+            {% if q or status or organizer or category or date_filter or popularity or sort %}
               <a role="button" class="secondary" href="/?tab=events">Скинути</a>
             {% endif %}
           </div>
@@ -218,7 +223,7 @@
       </form>
     </div>
     
-    {% if q or status or organizer or date_filter or popularity or sort %}
+    {% if q or status or organizer or category or date_filter or popularity or sort %}
       <p style="margin: 12px 0; color: var(--muted);">
         Знайдено подій: <strong>{{ events_count }}</strong>
         {% if sort %}

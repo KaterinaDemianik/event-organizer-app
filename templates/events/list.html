@@ -17,7 +17,7 @@
     <form method="get">
       <input type="hidden" name="view" value="{{ view }}" />
       
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; align-items: end;">
+      <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 12px; align-items: end;">
         <div>
           <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🔍 Пошук</label>
           <input type="search" name="q" value="{{ q }}" placeholder="Пошук..." />
@@ -31,6 +31,11 @@
               <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
           </select>
+        </div>
+        
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🏷️ Категорія</label>
+          <input type="search" name="category" value="{{ category }}" placeholder="Наприклад: конференція, вебінар" />
         </div>
         
         <div>
@@ -69,13 +74,30 @@
         
         <div style="display: flex; gap: 8px; padding-top: 26px;">
           <button type="submit">Застосувати</button>
-          {% if q or status or date_filter or popularity or sort != 'date' %}
+          {% if q or status or category or date_filter or popularity or sort != 'date' %}
             <a role="button" class="secondary" href="/events/?view={{ view }}">Скинути</a>
           {% endif %}
         </div>
       </div>
     </form>
   </div>
+  
+  {% if popular_tags %}
+    <div class="popular-tags" style="margin: 12px 0 20px 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+      <span style="font-size: 13px; color: var(--muted);">Популярні теги:</span>
+      <form method="get" style="display: flex; flex-wrap: wrap; gap: 8px; margin: 0;">
+        <input type="hidden" name="view" value="{{ view }}" />
+        {% if q %}<input type="hidden" name="q" value="{{ q }}" />{% endif %}
+        {% if status %}<input type="hidden" name="status" value="{{ status }}" />{% endif %}
+        {% if date_filter %}<input type="hidden" name="date_filter" value="{{ date_filter }}" />{% endif %}
+        {% if popularity %}<input type="hidden" name="popularity" value="{{ popularity }}" />{% endif %}
+        {% if sort %}<input type="hidden" name="sort" value="{{ sort }}" />{% endif %}
+        {% for tag in popular_tags %}
+          <button type="submit" name="category" value="{{ tag.slug }}" class="tag-pill{% if category == tag.slug %} active{% endif %}"># {{ tag.label }} ({{ tag.count }})</button>
+        {% endfor %}
+      </form>
+    </div>
+  {% endif %}
 
   {% if events %}
     <div class="grid">
@@ -90,6 +112,7 @@
             <div style="display:flex; gap:12px; flex-wrap:wrap;">
               {% if e.location %}<small class="muted">📍 {{ e.location }}</small>{% endif %}
               <small class="muted">👤 {{ e.organizer.username }}</small>
+              {% if e.category %}<small class="muted">🏷️ {{ e.category }}</small>{% endif %}
               <small class="muted">👥 {{ e.rsvp_count }} RSVP</small>
             </div>
           </header>
