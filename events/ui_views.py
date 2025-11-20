@@ -9,8 +9,8 @@ from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from datetime import timedelta, date
 
-from .models import Event
-from .forms import EventForm
+from .models import Event, Review
+from .forms import EventForm, ReviewForm
 from .specifications import (
     EventByStatusSpecification,
     EventByTitleSpecification,
@@ -396,19 +396,73 @@ class EventDetailView(DetailView):
     
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        
+        event = self.object
+
         if self.request.user.is_authenticated:
-            ctx["user_rsvp"] = RSVP.objects.filter(
-                event=self.object, 
-                user=self.request.user
-            ).first()
+            user_rsvp = RSVP.objects.filter(event=event, user=self.request.user).first()
+            ctx["user_rsvp"] = user_rsvp
         else:
+            user_rsvp = None
             ctx["user_rsvp"] = None
-        
+
         # Кількість учасників
-        ctx["rsvp_count"] = RSVP.objects.filter(event=self.object).count()
-        
+        ctx["rsvp_count"] = RSVP.objects.filter(event=event).count()
+
+        # Відгуки та рейтинг
+        from django.db.models import Avg, Count
+
+        reviews_qs = event.reviews.select_related("user")
+        agg = reviews_qs.aggregate(avg_rating=Avg("rating"), reviews_count=Count("id"))
+        ctx["reviews"] = reviews_qs
+        ctx["avg_rating"] = agg["avg_rating"]
+        ctx["reviews_count"] = agg["reviews_count"]
+
+        # Чи може поточний користувач залишити відгук
+        can_review = False
+        if self.request.user.is_authenticated:
+            from django.utils import timezone
+
+            event_ended = event.ends_at <= timezone.now()
+            has_rsvp = RSVP.objects.filter(event=event, user=self.request.user).exists()
+            has_review = Review.objects.filter(event=event, user=self.request.user).exists()
+            can_review = event_ended and has_rsvp and not has_review
+
+        ctx["can_review"] = can_review
         return ctx
+
+
+@login_required
+def event_review_create_view(request, pk: int):
+    event = get_object_or_404(Event, pk=pk)
+
+    # Перевіряємо, що подія вже завершилась
+    if event.ends_at > timezone.now():
+        messages.error(request, "Ви можете залишити відгук лише після завершення події.")
+        return redirect("event_detail", pk=pk)
+
+    # Перевіряємо, що користувач був учасником події
+    if not RSVP.objects.filter(event=event, user=request.user).exists():
+        messages.error(request, "Ви можете залишити відгук лише як учасник цієї події.")
+        return redirect("event_detail", pk=pk)
+
+    # Перевіряємо, що відгук ще не залишено
+    if Review.objects.filter(event=event, user=request.user).exists():
+        messages.info(request, "Ви вже залишили відгук для цієї події.")
+        return redirect("event_detail", pk=pk)
+
+    if request.method == "POST":
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.event = event
+            review.user = request.user
+            review.save()
+            messages.success(request, "Дякуємо за ваш відгук!")
+            return redirect("event_detail", pk=pk)
+    else:
+        form = ReviewForm()
+
+    return render(request, "events/review_form.html", {"event": event, "form": form})
 
 
 class EventCreateView(LoginRequiredMixin, CreateView):
@@ -451,6 +505,10 @@ class EventUpdateView(LoginRequiredMixin, UpdateView):
         if event.organizer != request.user and not request.user.is_staff:
             messages.error(request, "Ви не можете редагувати цю подію")
             return redirect("event_detail", pk=event.pk)
+        # Перевіряємо, чи подія не є архівною
+        if event.status == Event.ARCHIVED:
+            messages.error(request, "Архівну подію не можна редагувати")
+            return redirect("event_detail", pk=event.pk)
         return super().dispatch(request, *args, **kwargs)
     
     def form_valid(self, form):
@@ -491,6 +549,16 @@ def event_cancel_view(request, pk: int):
         # Перевіряємо, чи користувач є організатором або адміном
         if event.organizer != request.user and not request.user.is_staff:
             messages.error(request, "Ви не можете скасувати цю подію")
+            return redirect("event_detail", pk=pk)
+        
+        # Перевіряємо, чи подія не є архівною
+        if event.status == Event.ARCHIVED:
+            messages.error(request, "Архівну подію не можна скасувати")
+            return redirect("event_detail", pk=pk)
+        
+        # Перевіряємо, чи подія вже не скасована
+        if event.status == Event.CANCELLED:
+            messages.info(request, "Ця подія вже скасована")
             return redirect("event_detail", pk=pk)
         
         # Змінюємо статус на "cancelled"

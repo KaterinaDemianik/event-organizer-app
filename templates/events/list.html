@@ -5,13 +5,15 @@
 
   <!-- Tabs Navigation -->
   <div class="tabs-nav">
-    <a href="/?view=all" class="tab-link {% if view == 'all' or not view %}active{% endif %}">Всі події</a>
+    <a href="/events/?view=all" class="tab-link {% if view == 'all' or not view %}active{% endif %}">Всі події</a>
     {% if user.is_authenticated %}
-      <a href="/?view=my" class="tab-link {% if view == 'my' %}active{% endif %}">Мої події</a>
-      <a href="/?view=upcoming" class="tab-link {% if view == 'upcoming' %}active{% endif %}">Заплановані</a>
-      <a href="/?view=archived" class="tab-link {% if view == 'archived' %}active{% endif %}">Архів</a>
+      <a href="/events/?view=my" class="tab-link {% if view == 'my' %}active{% endif %}">Мої події</a>
+      <a href="/events/?view=upcoming" class="tab-link {% if view == 'upcoming' %}active{% endif %}">Заплановані</a>
+      <a href="/events/?view=archived" class="tab-link {% if view == 'archived' %}active{% endif %}">Архів</a>
     {% endif %}
   </div>
+
+  <div id="events-map" class="card" style="height: 380px; margin-bottom: 16px; padding: 0; overflow: hidden;"></div>
 
   <div class="filters-card card">
     <form method="get">
@@ -96,6 +98,12 @@
           <button type="submit" name="category" value="{{ tag.slug }}" class="tag-pill{% if category == tag.slug %} active{% endif %}"># {{ tag.label }} ({{ tag.count }})</button>
         {% endfor %}
       </form>
+      {% if category %}
+        <a href="/events/?view={{ view }}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if date_filter %}&date_filter={{ date_filter }}{% endif %}{% if popularity %}&popularity={{ popularity }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
+           style="font-size: 13px; color: var(--link); text-decoration: none; white-space: nowrap; font-weight: 500;">
+          × Показати всі
+        </a>
+      {% endif %}
     </div>
   {% endif %}
 
@@ -121,7 +129,9 @@
             <a role="button" href="/events/{{ e.id }}/">Детальніше</a>
             {% if user.is_authenticated %}
               {% if e.organizer == user or user.is_staff %}
-                <a role="button" class="outline" href="/events/{{ e.id }}/edit/">✏️ Редагувати</a>
+                {% if e.status != 'archived' %}
+                  <a role="button" class="outline" href="/events/{{ e.id }}/edit/">✏️ Редагувати</a>
+                {% endif %}
               {% endif %}
             {% endif %}
           </footer>
@@ -152,4 +162,63 @@
       </ul>
     </nav>
   {% endif %}
+  
+  <script>
+    (function() {
+      var mapContainer = document.getElementById('events-map');
+      if (!mapContainer) return;
+
+      // Збираємо події з координатами
+      var eventsData = [
+        {% for e in events %}
+          {% if e.latitude and e.longitude %}
+            {
+              title: "{{ e.title|escapejs }}",
+              lat: {{ e.latitude|floatformat:"6" }},
+              lng: {{ e.longitude|floatformat:"6" }},
+              url: "/events/{{ e.id }}/"
+            },
+          {% endif %}
+        {% endfor %}
+      ];
+
+      if (eventsData.length === 0) {
+        mapContainer.style.display = 'none';
+        return;
+      }
+
+      if (typeof L === 'undefined') {
+        console.error('Leaflet не завантажено');
+        mapContainer.style.display = 'none';
+        return;
+      }
+
+      var map = L.map('events-map');
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
+
+      // Кастомна іконка з emoji
+      var eventIcon = L.divIcon({
+        html: '<div style="font-size: 32px; line-height: 1;">⭐</div>',
+        className: 'custom-event-marker',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+      });
+
+      var markers = [];
+      eventsData.forEach(function(ev) {
+        var marker = L.marker([ev.lat, ev.lng], { icon: eventIcon }).addTo(map);
+        marker.bindPopup('<strong>' + ev.title + '</strong><br><a href="' + ev.url + '">Детальніше</a>');
+        markers.push(marker);
+      });
+
+      if (markers.length > 0) {
+        var group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.2));
+      }
+    })();
+  </script>
 {% endblock %}

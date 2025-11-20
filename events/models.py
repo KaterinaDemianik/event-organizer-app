@@ -26,6 +26,8 @@ class Event(models.Model):
         blank=True,
         help_text="Тип події (вільний текст, наприклад: конференція, вебінар, воркшоп)",
     )
+    latitude = models.FloatField(null=True, blank=True, help_text="Широта місця проведення (наприклад, 50.4501)")
+    longitude = models.FloatField(null=True, blank=True, help_text="Довгота місця проведення (наприклад, 30.5234)")
     organizer = models.ForeignKey(
         get_user_model(), 
         on_delete=models.CASCADE, 
@@ -38,4 +40,19 @@ class Event(models.Model):
     def __str__(self):
         return self.title
 
-# Create your models here.
+
+class Review(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="event_reviews")
+    rating = models.PositiveSmallIntegerField()
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("event", "user")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Review({self.user_id} -> {self.event_id}, rating={self.rating})"
+

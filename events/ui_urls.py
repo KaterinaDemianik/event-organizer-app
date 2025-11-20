@@ -8,7 +8,8 @@ from .ui_views import (
     rsvp_view, 
     rsvp_cancel_view,
     event_cancel_view,
-    event_participants_view
+    event_participants_view,
+    event_review_create_view,
 )
 
 urlpatterns = [
@@ -21,4 +22,5 @@ urlpatterns = [
     path("events/<int:pk>/participants/", event_participants_view, name="event-participants"),
     path("events/<int:pk>/rsvp/", rsvp_view, name="event-rsvp"),
     path("events/<int:pk>/rsvp/cancel/", rsvp_cancel_view, name="event-rsvp-cancel"),
+    path("events/<int:pk>/review/", event_review_create_view, name="event-review-create"),
 ]

@@ -23,3 +23,32 @@
     });
   }
 })();
+
+// Scroll position restoration
+(function(){
+  const SCROLL_KEY = 'scrollPos';
+  
+  // Відновлюємо позицію скролу після завантаження сторінки
+  window.addEventListener('load', function() {
+    const savedScroll = sessionStorage.getItem(SCROLL_KEY);
+    if (savedScroll) {
+      setTimeout(function() {
+        window.scrollTo(0, parseInt(savedScroll, 10));
+      }, 50); // Невелика затримка для коректного відновлення
+      sessionStorage.removeItem(SCROLL_KEY);
+    }
+  });
+  
+  // Зберігаємо позицію скролу перед переходом на іншу сторінку
+  window.addEventListener('beforeunload', function() {
+    sessionStorage.setItem(SCROLL_KEY, window.pageYOffset || document.documentElement.scrollTop);
+  });
+  
+  // Зберігаємо позицію при кліку на посилання/кнопки форм
+  document.addEventListener('click', function(e) {
+    const link = e.target.closest('a[href], button[type="submit"]');
+    if (link && !link.target) { // Ігноруємо посилання, що відкриваються в новій вкладці
+      sessionStorage.setItem(SCROLL_KEY, window.pageYOffset || document.documentElement.scrollTop);
+    }
+  });
+})();

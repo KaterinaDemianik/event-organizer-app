@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Відгук про подію · Event Organizer{% endblock %}
+{% block content %}
+  <div class="auth-wrap">
+    <article class="card">
+      <h1>Відгук про подію "{{ event.title }}"</h1>
+      <p style="color: var(--muted); font-size: 14px;">Дата події: {{ event.starts_at|date:"d.m.Y H:i" }} → {{ event.ends_at|date:"d.m.Y H:i" }}</p>
+
+      <form method="post">
+        {% csrf_token %}
+        <fieldset>
+          {{ form.as_p }}
+        </fieldset>
+        <div style="display:flex; gap:8px;">
+          <button type="submit">Зберегти відгук</button>
+          <a role="button" class="outline" href="/events/{{ event.id }}/">Скасувати</a>
+        </div>
+      </form>
+    </article>
+  </div>
+{% endblock %}

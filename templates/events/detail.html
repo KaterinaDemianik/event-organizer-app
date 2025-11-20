@@ -29,17 +29,26 @@
     
     <p style="margin:16px 0;">{{ event.description|linebreaksbr }}</p>
     
+    {% if reviews_count %}
+      <div class="flash info" style="margin:16px 0;">
+        <strong>Рейтинг події:</strong>
+        ⭐ {{ avg_rating|floatformat:1 }} / 5 · {{ reviews_count }} відгук(ів)
+      </div>
+    {% endif %}
+    
     <div class="event-actions">
       {% if user.is_authenticated %}
         {% if event.organizer == user or user.is_staff %}
           <!-- Організатор та адмін бачать кнопки редагування та скасування -->
           <a role="button" href="/events/{{ event.id }}/participants/">👥 Учасники ({{ rsvp_count }})</a>
-          <a role="button" href="/events/{{ event.id }}/edit/">✏️ Редагувати подію</a>
-          {% if event.status != 'cancelled' %}
-            <form method="post" action="/events/{{ event.id }}/cancel/" style="display:inline; margin:0;" onsubmit="return confirm('Ви впевнені, що хочете скасувати цю подію?');">
-              {% csrf_token %}
-              <button type="submit" class="outline" style="background:#dc3545; border-color:#dc3545; color:#fff;">🚫 Скасувати подію</button>
-            </form>
+          {% if event.status != 'archived' %}
+            <a role="button" href="/events/{{ event.id }}/edit/">✏️ Редагувати подію</a>
+            {% if event.status != 'cancelled' %}
+              <form method="post" action="/events/{{ event.id }}/cancel/" style="display:inline; margin:0;" onsubmit="return confirm('Ви впевнені, що хочете скасувати цю подію?');">
+                {% csrf_token %}
+                <button type="submit" class="outline" style="background:#dc3545; border-color:#dc3545; color:#fff;">🚫 Скасувати подію</button>
+              </form>
+            {% endif %}
           {% endif %}
           <a role="button" class="outline" href="/">← Назад</a>
         {% else %}
@@ -65,5 +74,42 @@
         <a role="button" class="outline" href="/">← Назад</a>
       {% endif %}
     </div>
+    
+    <hr style="margin:24px 0;">
+    
+    <section>
+      <h2>Відгуки</h2>
+      {% if user.is_authenticated and can_review %}
+        <p>Ви були учасником цієї події і вона вже завершилась. Ви можете залишити відгук.</p>
+        <a role="button" href="/events/{{ event.id }}/review/">Залишити відгук</a>
+      {% elif user.is_authenticated and not can_review %}
+        <p style="color: var(--muted); font-size: 14px;">Відгук можуть залишити лише учасники події після її завершення, і лише один раз.</p>
+      {% else %}
+        <p style="color: var(--muted); font-size: 14px;">Увійдіть, щоб мати можливість залишити відгук.</p>
+      {% endif %}
+
+      {% if reviews %}
+        <div style="margin-top:16px; display:flex; flex-direction:column; gap:12px;">
+          {% for review in reviews %}
+            <article class="card" style="margin:0;">
+              <header class="card-head">
+                <div class="card-title">
+                  <strong>{{ review.user.username }}</strong>
+                  <span class="badge">⭐ {{ review.rating }}/5</span>
+                </div>
+                <small class="muted">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+              </header>
+              {% if review.comment %}
+                <p style="margin-top:8px;">{{ review.comment|linebreaksbr }}</p>
+              {% endif %}
+            </article>
+          {% empty %}
+            <p>Ще немає жодного відгуку.</p>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p style="margin-top:8px;">Ще немає жодного відгуку.</p>
+      {% endif %}
+    </section>
   </article>
 {% endblock %}

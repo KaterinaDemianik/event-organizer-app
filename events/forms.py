@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-from .models import Event
+from .models import Event, Review
 
 User = get_user_model()
 
@@ -15,6 +15,8 @@ class EventForm(forms.ModelForm):
         widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
         label="Дата закінчення"
     )
+    latitude = forms.FloatField(required=False, widget=forms.HiddenInput())
+    longitude = forms.FloatField(required=False, widget=forms.HiddenInput())
 
     class Meta:
         model = Event
@@ -22,6 +24,8 @@ class EventForm(forms.ModelForm):
             "title",
             "description",
             "location",
+            "latitude",
+            "longitude",
             "starts_at",
             "ends_at",
             "status",
@@ -62,3 +66,24 @@ class EventForm(forms.ModelForm):
                 )
         
         return cleaned_data
+
+
+class ReviewForm(forms.ModelForm):
+    rating = forms.ChoiceField(
+        choices=[(str(i), str(i)) for i in range(1, 6)],
+        widget=forms.Select(),
+        label="Рейтинг (1-5)",
+    )
+
+    class Meta:
+        model = Review
+        fields = ["rating", "comment"]
+        widgets = {
+            "comment": forms.Textarea(attrs={"rows": 4}),
+        }
+
+    def clean_rating(self):
+        value = int(self.cleaned_data["rating"])
+        if value < 1 or value > 5:
+            raise forms.ValidationError("Рейтинг має бути від 1 до 5.")
+        return value
