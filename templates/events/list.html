@@ -13,7 +13,9 @@
     {% endif %}
   </div>
 
-  <div id="events-map" class="card" style="height: 380px; margin-bottom: 16px; padding: 0; overflow: hidden;"></div>
+  {% if view != 'archived' %}
+    <div id="events-map" class="card" style="height: 380px; margin-bottom: 16px; padding: 0; overflow: hidden;"></div>
+  {% endif %}
 
   <div class="filters-card card">
     <form method="get">
@@ -162,7 +164,8 @@
       </ul>
     </nav>
   {% endif %}
-  
+
+  {% if view != 'archived' %}
   <script>
     (function() {
       var mapContainer = document.getElementById('events-map');
@@ -221,4 +224,5 @@
       }
     })();
   </script>
+  {% endif %}
 {% endblock %}

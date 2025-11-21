@@ -11,6 +11,7 @@ from datetime import timedelta, date
 
 from .models import Event, Review
 from .forms import EventForm, ReviewForm
+from .services import EventArchiveService
 from .specifications import (
     EventByStatusSpecification,
     EventByTitleSpecification,
@@ -254,6 +255,9 @@ class EventListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
+        # Перед формуванням списку — автоматично архівуємо завершені події
+        EventArchiveService().archive_past_events()
+
         # Додаємо анотацію з кількістю RSVP
         qs = Event.objects.annotate(rsvp_count=Count('rsvps')).order_by("-starts_at")
         
