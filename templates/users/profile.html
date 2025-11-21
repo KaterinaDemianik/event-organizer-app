@@ -52,10 +52,10 @@
     </form>
   </article>
 
-  <div class="grid" style="margin-top: 16px;">
+  <div class="grid" style="margin-top: 24px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch;">
     <article class="card">
-      <h5 style="margin-bottom: 8px;">Статистика</h5>
-      <div style="font-size: 14px; display: grid; row-gap: 4px;">
+      <h5 style="margin-bottom: 10px; font-size: 16px;">Статистика</h5>
+      <div style="font-size: 14px; display: grid; row-gap: 6px;">
         {% if age %}
         <div style="display:flex; justify-content: space-between;">
           <span class="muted">Вік</span>
@@ -92,39 +92,48 @@
           <span><strong>{{ my_reviews_count }}</strong></span>
         </div>
         {% if my_events_reviews_count %}
-          <div style="display:flex; justify-content: space-between; margin-top: 4px;">
+          <div style="display:flex; justify-content: space-between; margin-top: 6px; gap: 8px;">
             <span class="muted">Середній рейтинг моїх подій</span>
-            <span><strong>⭐ {{ my_events_avg_rating|floatformat:1 }}</strong> ({{ my_events_reviews_count }} відгук(ів))</span>
+            <span style="text-align: right; white-space: nowrap;">
+              <strong>⭐ {{ my_events_avg_rating|floatformat:1 }}</strong><br>
+              <span class="muted" style="font-size: 12px;">{{ my_events_reviews_count }} відгук(ів)</span>
+            </span>
           </div>
         {% endif %}
       </div>
     </article>
 
     <article class="card">
-      <h5 style="margin-bottom: 8px;">Останні RSVP</h5>
-      <ul>
+      <h5 style="margin-bottom: 10px; font-size: 16px;">Останні RSVP</h5>
+      <ul style="list-style: none; padding-left: 0; margin: 0; font-size: 14px;">
         {% for r in recent_rsvps %}
-          <li><a href="/events/{{ r.event.id }}/">{{ r.event.title }}</a> — {{ r.created_at }}</li>
+          <li style="margin-bottom: 6px; list-style: none;">
+            <a href="/events/{{ r.event.id }}/">{{ r.event.title }}</a>
+            <span class="muted" style="font-size: 12px;"> — {{ r.created_at }}</span>
+          </li>
         {% empty %}
-          <li class="muted">Немає</li>
+          <li class="muted" style="font-size: 14px;">Немає</li>
         {% endfor %}
       </ul>
     </article>
 
     <article class="card">
-      <h5 style="margin-bottom: 8px;">Останні створені події</h5>
-      <ul>
+      <h5 style="margin-bottom: 10px; font-size: 16px;">Останні створені події</h5>
+      <ul style="list-style: none; padding-left: 0; margin: 0; font-size: 14px;">
         {% for e in recent_events %}
-          <li><a href="/events/{{ e.id }}/">{{ e.title }}</a> — {{ e.created_at }}</li>
+          <li style="margin-bottom: 6px; list-style: none;">
+            <a href="/events/{{ e.id }}/">{{ e.title }}</a>
+            <span class="muted" style="font-size: 12px;"> — {{ e.created_at }}</span>
+          </li>
         {% empty %}
-          <li class="muted">Немає</li>
+          <li class="muted" style="font-size: 14px;">Немає</li>
         {% endfor %}
       </ul>
     </article>
 
-    <article class="card">
-      <h5 style="margin-bottom: 8px;">Налаштування безпеки</h5>
-      <p class="muted" style="font-size: 14px;">Рекомендуємо час від часу змінювати пароль та не використовувати один і той самий пароль на різних сервісах.</p>
+    <article class="card" style="grid-column: 1 / -1;">
+      <h5 style="margin-bottom: 8px; font-size: 16px;">Налаштування безпеки</h5>
+      <p class="muted" style="font-size: 14px; margin-bottom: 10px;">Рекомендуємо час від часу змінювати пароль та не використовувати один і той самий пароль на різних сервісах.</p>
       <a role="button" href="/accounts/password/change/">Змінити пароль</a>
     </article>
   </div>
