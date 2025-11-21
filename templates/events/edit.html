@@ -19,9 +19,9 @@
         <div style="margin: 16px 0;">
           <label style="font-weight: 600; margin-bottom: 8px; display: block;">📍 Оберіть місце на карті (опціонально)</label>
           
-          <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-            <input type="text" id="address-search" placeholder="Введіть адресу (наприклад: Хрещатик 22, Київ)" style="flex: 1;" />
-            <button type="button" onclick="searchAddress()" style="white-space: nowrap;">🔍 Знайти на карті</button>
+          <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: stretch;">
+            <input type="text" id="address-search" placeholder="Введіть адресу (наприклад: Хрещатик 22, Київ)" style="flex: 1; height: 44px; min-height: 44px; max-height: 44px; box-sizing: border-box;" />
+            <button type="button" onclick="searchAddress()" style="white-space: nowrap; height: 44px; min-height: 44px; max-height: 44px;">🔍 Знайти на карті</button>
           </div>
           
           <div id="location-map" style="width: 100%; height: 350px; border: 1px solid #ccc; border-radius: 8px; position: relative; z-index: 1;"></div>

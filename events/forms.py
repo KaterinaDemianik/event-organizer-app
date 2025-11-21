@@ -30,12 +30,21 @@ class EventForm(forms.ModelForm):
             "ends_at",
             "status",
             "category",
+            "capacity",
         ]
     
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        
+
+        # Локалізуємо назви деяких полів форми
+        if "capacity" in self.fields:
+            self.fields["capacity"].label = "Максимальна кількість учасників"
+        if "status" in self.fields:
+            self.fields["status"].label = "Статус події"
+        if "category" in self.fields:
+            self.fields["category"].label = "Категорія події"
+
         # Якщо користувач - адмін, показуємо поле organizer
         if user and user.is_staff:
             self.fields['organizer'] = forms.ModelChoiceField(
@@ -58,12 +67,18 @@ class EventForm(forms.ModelForm):
         cleaned_data = super().clean()
         starts_at = cleaned_data.get('starts_at')
         ends_at = cleaned_data.get('ends_at')
+        capacity = cleaned_data.get('capacity')
         
         if starts_at and ends_at:
             if ends_at <= starts_at:
                 raise forms.ValidationError(
                     "Дата закінчення має бути пізніше дати початку події."
                 )
+
+        # Перевірка місткості
+        if capacity is not None:
+            if capacity <= 0:
+                self.add_error("capacity", "Місткість має бути додатним числом або порожньою (без обмежень).")
         
         return cleaned_data
 

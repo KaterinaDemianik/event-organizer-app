@@ -13,6 +13,11 @@
       <span>📅 {{ event.starts_at|date:"d.m.Y H:i" }} → {{ event.ends_at|date:"d.m.Y H:i" }}</span>
       <span>📍 {{ event.location }}</span>
       <span>👤 Організатор: {{ event.organizer.username }}</span>
+      {% if event.capacity %}
+        <span>👥 Учасники: {{ rsvp_count }} / {{ event.capacity }}</span>
+      {% else %}
+        <span>👥 Учасники: {{ rsvp_count }}</span>
+      {% endif %}
     </div>
     
     {% if event.status == 'cancelled' %}
@@ -66,7 +71,11 @@
             </form>
           {% endif %}
         {% else %}
-          <a role="button" href="/events/{{ event.id }}/rsvp/">📝 Зареєструватися</a>
+          {% if event.capacity and rsvp_count >= event.capacity %}
+            <p style="color: var(--muted);">Реєстрація недоступна: всі місця зайняті.</p>
+          {% else %}
+            <a role="button" href="/events/{{ event.id }}/rsvp/">📝 Зареєструватися</a>
+          {% endif %}
         {% endif %}
         <a role="button" class="outline" href="/">← Назад</a>
         {% endif %}

@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib import messages
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from datetime import timedelta, date
@@ -343,6 +343,20 @@ class EventListView(ListView):
             elif popularity == 'none':
                 filtered_qs = filtered_qs.filter(rsvp_count=0)
 
+        # Фільтр по наявності місць
+        availability = self.request.GET.get("availability")
+        if availability == "available":
+            # Є місця: або немає обмеження, або записів менше за місткість
+            filtered_qs = filtered_qs.filter(
+                Q(capacity__isnull=True) | Q(capacity__gt=F("rsvp_count"))
+            )
+        elif availability == "full":
+            # Немає місць: місткість задана і вже заповнена або переповнена
+            filtered_qs = filtered_qs.filter(
+                capacity__isnull=False,
+                capacity__lte=F("rsvp_count"),
+            )
+
         # Застосовуємо стратегію сортування
         sort_slug = self.request.GET.get("sort", "date")
         
@@ -368,6 +382,7 @@ class EventListView(ListView):
         ctx["view"] = self.request.GET.get("view", "all")
         ctx["date_filter"] = self.request.GET.get("date_filter", "")
         ctx["popularity"] = self.request.GET.get("popularity", "")
+        ctx["availability"] = self.request.GET.get("availability", "")
         ctx["sort"] = getattr(self, "_current_sort", self.request.GET.get("sort", "date"))
         ctx["sort_choices"] = get_sort_choices()
         ctx["category"] = self.request.GET.get("category", "")
@@ -532,11 +547,27 @@ class EventUpdateView(LoginRequiredMixin, UpdateView):
 @login_required
 def rsvp_view(request, pk: int):
     event = get_object_or_404(Event, pk=pk)
-    _, created = RSVP.objects.get_or_create(user=request.user, event=event)
-    if created:
-        messages.success(request, "Ваш RSVP збережено")
-    else:
+
+    # Не дозволяємо реєструватися на скасовані або архівні події
+    if event.status in {Event.CANCELLED, Event.ARCHIVED}:
+        messages.info(request, "Реєстрація недоступна для цієї події.")
+        return redirect("event_detail", pk=pk)
+
+    # Якщо користувач вже зареєстрований
+    existing = RSVP.objects.filter(user=request.user, event=event)
+    if existing.exists():
         messages.info(request, "Ви вже підтвердили участь у цій події")
+        return redirect("event_detail", pk=pk)
+
+    # Перевірка ліміту місць
+    if event.capacity is not None:
+        current = RSVP.objects.filter(event=event).count()
+        if current >= event.capacity:
+            messages.warning(request, "Реєстрація недоступна: всі місця зайняті.")
+            return redirect("event_detail", pk=pk)
+
+    RSVP.objects.create(user=request.user, event=event)
+    messages.success(request, "Ваш RSVP збережено")
     return redirect("event_detail", pk=pk)
 
 

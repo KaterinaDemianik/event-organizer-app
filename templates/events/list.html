@@ -21,7 +21,7 @@
     <form method="get">
       <input type="hidden" name="view" value="{{ view }}" />
       
-      <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 12px; align-items: end;">
+      <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 12px; align-items: end;">
         <div>
           <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🔍 Пошук</label>
           <input type="search" name="q" value="{{ q }}" placeholder="Пошук..." />
@@ -62,6 +62,15 @@
             <option value="none" {% if popularity == 'none' %}selected{% endif %}>Без RSVP</option>
           </select>
         </div>
+
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🪑 Місця</label>
+          <select name="availability">
+            <option value="">Всі</option>
+            <option value="available" {% if availability == 'available' %}selected{% endif %}>Є місця</option>
+            <option value="full" {% if availability == 'full' %}selected{% endif %}>Немає місць</option>
+          </select>
+        </div>
       </div>
       
       <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px;">
@@ -78,7 +87,7 @@
         
         <div style="display: flex; gap: 8px; padding-top: 26px;">
           <button type="submit">Застосувати</button>
-          {% if q or status or category or date_filter or popularity or sort != 'date' %}
+          {% if q or status or category or date_filter or popularity or availability or sort != 'date' %}
             <a role="button" class="secondary" href="/events/?view={{ view }}">Скинути</a>
           {% endif %}
         </div>
@@ -95,13 +104,14 @@
         {% if status %}<input type="hidden" name="status" value="{{ status }}" />{% endif %}
         {% if date_filter %}<input type="hidden" name="date_filter" value="{{ date_filter }}" />{% endif %}
         {% if popularity %}<input type="hidden" name="popularity" value="{{ popularity }}" />{% endif %}
+        {% if availability %}<input type="hidden" name="availability" value="{{ availability }}" />{% endif %}
         {% if sort %}<input type="hidden" name="sort" value="{{ sort }}" />{% endif %}
         {% for tag in popular_tags %}
           <button type="submit" name="category" value="{{ tag.slug }}" class="tag-pill{% if category == tag.slug %} active{% endif %}"># {{ tag.label }} ({{ tag.count }})</button>
         {% endfor %}
       </form>
       {% if category %}
-        <a href="/events/?view={{ view }}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if date_filter %}&date_filter={{ date_filter }}{% endif %}{% if popularity %}&popularity={{ popularity }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
+        <a href="/events/?view={{ view }}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if date_filter %}&date_filter={{ date_filter }}{% endif %}{% if popularity %}&popularity={{ popularity }}{% endif %}{% if availability %}&availability={{ availability }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
            style="font-size: 13px; color: var(--link); text-decoration: none; white-space: nowrap; font-weight: 500;">
           × Показати всі
         </a>
@@ -123,7 +133,11 @@
               {% if e.location %}<small class="muted">📍 {{ e.location }}</small>{% endif %}
               <small class="muted">👤 {{ e.organizer.username }}</small>
               {% if e.category %}<small class="muted">🏷️ {{ e.category }}</small>{% endif %}
-              <small class="muted">👥 {{ e.rsvp_count }} RSVP</small>
+              {% if e.capacity %}
+                <small class="muted">👥 {{ e.rsvp_count }} / {{ e.capacity }} місць</small>
+              {% else %}
+                <small class="muted">👥 {{ e.rsvp_count }} RSVP</small>
+              {% endif %}
             </div>
           </header>
           <p>{{ e.description|truncatechars:160 }}</p>
@@ -151,15 +165,15 @@
     <nav class="pagination" aria-label="Pagination">
       <ul>
         {% if page_obj.has_previous %}
-          <li><a href="?page=1{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">&laquo; Перша</a></li>
-          <li><a href="?page={{ page_obj.previous_page_number }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">← Попередня</a></li>
+          <li><a href="?page=1{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if popularity %}&popularity={{ popularity }}{% endif %}{% if availability %}&availability={{ availability }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">&laquo; Перша</a></li>
+          <li><a href="?page={{ page_obj.previous_page_number }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if popularity %}&popularity={{ popularity }}{% endif %}{% if availability %}&availability={{ availability }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">← Попередня</a></li>
         {% endif %}
         
         <li class="current">Сторінка {{ page_obj.number }} з {{ page_obj.paginator.num_pages }}</li>
         
         {% if page_obj.has_next %}
-          <li><a href="?page={{ page_obj.next_page_number }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">Наступна →</a></li>
-          <li><a href="?page={{ page_obj.paginator.num_pages }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">Остання &raquo;</a></li>
+          <li><a href="?page={{ page_obj.next_page_number }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if popularity %}&popularity={{ popularity }}{% endif %}{% if availability %}&availability={{ availability }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">Наступна →</a></li>
+          <li><a href="?page={{ page_obj.paginator.num_pages }}{% if view %}&view={{ view }}{% endif %}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if popularity %}&popularity={{ popularity }}{% endif %}{% if availability %}&availability={{ availability }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">Остання &raquo;</a></li>
         {% endif %}
       </ul>
     </nav>

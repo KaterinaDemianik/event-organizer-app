@@ -9,10 +9,10 @@ class Event(models.Model):
     ARCHIVED = "archived"
 
     STATUS_CHOICES = [
-        (DRAFT, "draft"),
-        (PUBLISHED, "published"),
-        (CANCELLED, "cancelled"),
-        (ARCHIVED, "archived"),
+        (DRAFT, "Чернетка"),
+        (PUBLISHED, "Опубліковано"),
+        (CANCELLED, "Скасовано"),
+        (ARCHIVED, "Архів"),
     ]
 
     title = models.CharField(max_length=200)
@@ -20,6 +20,11 @@ class Event(models.Model):
     location = models.CharField(max_length=255, blank=True)
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField()
+    capacity = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Максимальна кількість учасників. Залиште порожнім, якщо без обмежень.",
+    )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=DRAFT)
     category = models.CharField(
         max_length=100,
