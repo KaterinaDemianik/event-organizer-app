@@ -2,12 +2,19 @@
 {% block title %}Профіль · Event Organizer{% endblock %}
 {% block content %}
   <h2 style="margin-bottom: 8px;">Профіль</h2>
-  <article class="card" style="margin-top: 8px;">
+  <article class="card" style="margin-top: 16px;">
     <h5 style="margin-bottom: 8px;">Особиста інформація</h5>
     <p style="margin-bottom: 4px; font-weight: 600;">{{ user_obj.username }}</p>
     <form method="post" style="margin: 0;">
       {% csrf_token %}
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
+        <div style="grid-column: 1 / -1;">
+          <label for="id_username" style="font-size: 13px; color: var(--muted);">Ім'я користувача</label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <span style="display:block; color:#dc3545; font-size:12px; margin-top:2px;">{{ form.username.errors|striptags }}</span>
+          {% endif %}
+        </div>
         <div>
           <label for="id_first_name" style="font-size: 13px; color: var(--muted);">Ім'я</label>
           {{ form.first_name }}
@@ -16,9 +23,13 @@
           <label for="id_last_name" style="font-size: 13px; color: var(--muted);">Прізвище</label>
           {{ form.last_name }}
         </div>
-        <div style="grid-column: 1 / -1;">
+        <div>
           <label for="id_email" style="font-size: 13px; color: var(--muted);">Email</label>
           {{ form.email }}
+        </div>
+        <div>
+          <label for="id_phone" style="font-size: 13px; color: var(--muted);">Телефон</label>
+          {{ form.phone }}
         </div>
         <div>
           <label for="id_birth_date" style="font-size: 13px; color: var(--muted);">Дата народження</label>
@@ -27,10 +38,6 @@
         <div>
           <label for="id_city" style="font-size: 13px; color: var(--muted);">Місто</label>
           {{ form.city }}
-        </div>
-        <div style="grid-column: 1 / -1;">
-          <label for="id_phone" style="font-size: 13px; color: var(--muted);">Телефон</label>
-          {{ form.phone }}
         </div>
       </div>
       <p class="muted" style="font-size: 13px; margin-top: 8px;">

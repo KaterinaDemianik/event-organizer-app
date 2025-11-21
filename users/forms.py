@@ -36,6 +36,12 @@ class AdminUserCreateForm(UserCreationForm):
 
 
 class UserProfileForm(forms.ModelForm):
+    username = forms.CharField(
+        required=True,
+        label="Ім'я користувача",
+        widget=forms.TextInput(attrs={"placeholder": "Ваше ім'я користувача"}),
+    )
+
     first_name = forms.CharField(
         required=False,
         label="Ім'я",
@@ -54,7 +60,7 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = get_user_model()
-        fields = ("first_name", "last_name", "email")
+        fields = ("username", "first_name", "last_name", "email")
 
     birth_date = forms.DateField(
         required=False,

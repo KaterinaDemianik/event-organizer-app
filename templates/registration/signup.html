@@ -7,7 +7,7 @@
       
       {% if form.errors %}
         <div class="flash error">
-          <strong>❌ Помилка реєстрації</strong>
+          <strong>Помилка реєстрації</strong>
           {% for field, errors in form.errors.items %}
             {% for error in errors %}
               <p style="margin:4px 0 0;">{{ error }}</p>

@@ -147,7 +147,7 @@ header.container {
   white-space: nowrap;
 }
 .topbar a:hover { color: var(--link); }
-.topbar .brand { font-weight: 700; font-size: 20px; }
+.topbar .brand { font-weight: 700; font-size: 20px; margin-right: 24px; }
 .topbar .nav-link { font-size: 15px; }
 .topbar .nav-link.active { color: var(--link); font-weight: 600; }
 .topbar .muted { 
