@@ -19,11 +19,11 @@
       <ul>
         <li><a class="brand {% if request.path == '/' %}active{% endif %}" href="/">Event Organizer</a></li>
         {% if user.is_authenticated and not user.is_staff %}
-          <li><a class="nav-link {% if request.path == '/' or request.path == '/events/' or '/events/' in request.get_full_path %}active{% endif %}" href="/">Головна</a></li>
+          <li><a class="nav-link {% if request.path == '/' or request.path == '/events/' or '/events/?' in request.get_full_path %}active{% endif %}" href="/">Головна</a></li>
           <li><a class="nav-link {% if request.path == '/events/create/' %}active{% endif %}" href="/events/create/">Створити подію</a></li>
           <li><a class="nav-link {% if request.path == '/accounts/profile/' %}active{% endif %}" href="/accounts/profile/">Профіль</a></li>
         {% elif not user.is_authenticated %}
-          <li><a class="nav-link {% if request.path == '/' or request.path == '/events/' or '/events/' in request.get_full_path %}active{% endif %}" href="/">Головна</a></li>
+          <li><a class="nav-link {% if request.path == '/' or request.path == '/events/' or '/events/?' in request.get_full_path %}active{% endif %}" href="/">Головна</a></li>
           <li><a class="nav-link" href="/accounts/signup/">Реєстрація</a></li>
         {% endif %}
       </ul>

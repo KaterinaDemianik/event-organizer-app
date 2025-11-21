@@ -1,15 +1,100 @@
 {% extends "base.html" %}
 {% block title %}Профіль · Event Organizer{% endblock %}
 {% block content %}
-  <h1>Профіль</h1>
-  <article class="card">
-    <h3>{{ user_obj.username }}</h3>
-    <p class="muted">RSVP: {{ rsvp_count }} · Мої події: {{ my_events_count }}</p>
+  <h2 style="margin-bottom: 8px;">Профіль</h2>
+  <article class="card" style="margin-top: 8px;">
+    <h5 style="margin-bottom: 8px;">Особиста інформація</h5>
+    <p style="margin-bottom: 4px; font-weight: 600;">{{ user_obj.username }}</p>
+    <form method="post" style="margin: 0;">
+      {% csrf_token %}
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
+        <div>
+          <label for="id_first_name" style="font-size: 13px; color: var(--muted);">Ім'я</label>
+          {{ form.first_name }}
+        </div>
+        <div>
+          <label for="id_last_name" style="font-size: 13px; color: var(--muted);">Прізвище</label>
+          {{ form.last_name }}
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label for="id_email" style="font-size: 13px; color: var(--muted);">Email</label>
+          {{ form.email }}
+        </div>
+        <div>
+          <label for="id_birth_date" style="font-size: 13px; color: var(--muted);">Дата народження</label>
+          {{ form.birth_date }}
+        </div>
+        <div>
+          <label for="id_city" style="font-size: 13px; color: var(--muted);">Місто</label>
+          {{ form.city }}
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label for="id_phone" style="font-size: 13px; color: var(--muted);">Телефон</label>
+          {{ form.phone }}
+        </div>
+      </div>
+      <p class="muted" style="font-size: 13px; margin-top: 8px;">
+        Особисті дані використовуються лише для роботи сервісу та не публікуються у подіях.
+      </p>
+      <p class="muted" style="font-size: 13px; margin-top: 4px;">
+        Дата реєстрації: {{ user_obj.date_joined|date:"d.m.Y" }}
+      </p>
+      <div style="margin-top: 8px;">
+        <button type="submit">Зберегти зміни</button>
+      </div>
+    </form>
   </article>
 
-  <div class="grid" style="margin-top: 12px;">
+  <div class="grid" style="margin-top: 16px;">
     <article class="card">
-      <h4>Останні RSVP</h4>
+      <h5 style="margin-bottom: 8px;">Статистика</h5>
+      <div style="font-size: 14px; display: grid; row-gap: 4px;">
+        {% if age %}
+        <div style="display:flex; justify-content: space-between;">
+          <span class="muted">Вік</span>
+          <span><strong>{{ age }}</strong></span>
+        </div>
+        {% endif %}
+        <div style="display:flex; justify-content: space-between;">
+          <span class="muted">RSVP</span>
+          <span><strong>{{ rsvp_count }}</strong></span>
+        </div>
+        <div style="display:flex; justify-content: space-between;">
+          <span class="muted">Майбутні події, на які ви записані</span>
+          <span><strong>{{ upcoming_rsvps_count }}</strong></span>
+        </div>
+        <div style="display:flex; justify-content: space-between;">
+          <span class="muted">Минулі події, які ви відвідали</span>
+          <span><strong>{{ past_rsvps_count }}</strong></span>
+        </div>
+        <hr style="margin: 6px 0; border: none; border-top: 1px solid rgba(0,0,0,0.04);" />
+        <div style="display:flex; justify-content: space-between;">
+          <span class="muted">Мої події (всього)</span>
+          <span><strong>{{ my_events_count }}</strong></span>
+        </div>
+        <div style="display:flex; justify-content: space-between;">
+          <span class="muted">Опубліковані події</span>
+          <span><strong>{{ my_published_events_count }}</strong></span>
+        </div>
+        <div style="display:flex; justify-content: space-between;">
+          <span class="muted">Подій в архіві</span>
+          <span><strong>{{ my_archived_events_count }}</strong></span>
+        </div>
+        <div style="display:flex; justify-content: space-between;">
+          <span class="muted">Мої відгуки</span>
+          <span><strong>{{ my_reviews_count }}</strong></span>
+        </div>
+        {% if my_events_reviews_count %}
+          <div style="display:flex; justify-content: space-between; margin-top: 4px;">
+            <span class="muted">Середній рейтинг моїх подій</span>
+            <span><strong>⭐ {{ my_events_avg_rating|floatformat:1 }}</strong> ({{ my_events_reviews_count }} відгук(ів))</span>
+          </div>
+        {% endif %}
+      </div>
+    </article>
+
+    <article class="card">
+      <h5 style="margin-bottom: 8px;">Останні RSVP</h5>
       <ul>
         {% for r in recent_rsvps %}
           <li><a href="/events/{{ r.event.id }}/">{{ r.event.title }}</a> — {{ r.created_at }}</li>
@@ -20,7 +105,7 @@
     </article>
 
     <article class="card">
-      <h4>Останні створені події</h4>
+      <h5 style="margin-bottom: 8px;">Останні створені події</h5>
       <ul>
         {% for e in recent_events %}
           <li><a href="/events/{{ e.id }}/">{{ e.title }}</a> — {{ e.created_at }}</li>
@@ -28,6 +113,12 @@
           <li class="muted">Немає</li>
         {% endfor %}
       </ul>
+    </article>
+
+    <article class="card">
+      <h5 style="margin-bottom: 8px;">Налаштування безпеки</h5>
+      <p class="muted" style="font-size: 14px;">Рекомендуємо час від часу змінювати пароль та не використовувати один і той самий пароль на різних сервісах.</p>
+      <a role="button" href="/accounts/password/change/">Змінити пароль</a>
     </article>
   </div>
 {% endblock %}
