@@ -276,7 +276,15 @@ class EventListView(ListView):
             )
         elif view == "archived" and self.request.user.is_authenticated:
             # Архів - завершені події
-            qs = qs.filter(status=Event.ARCHIVED)
+            if self.request.user.is_staff:
+                # Адміни бачать всі архівні події
+                qs = qs.filter(status=Event.ARCHIVED)
+            else:
+                # Звичайний користувач бачить тільки свої події
+                # та події, в яких він брав участь (RSVP)
+                qs = qs.filter(status=Event.ARCHIVED).filter(
+                    Q(organizer=self.request.user) | Q(rsvps__user=self.request.user)
+                ).distinct()
         # view == "all" - всі опубліковані події
         elif view == "all":
             qs = qs.filter(status=Event.PUBLISHED)
@@ -536,6 +544,12 @@ def rsvp_view(request, pk: int):
 def rsvp_cancel_view(request, pk: int):
     if request.method == "POST":
         event = get_object_or_404(Event, pk=pk)
+
+        # Забороняємо скасовувати участь у архівних подіях
+        if event.status == Event.ARCHIVED:
+            messages.info(request, "Неможливо скасувати участь у архівній події")
+            return redirect("event_detail", pk=pk)
+
         deleted_count, _ = RSVP.objects.filter(user=request.user, event=event).delete()
         if deleted_count > 0:
             messages.success(request, "Реєстрацію скасовано")

@@ -36,7 +36,7 @@
       </div>
     {% endif %}
     
-    <div class="event-actions">
+    <div class="event-actions" style="margin-bottom: 16px;">
       {% if user.is_authenticated %}
         {% if event.organizer == user or user.is_staff %}
           <!-- Організатор та адмін бачать кнопки редагування та скасування -->
@@ -55,14 +55,16 @@
         <!-- Звичайні користувачі бачать RSVP -->
         {% if event.status == 'cancelled' %}
           <p style="color: var(--muted);">Реєстрація недоступна - подію скасовано</p>
-        {% elif event.status == 'archived' %}
-          <p style="color: var(--muted);">Реєстрація недоступна - подія завершилась</p>
         {% elif user_rsvp %}
-          <button disabled class="rsvp-registered">✓ Ви зареєстровані</button>
-          <form method="post" action="/events/{{ event.id }}/rsvp/cancel/" style="display:inline; margin:0;">
-            {% csrf_token %}
-            <button type="submit" class="outline">Скасувати участь</button>
-          </form>
+          {% if event.status == 'archived' %}
+            <button disabled class="rsvp-registered">✓ Ви відвідали цю подію</button>
+          {% else %}
+            <button disabled class="rsvp-registered">✓ Ви зареєстровані</button>
+            <form method="post" action="/events/{{ event.id }}/rsvp/cancel/" style="display:inline; margin:0;">
+              {% csrf_token %}
+              <button type="submit" class="outline">Скасувати участь</button>
+            </form>
+          {% endif %}
         {% else %}
           <a role="button" href="/events/{{ event.id }}/rsvp/">📝 Зареєструватися</a>
         {% endif %}
