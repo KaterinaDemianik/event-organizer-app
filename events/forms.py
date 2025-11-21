@@ -45,6 +45,15 @@ class EventForm(forms.ModelForm):
         if "category" in self.fields:
             self.fields["category"].label = "Категорія події"
 
+        # При створенні події дозволяємо вибирати тільки Чернетка / Опубліковано
+        if "status" in self.fields and not getattr(self.instance, "pk", None):
+            allowed_statuses = {Event.DRAFT, Event.PUBLISHED}
+            self.fields["status"].choices = [
+                (value, label)
+                for value, label in self.fields["status"].choices
+                if value in allowed_statuses
+            ]
+
         # Якщо користувач - адмін, показуємо поле organizer
         if user and user.is_staff:
             self.fields['organizer'] = forms.ModelChoiceField(

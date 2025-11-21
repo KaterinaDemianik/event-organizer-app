@@ -19,7 +19,86 @@
           <div style="margin-bottom: 24px;">
             <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 16px 0; color: var(--muted);">Основна інформація</h3>
             <fieldset>
-              {{ form.as_p }}
+              {{ form.latitude }}
+              {{ form.longitude }}
+              {% if form.organizer %}
+                <p>
+                  {{ form.organizer.label_tag }}
+                  {{ form.organizer }}
+                  {% if form.organizer.errors %}
+                    <span style="color: #dc3545; font-size: 13px;">{{ form.organizer.errors }}</span>
+                  {% endif %}
+                </p>
+              {% endif %}
+              
+              <p>
+                {{ form.title.label_tag }}
+                {{ form.title }}
+                {% if form.title.errors %}
+                  <span style="color: #dc3545; font-size: 13px;">{{ form.title.errors }}</span>
+                {% endif %}
+              </p>
+              
+              <p>
+                {{ form.description.label_tag }}
+                {{ form.description }}
+                {% if form.description.errors %}
+                  <span style="color: #dc3545; font-size: 13px;">{{ form.description.errors }}</span>
+                {% endif %}
+              </p>
+              
+              <p>
+                {{ form.location.label_tag }}
+                {{ form.location }}
+                {% if form.location.errors %}
+                  <span style="color: #dc3545; font-size: 13px;">{{ form.location.errors }}</span>
+                {% endif %}
+              </p>
+              
+              <div class="event-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <p>
+                  {{ form.starts_at.label_tag }}
+                  {{ form.starts_at }}
+                  {% if form.starts_at.errors %}
+                    <span style="color: #dc3545; font-size: 13px;">{{ form.starts_at.errors }}</span>
+                  {% endif %}
+                </p>
+                
+                <p>
+                  {{ form.ends_at.label_tag }}
+                  {{ form.ends_at }}
+                  {% if form.ends_at.errors %}
+                    <span style="color: #dc3545; font-size: 13px;">{{ form.ends_at.errors }}</span>
+                  {% endif %}
+                </p>
+                
+                <p>
+                  {{ form.status.label_tag }}
+                  {{ form.status }}
+                  {% if form.status.errors %}
+                    <span style="color: #dc3545; font-size: 13px;">{{ form.status.errors }}</span>
+                  {% endif %}
+                </p>
+                
+                <p>
+                  {{ form.category.label_tag }}
+                  {{ form.category }}
+                  {% if form.category.errors %}
+                    <span style="color: #dc3545; font-size: 13px;">{{ form.category.errors }}</span>
+                  {% endif %}
+                </p>
+                
+                <p style="grid-column: 1 / -1;">
+                  {{ form.capacity.label_tag }}
+                  {{ form.capacity }}
+                  {% if form.capacity.errors %}
+                    <span style="color: #dc3545; font-size: 13px;">{{ form.capacity.errors }}</span>
+                  {% endif %}
+                  {% if form.capacity.help_text %}
+                    <small style="display: block; color: var(--muted); font-size: 13px; margin-top: 4px;">{{ form.capacity.help_text }}</small>
+                  {% endif %}
+                </p>
+              </div>
             </fieldset>
           </div>
           
@@ -28,7 +107,7 @@
             
             <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: stretch;">
               <input type="text" id="address-search" placeholder="Введіть адресу (наприклад: Хрещатик 22, Київ)" style="flex: 1; height: 44px; min-height: 44px; max-height: 44px; box-sizing: border-box;" />
-              <button type="button" onclick="searchAddress()" style="white-space: nowrap; height: 44px; min-height: 44px; max-height: 44px;">🔍 Знайти на карті</button>
+              <button type="button" onclick="searchAddress()" style="white-space: nowrap; height: 44px; min-height: 44px; max-height: 44px;">Знайти на карті</button>
             </div>
             
             <div id="location-map" style="width: 100%; height: 400px; border: 1px solid var(--border); border-radius: 12px; position: relative; z-index: 1; overflow: hidden;"></div>
@@ -38,9 +117,9 @@
             </p>
           </div>
           
-          <div style="display: flex; gap: 12px; padding-top: 8px; border-top: 1px solid var(--border); margin-top: 24px; padding-top: 24px;">
-            <button type="submit" style="flex: 1;">Створити подію</button>
-            <a role="button" class="outline" href="/" style="flex: 0 0 auto;">Скасувати</a>
+          <div style="display: flex; gap: 12px; justify-content: center; padding-top: 8px; border-top: 1px solid var(--border); margin-top: 24px; padding-top: 24px;">
+            <button type="submit" style="width: auto !important; min-width: auto; flex: 0 0 auto;">Створити подію</button>
+            <a role="button" class="outline" href="/" style="width: auto !important; min-width: auto; flex: 0 0 auto;">Скасувати</a>
           </div>
         </form>
       {% endif %}

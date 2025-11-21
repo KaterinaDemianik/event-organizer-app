@@ -10,7 +10,7 @@
     </header>
     
     <div class="event-meta" style="margin:16px 0;">
-      <span>📅 {{ event.starts_at|date:"d.m.Y H:i" }} → {{ event.ends_at|date:"d.m.Y H:i" }}</span>
+      <span>{{ event.starts_at|date:"d.m.Y H:i" }} → {{ event.ends_at|date:"d.m.Y H:i" }}</span>
       <span>📍 {{ event.location }}</span>
       <span>👤 Організатор: {{ event.organizer.username }}</span>
       {% if event.capacity %}
@@ -22,12 +22,12 @@
     
     {% if event.status == 'cancelled' %}
       <div class="flash warning" style="margin:16px 0;">
-        <strong>⚠️ Подію скасовано</strong><br>
+        <strong>Подію скасовано</strong><br>
         Ця подія була скасована організатором.
       </div>
     {% elif event.status == 'archived' %}
       <div class="flash info" style="margin:16px 0;">
-        <strong>📦 Подія в архіві</strong><br>
+        <strong>Подія в архіві</strong><br>
         Ця подія завершилась і переміщена в архів.
       </div>
     {% endif %}

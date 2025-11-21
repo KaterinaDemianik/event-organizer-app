@@ -57,6 +57,19 @@ form fieldset { border: 0; padding: 0; margin: 0 0 12px; }
 input, textarea, select { font-size: 14px; }
 textarea { min-height: 120px; }
 
+/* Short fields grid in event forms */
+.event-form-grid p {
+  margin: 0 0 12px 0;
+}
+.event-form-grid input,
+.event-form-grid select {
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  padding: 10px 12px !important;
+  box-sizing: border-box !important;
+}
+
 /* Buttons */
 button, [role="button"], input[type="submit"] { 
   font-size: 14px !important; 
