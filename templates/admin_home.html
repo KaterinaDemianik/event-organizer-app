@@ -148,12 +148,12 @@
         
         <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 12px; align-items: end;">
           <div>
-            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🔍 Пошук</label>
+            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Пошук</label>
             <input type="search" name="q" value="{{ q }}" placeholder="Пошук..." />
           </div>
           
           <div>
-            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📊 Статус</label>
+            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Статус</label>
             <select name="status">
               <option value="">Всі</option>
               <option value="draft" {% if status == 'draft' %}selected{% endif %}>Чернетка</option>
@@ -164,7 +164,7 @@
           </div>
           
           <div>
-            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🏷️ Категорія</label>
+            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Категорія</label>
             <input type="search" name="category" value="{{ category }}" placeholder="Наприклад: конференція, вебінар" />
           </div>
           
@@ -179,7 +179,7 @@
           </div>
           
           <div>
-            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📅 Дата</label>
+            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Дата</label>
             <select name="date_filter">
               <option value="">Всі</option>
               <option value="upcoming" {% if date_filter == 'upcoming' %}selected{% endif %}>Майбутні</option>
@@ -191,7 +191,7 @@
           </div>
           
           <div>
-            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📈 Популярність</label>
+            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Популярність</label>
             <select name="popularity">
               <option value="">Всі</option>
               <option value="popular" {% if popularity == 'popular' %}selected{% endif %}>Популярні (5+)</option>
@@ -203,7 +203,7 @@
         
         <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px;">
           <div>
-            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🔄 Сортування</label>
+            <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Сортування</label>
             <select name="sort">
               <option value="date_desc" {% if sort == 'date_desc' or not sort %}selected{% endif %}>Найновіші</option>
               <option value="date_asc" {% if sort == 'date_asc' %}selected{% endif %}>Найстаріші</option>

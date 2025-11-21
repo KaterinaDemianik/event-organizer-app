@@ -47,7 +47,7 @@
           <!-- Організатор та адмін бачать кнопки редагування та скасування -->
           <a role="button" href="/events/{{ event.id }}/participants/">👥 Учасники ({{ rsvp_count }})</a>
           {% if event.status != 'archived' %}
-            <a role="button" href="/events/{{ event.id }}/edit/">✏️ Редагувати подію</a>
+            <a role="button" href="/events/{{ event.id }}/edit/">Редагувати подію</a>
             {% if event.status != 'cancelled' %}
               <form method="post" action="/events/{{ event.id }}/cancel/" style="display:inline; margin:0;" onsubmit="return confirm('Ви впевнені, що хочете скасувати цю подію?');">
                 {% csrf_token %}

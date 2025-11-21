@@ -23,12 +23,12 @@
       
       <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 12px; align-items: end;">
         <div>
-          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🔍 Пошук</label>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Пошук</label>
           <input type="search" name="q" value="{{ q }}" placeholder="Пошук..." />
         </div>
         
         <div>
-          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📊 Статус</label>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Статус</label>
           <select name="status">
             <option value="">Всі</option>
             {% for val,label in status_choices %}
@@ -38,12 +38,12 @@
         </div>
         
         <div>
-          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🏷️ Категорія</label>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Категорія</label>
           <input type="search" name="category" value="{{ category }}" placeholder="Наприклад: конференція, вебінар" />
         </div>
         
         <div>
-          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📅 Дата</label>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Дата</label>
           <select name="date_filter">
             <option value="">Всі</option>
             <option value="upcoming" {% if date_filter == 'upcoming' %}selected{% endif %}>Майбутні</option>
@@ -54,7 +54,7 @@
         </div>
         
         <div>
-          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">📈 Популярність</label>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Популярність</label>
           <select name="popularity">
             <option value="">Всі</option>
             <option value="popular" {% if popularity == 'popular' %}selected{% endif %}>Популярні (5+)</option>
@@ -64,7 +64,7 @@
         </div>
 
         <div>
-          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🪑 Місця</label>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Місця</label>
           <select name="availability">
             <option value="">Всі</option>
             <option value="available" {% if availability == 'available' %}selected{% endif %}>Є місця</option>
@@ -75,7 +75,7 @@
       
       <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px;">
         <div>
-          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">🔄 Сортування</label>
+          <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Сортування</label>
           <select name="sort">
             <option value="date" {% if sort == 'date' or not sort %}selected{% endif %}>За датою створення</option>
             <option value="popular" {% if sort == 'popular' %}selected{% endif %}>По популярності</option>
@@ -146,7 +146,7 @@
             {% if user.is_authenticated %}
               {% if e.organizer == user or user.is_staff %}
                 {% if e.status != 'archived' %}
-                  <a role="button" class="outline" href="/events/{{ e.id }}/edit/">✏️ Редагувати</a>
+                  <a role="button" class="outline" href="/events/{{ e.id }}/edit/">Редагувати</a>
                 {% endif %}
               {% endif %}
             {% endif %}
