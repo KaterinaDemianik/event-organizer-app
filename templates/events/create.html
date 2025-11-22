@@ -151,13 +151,13 @@
       
       eventMarker = null;
       
-      // Кастомна іконка з emoji
+      // Кастомна іконка з невеликою зірочкою
       var eventIcon = L.divIcon({
-        html: '<div style="font-size: 32px; line-height: 1;">⭐</div>',
+        html: '<div style="font-size: 20px; line-height: 1;">⭐</div>',
         className: 'custom-event-marker',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
+        iconSize: [20, 20],
+        iconAnchor: [10, 20],
+        popupAnchor: [0, -20]
       });
 
       if (latInput.value && lngInput.value) {
@@ -187,11 +187,11 @@
       }
       
       var eventIcon = L.divIcon({
-        html: '<div style="font-size: 32px; line-height: 1;">⭐</div>',
+        html: '<div style="font-size: 20px; line-height: 1;">⭐</div>',
         className: 'custom-event-marker',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
+        iconSize: [20, 20],
+        iconAnchor: [10, 20],
+        popupAnchor: [0, -20]
       });
       
       eventMarker = L.marker([lat, lng], { icon: eventIcon }).addTo(eventMap);
