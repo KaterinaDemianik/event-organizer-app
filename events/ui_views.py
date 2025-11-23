@@ -274,12 +274,13 @@ class EventListView(ListView):
             # Мої події - де я організатор
             qs = qs.filter(organizer=self.request.user)
         elif view == "upcoming" and self.request.user.is_authenticated:
-            # Заплановані - майбутні опубліковані події
+            # Заплановані - майбутні події, на які користувач зареєстрований
             now = timezone.now()
             qs = qs.filter(
                 starts_at__gte=now,
-                status=Event.PUBLISHED
-            )
+                status=Event.PUBLISHED,
+                rsvps__user=self.request.user
+            ).distinct()
         elif view == "archived" and self.request.user.is_authenticated:
             # Архів - завершені події
             if self.request.user.is_staff:

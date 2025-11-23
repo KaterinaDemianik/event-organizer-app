@@ -8,12 +8,22 @@ User = get_user_model()
 
 class EventForm(forms.ModelForm):
     starts_at = forms.DateTimeField(
-        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
-        label="Дата початку"
+        widget=forms.DateTimeInput(attrs={
+            "type": "datetime-local",
+            "class": "form-control",
+            "step": "1"
+        }),
+        label="Дата початку",
+        input_formats=['%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M']
     )
     ends_at = forms.DateTimeField(
-        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
-        label="Дата закінчення"
+        widget=forms.DateTimeInput(attrs={
+            "type": "datetime-local", 
+            "class": "form-control",
+            "step": "1"
+        }),
+        label="Дата закінчення",
+        input_formats=['%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M']
     )
     latitude = forms.FloatField(required=False, widget=forms.HiddenInput())
     longitude = forms.FloatField(required=False, widget=forms.HiddenInput())

@@ -244,5 +244,67 @@
     } else {
       window.addEventListener('load', initEventMap);
     }
+    
+    // Ініціалізація полів дати
+    document.addEventListener('DOMContentLoaded', function() {
+      // Встановлюємо мінімальну дату як поточну
+      var now = new Date();
+      var year = now.getFullYear();
+      var month = String(now.getMonth() + 1).padStart(2, '0');
+      var day = String(now.getDate()).padStart(2, '0');
+      var hours = String(now.getHours()).padStart(2, '0');
+      var minutes = String(now.getMinutes()).padStart(2, '0');
+      
+      var minDateTime = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+      
+      var startsAtField = document.getElementById('id_starts_at');
+      var endsAtField = document.getElementById('id_ends_at');
+      
+      if (startsAtField) {
+        startsAtField.setAttribute('min', minDateTime);
+        // Встановлюємо значення за замовчуванням на годину вперед
+        if (!startsAtField.value) {
+          var defaultStart = new Date(now.getTime() + 60 * 60 * 1000); // +1 година
+          var defaultStartStr = defaultStart.getFullYear() + '-' + 
+            String(defaultStart.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(defaultStart.getDate()).padStart(2, '0') + 'T' + 
+            String(defaultStart.getHours()).padStart(2, '0') + ':' + 
+            String(defaultStart.getMinutes()).padStart(2, '0');
+          startsAtField.value = defaultStartStr;
+        }
+      }
+      
+      if (endsAtField) {
+        endsAtField.setAttribute('min', minDateTime);
+        // Встановлюємо значення за замовчуванням на 2 години вперед
+        if (!endsAtField.value) {
+          var defaultEnd = new Date(now.getTime() + 2 * 60 * 60 * 1000); // +2 години
+          var defaultEndStr = defaultEnd.getFullYear() + '-' + 
+            String(defaultEnd.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(defaultEnd.getDate()).padStart(2, '0') + 'T' + 
+            String(defaultEnd.getHours()).padStart(2, '0') + ':' + 
+            String(defaultEnd.getMinutes()).padStart(2, '0');
+          endsAtField.value = defaultEndStr;
+        }
+      }
+      
+      // Синхронізація: коли змінюється дата початку, автоматично оновлюємо мінімум для дати закінчення
+      if (startsAtField && endsAtField) {
+        startsAtField.addEventListener('change', function() {
+          endsAtField.setAttribute('min', startsAtField.value);
+          // Якщо дата закінчення менша за дату початку, оновлюємо її
+          if (endsAtField.value && endsAtField.value <= startsAtField.value) {
+            var startTime = new Date(startsAtField.value);
+            var endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // +1 година
+            var endStr = endTime.getFullYear() + '-' + 
+              String(endTime.getMonth() + 1).padStart(2, '0') + '-' + 
+              String(endTime.getDate()).padStart(2, '0') + 'T' + 
+              String(endTime.getHours()).padStart(2, '0') + ':' + 
+              String(endTime.getMinutes()).padStart(2, '0');
+            endsAtField.value = endStr;
+          }
+        });
+      }
+    });
   </script>
 {% endblock %}
