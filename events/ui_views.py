@@ -258,8 +258,13 @@ class EventListView(ListView):
         # Перед формуванням списку — автоматично архівуємо завершені події
         EventArchiveService().archive_past_events()
 
-        # Додаємо анотацію з кількістю RSVP
-        qs = Event.objects.annotate(rsvp_count=Count('rsvps')).order_by("-starts_at")
+        # Додаємо анотацію з кількістю RSVP та кількістю вільних місць
+        qs = (
+            Event.objects
+            .annotate(rsvp_count=Count("rsvps"))
+            .annotate(remaining_places=F("capacity") - F("rsvp_count"))
+            .order_by("-starts_at")
+        )
         
         # Фільтрація по вкладках
         view = self.request.GET.get("view", "all")
@@ -434,6 +439,13 @@ class EventDetailView(DetailView):
 
         # Кількість учасників
         ctx["rsvp_count"] = RSVP.objects.filter(event=event).count()
+
+        # Скільки місць залишилось (для зручного відображення в шаблоні)
+        if event.capacity is not None:
+            remaining = event.capacity - ctx["rsvp_count"]
+            ctx["remaining_places"] = remaining if remaining > 0 else 0
+        else:
+            ctx["remaining_places"] = None
 
         # Відгуки та рейтинг
         from django.db.models import Avg, Count

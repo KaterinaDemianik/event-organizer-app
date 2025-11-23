@@ -15,6 +15,13 @@
       <span>👤 Організатор: {{ event.organizer.username }}</span>
       {% if event.capacity %}
         <span>👥 Учасники: {{ rsvp_count }} / {{ event.capacity }}</span>
+        <span>
+          {% if remaining_places and remaining_places > 0 %}
+             Вільних місць: {{ remaining_places }}
+          {% else %}
+             Вільних місць немає
+          {% endif %}
+        </span>
       {% else %}
         <span>👥 Учасники: {{ rsvp_count }}</span>
       {% endif %}
@@ -51,7 +58,7 @@
             {% if event.status != 'cancelled' %}
               <form method="post" action="/events/{{ event.id }}/cancel/" style="display:inline; margin:0;" onsubmit="return confirm('Ви впевнені, що хочете скасувати цю подію?');">
                 {% csrf_token %}
-                <button type="submit" class="outline" style="background:#dc3545; border-color:#dc3545; color:#fff;">🚫 Скасувати подію</button>
+                <button type="submit" class="outline" style="background:#dc3545; border-color:#dc3545; color:#fff;">Скасувати подію</button>
               </form>
             {% endif %}
           {% endif %}

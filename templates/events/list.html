@@ -153,11 +153,18 @@
               {% if e.location %}<small class="muted">📍 {{ e.location }}</small>{% endif %}
               <small class="muted">👤 {{ e.organizer.username }}</small>
               {% if e.category %}<small class="muted">🏷️ {{ e.category }}</small>{% endif %}
-              {% if e.capacity %}
-                <small class="muted">👥 {{ e.rsvp_count }} / {{ e.capacity }} місць</small>
-              {% else %}
-                <small class="muted">👥 {{ e.rsvp_count }} RSVP</small>
-              {% endif %}
+              <small class="muted">
+                {% if e.capacity %}
+                  👥 Зареєстровано: {{ e.rsvp_count }} / {{ e.capacity }} ·
+                  {% if e.remaining_places > 0 %}
+                    вільних місць: {{ e.remaining_places }}
+                  {% else %}
+                    вільних місць немає
+                  {% endif %}
+                {% else %}
+                  👥 Зареєстровано: {{ e.rsvp_count }} · місць: необмежено
+                {% endif %}
+              </small>
             </div>
           </header>
           <p>{{ e.description|truncatechars:160 }}</p>
