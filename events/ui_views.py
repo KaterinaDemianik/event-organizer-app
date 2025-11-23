@@ -260,10 +260,22 @@ class EventListView(ListView):
         EventArchiveService().archive_past_events()
 
         # Додаємо анотацію з кількістю RSVP та кількістю вільних місць
+        from django.db.models import Case, When, Value, IntegerField
+        from django.db.models.functions import Greatest, Cast
+        
         qs = (
             Event.objects
             .annotate(rsvp_count=Count("rsvps"))
-            .annotate(remaining_places=F("capacity") - F("rsvp_count"))
+            .annotate(
+                remaining_places=Case(
+                    When(capacity__isnull=True, then=Value(None)),
+                    default=Greatest(
+                        Cast(F("capacity"), IntegerField()) - Cast(F("rsvp_count"), IntegerField()),
+                        Value(0)
+                    ),
+                    output_field=IntegerField()
+                )
+            )
             .order_by("-starts_at")
         )
         
@@ -271,10 +283,12 @@ class EventListView(ListView):
         view = self.request.GET.get("view", "all")
         
         if view == "my" and self.request.user.is_authenticated:
-            # Мої події - де я організатор
-            qs = qs.filter(organizer=self.request.user)
+            # Мої події - де я організатор (чернетки + опубліковані + скасовані, але не архівні)
+            qs = qs.filter(
+                organizer=self.request.user
+            ).exclude(status=Event.ARCHIVED)
         elif view == "upcoming" and self.request.user.is_authenticated:
-            # Заплановані - майбутні події, на які користувач зареєстрований
+            # Заплановані - майбутні опубліковані події, на які користувач зареєстрований
             now = timezone.now()
             qs = qs.filter(
                 starts_at__gte=now,
@@ -282,13 +296,12 @@ class EventListView(ListView):
                 rsvps__user=self.request.user
             ).distinct()
         elif view == "archived" and self.request.user.is_authenticated:
-            # Архів - завершені події
+            # Архів - завершені події, які організовував або відвідав
             if self.request.user.is_staff:
                 # Адміни бачать всі архівні події
                 qs = qs.filter(status=Event.ARCHIVED)
             else:
-                # Звичайний користувач бачить тільки свої події
-                # та події, в яких він брав участь (RSVP)
+                # Звичайний користувач бачить архівні події, які організовував або на які був зареєстрований
                 qs = qs.filter(status=Event.ARCHIVED).filter(
                     Q(organizer=self.request.user) | Q(rsvps__user=self.request.user)
                 ).distinct()

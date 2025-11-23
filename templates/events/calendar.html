@@ -277,8 +277,7 @@
           const statusClass = `event-${event.status}`;
           const isMultiDay = isMultiDayEvent(event);
           const multiDayClass = isMultiDay ? 'event-multiday' : '';
-          const eventTitle = isMultiDay ? `${event.title} (${getEventDuration(event)})` : event.title;
-          html += `<div class="event-item ${statusClass} ${multiDayClass}" onclick="goToEvent(${event.id})" title="${eventTitle}">${eventTitle}</div>`;
+          html += `<div class="event-item ${statusClass} ${multiDayClass}" onclick="goToEvent(${event.id})" title="${event.title}">${event.title}</div>`;
         });
         
         html += '</div>';
@@ -327,7 +326,7 @@
             const isMultiDay = isMultiDayEvent(event);
             const multiDayClass = isMultiDay ? 'event-multiday' : '';
             const time = new Date(event.starts_at).toLocaleTimeString('uk-UA', {hour: '2-digit', minute: '2-digit'});
-            const eventTitle = isMultiDay ? `${time} ${event.title} (${getEventDuration(event)})` : `${time} ${event.title}`;
+            const eventTitle = `${time} ${event.title}`;
             html += `<div class="event-item ${statusClass} ${multiDayClass}" onclick="goToEvent(${event.id})" title="${eventTitle}">${eventTitle}</div>`;
           });
           html += '</div>';
