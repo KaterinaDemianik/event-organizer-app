@@ -27,6 +27,12 @@
       {% endif %}
     </div>
     
+    <div style="margin:16px 0;">
+      <a href="{{ google_calendar_url }}" target="_blank" rel="noopener noreferrer" role="button" style="font-size:14px; display:inline-block;">
+        Додати в Google Calendar
+      </a>
+    </div>
+    
     {% if event.status == 'cancelled' %}
       <div class="flash warning" style="margin:16px 0;">
         <strong>Подію скасовано</strong><br>

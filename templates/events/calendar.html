@@ -8,10 +8,14 @@
         <div style="display:flex; gap:8px; align-items:center;">
           <button id="month-view" class="view-btn active" onclick="switchView('month')">Місяць</button>
           <button id="week-view" class="view-btn" onclick="switchView('week')">Тиждень</button>
-          <button onclick="exportCalendar()" style="font-size:14px;">Експорт</button>
+          <button onclick="exportCalendar()" style="font-size:14px;">Експортувати в Google Calendar</button>
         </div>
       </div>
     </header>
+
+    <div id="export-hint" style="display:none; margin:12px 0; padding:12px; background:rgba(66, 165, 245, 0.1); border-radius:8px; font-size:13px; color:var(--muted);">
+      <strong>Підказка:</strong> Файл завантажено! Відкрийте його у Google Calendar (Налаштування → Імпорт) або Apple Calendar.
+    </div>
 
     <div class="calendar-controls" style="margin:16px 0; display:flex; justify-content:space-between; align-items:center;">
       <div>
@@ -381,6 +385,16 @@
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      
+      // Показуємо підказку після завантаження
+      const hint = document.getElementById('export-hint');
+      if (hint) {
+        hint.style.display = 'block';
+        // Автоматично ховаємо підказку через 10 секунд
+        setTimeout(function() {
+          hint.style.display = 'none';
+        }, 10000);
+      }
     }
 
     function generateICalData() {

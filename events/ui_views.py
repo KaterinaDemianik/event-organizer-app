@@ -470,6 +470,24 @@ class EventDetailView(DetailView):
             can_review = event_ended and has_rsvp and not has_review
 
         ctx["can_review"] = can_review
+        
+        # Генеруємо URL для додавання події в Google Calendar
+        from urllib.parse import urlencode
+        
+        # Форматуємо дати в UTC для Google Calendar (формат: 20251124T183000Z)
+        start_utc = event.starts_at.strftime('%Y%m%dT%H%M%SZ')
+        end_utc = event.ends_at.strftime('%Y%m%dT%H%M%SZ')
+        
+        google_params = {
+            'action': 'TEMPLATE',
+            'text': event.title,
+            'dates': f'{start_utc}/{end_utc}',
+            'details': event.description or '',
+            'location': event.location or '',
+        }
+        
+        ctx["google_calendar_url"] = f"https://calendar.google.com/calendar/render?{urlencode(google_params)}"
+        
         return ctx
 
 
