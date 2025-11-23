@@ -8,6 +8,7 @@ from django.db.models import Count, Q, F
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from datetime import timedelta, date
+import json
 
 from .models import Event, Review
 from .forms import EventForm, ReviewForm
@@ -657,3 +658,52 @@ def event_participants_view(request, pk: int):
     }
     
     return render(request, 'events/participants.html', context)
+
+
+class CalendarView(ListView):
+    """Календар подій з місячним та тижневим виглядом"""
+    model = Event
+    template_name = "events/calendar.html"
+    context_object_name = "events"
+
+    def get_queryset(self):
+        # Показуємо тільки релевантні події для користувача:
+        # 1. Події, які він організовує (всі статуси)
+        # 2. Опубліковані події, на які він зареєстрований
+        if self.request.user.is_authenticated:
+            from tickets.models import RSVP
+            
+            # Події користувача як організатора
+            user_events = Q(organizer=self.request.user)
+            
+            # Опубліковані події, на які користувач зареєстрований
+            registered_events = Q(
+                status=Event.PUBLISHED,
+                rsvps__user=self.request.user
+            )
+            
+            return Event.objects.filter(
+                user_events | registered_events
+            ).distinct().order_by("starts_at")
+        else:
+            # Для неавторизованих користувачів показуємо тільки опубліковані події
+            return Event.objects.filter(status=Event.PUBLISHED).order_by("starts_at")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Серіалізуємо події для JavaScript
+        events_data = []
+        for event in self.get_queryset():
+            events_data.append({
+                'id': event.id,
+                'title': event.title,
+                'starts_at': event.starts_at.isoformat(),
+                'ends_at': event.ends_at.isoformat(),
+                'status': event.status,
+                'location': event.location,
+                'description': event.description,
+            })
+        
+        context['events_json'] = json.dumps(events_data)
+        return context

@@ -1,0 +1,414 @@
+{% extends "base.html" %}
+{% block title %}Календар подій · Event Organizer{% endblock %}
+{% block content %}
+  <article class="card">
+    <header class="card-head">
+      <div class="card-title">
+        <h1 style="margin:0; font-size: 1.6rem;">Календар подій</h1>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button id="month-view" class="view-btn active" onclick="switchView('month')">Місяць</button>
+          <button id="week-view" class="view-btn" onclick="switchView('week')">Тиждень</button>
+          <button onclick="exportCalendar()" style="font-size:14px;">Експорт</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="calendar-controls" style="margin:16px 0; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <button onclick="previousPeriod()" style="margin-right:8px;">‹ Назад</button>
+        <button onclick="nextPeriod()">Вперед ›</button>
+      </div>
+      <h2 id="current-period" style="margin:0; font-size:1.2rem;"></h2>
+      <button onclick="goToToday()" style="font-size:14px;">Сьогодні</button>
+    </div>
+
+    <div id="calendar-container" style="margin-bottom: 12px;">
+      <!-- Календар буде згенеровано через JavaScript -->
+    </div>
+
+    <div style="margin-top:12px; margin-bottom:8px; display:flex; gap:16px; flex-wrap:wrap; font-size:14px; justify-content:center;">
+      <div style="display:flex; align-items:center; gap:4px;">
+        <div style="width:12px; height:12px; background:#4CAF50; border-radius:2px;"></div>
+        <span>Опубліковано</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <div style="width:12px; height:12px; background:#FF9800; border-radius:2px;"></div>
+        <span>Чернетка</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <div style="width:12px; height:12px; background:#F44336; border-radius:2px;"></div>
+        <span>Скасовано</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <div style="width:12px; height:12px; background:#9E9E9E; border-radius:2px;"></div>
+        <span>Архів</span>
+      </div>
+    </div>
+
+  </article>
+
+  <style>
+    .view-btn {
+      padding: 6px 12px;
+      border: 1px solid var(--muted-border-color);
+      background: var(--card-background-color);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .view-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    
+    .calendar-grid {
+      display: grid;
+      gap: 1px;
+      background: var(--muted-border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      width: 100%;
+    }
+    
+    .month-grid {
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+    
+    .week-grid {
+      grid-template-columns: 80px repeat(7, minmax(0, 1fr));
+    }
+    
+    .calendar-header {
+      background: #90caf9; /* більш спокійний блідо-блакитний відтінок */
+      color: white;
+      padding: 6px 8px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    
+    .calendar-day {
+      background: var(--card-background-color);
+      min-height: 45px;
+      padding: 3px;
+      position: relative;
+      border: none;
+      font-size: 11px;
+      transition: background-color 0.2s ease;
+      min-width: 0;
+      word-wrap: break-word;
+    }
+    
+    .calendar-day:hover {
+      background: rgba(0,0,0,0.02);
+    }
+    
+    .week-day {
+      min-height: 35px;
+    }
+    
+    .day-number {
+      font-weight: 600;
+      margin-bottom: 2px;
+      font-size: 14px;
+      color: var(--color);
+    }
+    
+    .other-month {
+      opacity: 0.3;
+    }
+    
+    .today {
+      background: rgba(76, 175, 80, 0.15) !important;
+      border: 1px solid rgba(76, 175, 80, 0.3);
+    }
+    
+    .today .day-number {
+      color: #2E7D32;
+      font-weight: 700;
+    }
+    
+    .event-item {
+      background: #4CAF50;
+      color: white;
+      padding: 2px 4px;
+      margin: 1px 0;
+      border-radius: 3px;
+      font-size: 10px;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      line-height: 1.2;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .event-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .event-multiday {
+      background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+      border-left: 3px solid #2E7D32;
+      padding-left: 2px;
+      font-weight: 600;
+    }
+    
+    .event-multiday.event-draft {
+      background: linear-gradient(135deg, #FF9800 0%, #FFB74D 100%);
+      border-left-color: #F57C00;
+    }
+    
+    .event-multiday.event-cancelled {
+      background: linear-gradient(135deg, #F44336 0%, #EF5350 100%);
+      border-left-color: #C62828;
+    }
+    
+    .event-multiday.event-archived {
+      background: linear-gradient(135deg, #9E9E9E 0%, #BDBDBD 100%);
+      border-left-color: #616161;
+    }
+    
+    .event-draft { background: #FF9800; }
+    .event-cancelled { background: #F44336; }
+    .event-archived { background: #9E9E9E; }
+    
+    .time-slot {
+      background: var(--card-background-color);
+      padding: 4px 8px;
+      font-size: 12px;
+      color: var(--muted);
+      border-right: 1px solid var(--muted-border-color);
+    }
+  </style>
+
+  <script>
+    let currentDate = new Date();
+    let currentView = 'month';
+    let events = JSON.parse('{{ events_json|escapejs }}');
+
+    function switchView(view) {
+      currentView = view;
+      document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(view + '-view').classList.add('active');
+      renderCalendar();
+    }
+
+    function previousPeriod() {
+      if (currentView === 'month') {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+      } else {
+        currentDate.setDate(currentDate.getDate() - 7);
+      }
+      renderCalendar();
+    }
+
+    function nextPeriod() {
+      if (currentView === 'month') {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      } else {
+        currentDate.setDate(currentDate.getDate() + 7);
+      }
+      renderCalendar();
+    }
+
+    function goToToday() {
+      currentDate = new Date();
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const container = document.getElementById('calendar-container');
+      const periodElement = document.getElementById('current-period');
+      
+      if (currentView === 'month') {
+        renderMonthView(container, periodElement);
+      } else {
+        renderWeekView(container, periodElement);
+      }
+    }
+
+    function renderMonthView(container, periodElement) {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      
+      periodElement.textContent = new Date(year, month).toLocaleDateString('uk-UA', { 
+        year: 'numeric', 
+        month: 'long' 
+      });
+
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const firstDayOfWeek = firstDay.getDay();
+
+      let html = '<div class="calendar-grid month-grid">';
+      
+      // Заголовки днів тижня
+      const dayNames = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+      dayNames.forEach(day => {
+        html += `<div class="calendar-header">${day}</div>`;
+      });
+
+      // Порожні комірки на початку місяця
+      for (let i = 0; i < firstDayOfWeek; i++) {
+        html += `<div class="calendar-day" style="visibility:hidden;"></div>`;
+      }
+
+      // Дні поточного місяця
+      for (let day = 1; day <= daysInMonth; day++) {
+        const currentDateObj = new Date(year, month, day);
+        const isToday = currentDateObj.toDateString() === new Date().toDateString();
+        const dayEvents = getEventsForDate(currentDateObj);
+
+        html += `<div class="calendar-day ${isToday ? 'today' : ''}">`;
+        html += `<div class="day-number">${day}</div>`;
+        
+        dayEvents.forEach(event => {
+          const statusClass = `event-${event.status}`;
+          const isMultiDay = isMultiDayEvent(event);
+          const multiDayClass = isMultiDay ? 'event-multiday' : '';
+          const eventTitle = isMultiDay ? `${event.title} (${getEventDuration(event)})` : event.title;
+          html += `<div class="event-item ${statusClass} ${multiDayClass}" onclick="goToEvent(${event.id})" title="${eventTitle}">${eventTitle}</div>`;
+        });
+        
+        html += '</div>';
+      }
+      
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    function renderWeekView(container, periodElement) {
+      const startOfWeek = new Date(currentDate);
+      startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+      
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      
+      periodElement.textContent = `${startOfWeek.toLocaleDateString('uk-UA')} - ${endOfWeek.toLocaleDateString('uk-UA')}`;
+
+      let html = '<div class="calendar-grid week-grid">';
+      
+      // Заголовок з часом
+      html += '<div class="calendar-header">Час</div>';
+      const dayNames = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+      for (let i = 0; i < 7; i++) {
+        const day = new Date(startOfWeek);
+        day.setDate(startOfWeek.getDate() + i);
+        html += `<div class="calendar-header">${dayNames[i]} ${day.getDate()}</div>`;
+      }
+
+      // Часові слоти
+      for (let hour = 0; hour < 24; hour += 2) {
+        html += `<div class="time-slot">${hour.toString().padStart(2, '0')}:00</div>`;
+        
+        for (let i = 0; i < 7; i++) {
+          const day = new Date(startOfWeek);
+          day.setDate(startOfWeek.getDate() + i);
+          const isToday = day.toDateString() === new Date().toDateString();
+          const dayEvents = getEventsForDate(day).filter(event => {
+            const eventHour = new Date(event.starts_at).getHours();
+            return eventHour >= hour && eventHour < hour + 2;
+          });
+
+          html += `<div class="calendar-day week-day ${isToday ? 'today' : ''}">`;
+          dayEvents.forEach(event => {
+            const statusClass = `event-${event.status}`;
+            const isMultiDay = isMultiDayEvent(event);
+            const multiDayClass = isMultiDay ? 'event-multiday' : '';
+            const time = new Date(event.starts_at).toLocaleTimeString('uk-UA', {hour: '2-digit', minute: '2-digit'});
+            const eventTitle = isMultiDay ? `${time} ${event.title} (${getEventDuration(event)})` : `${time} ${event.title}`;
+            html += `<div class="event-item ${statusClass} ${multiDayClass}" onclick="goToEvent(${event.id})" title="${eventTitle}">${eventTitle}</div>`;
+          });
+          html += '</div>';
+        }
+      }
+      
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    function getEventsForDate(date) {
+      const dateStr = date.toISOString().split('T')[0];
+      return events.filter(event => {
+        const eventStart = new Date(event.starts_at);
+        const eventEnd = new Date(event.ends_at);
+        const checkDate = new Date(date);
+        
+        // Скидаємо час до початку дня для порівняння
+        eventStart.setHours(0, 0, 0, 0);
+        eventEnd.setHours(0, 0, 0, 0);
+        checkDate.setHours(0, 0, 0, 0);
+        
+        // Подія відображається, якщо дата знаходиться між початком і кінцем події
+        return checkDate >= eventStart && checkDate <= eventEnd;
+      });
+    }
+    
+    function isMultiDayEvent(event) {
+      const start = new Date(event.starts_at);
+      const end = new Date(event.ends_at);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+      return end > start;
+    }
+    
+    function getEventDuration(event) {
+      const start = new Date(event.starts_at);
+      const end = new Date(event.ends_at);
+      const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+      return days === 1 ? '1 день' : `${days} дн.`;
+    }
+
+    function goToEvent(eventId) {
+      window.location.href = `/events/${eventId}/`;
+    }
+
+    function exportCalendar() {
+      const icalData = generateICalData();
+      const blob = new Blob([icalData], { type: 'text/calendar' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'events-calendar.ics';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function generateICalData() {
+      let ical = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Event Organizer//Calendar//EN\n';
+      
+      events.forEach(event => {
+        if (event.status === 'published') {
+          const startDate = new Date(event.starts_at).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+          const endDate = new Date(event.ends_at).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+          
+          ical += 'BEGIN:VEVENT\n';
+          ical += `UID:${event.id}@event-organizer.com\n`;
+          ical += `DTSTART:${startDate}\n`;
+          ical += `DTEND:${endDate}\n`;
+          ical += `SUMMARY:${event.title}\n`;
+          ical += `DESCRIPTION:${event.description || ''}\n`;
+          ical += `LOCATION:${event.location || ''}\n`;
+          ical += 'END:VEVENT\n';
+        }
+      });
+      
+      ical += 'END:VCALENDAR';
+      return ical;
+    }
+
+    // Ініціалізація
+    document.addEventListener('DOMContentLoaded', function() {
+      renderCalendar();
+    });
+  </script>
+{% endblock %}
