@@ -65,11 +65,22 @@ python manage.py runserver
 
 ##  Патерни проєктування
 
-- **Specification Pattern** - Фільтрація подій
-- **Repository Pattern** - Абстракція доступу до даних
-- **Unit of Work** - Управління транзакціями
-- **Strategy Pattern** - Різні стратегії пошуку
-- **Observer Pattern** - Сповіщення про події
+**Реалізовано в коді:**
+
+- **Specification Pattern** – гнучка фільтрація подій (`events/specifications.py`, `events/ui_views.py`)
+- **Strategy Pattern** – стратегії сортування списку подій (`events/strategies.py`, `EventListView`)
+- **Service Layer + Singleton** – сервіс архівації подій `EventArchiveService` (`events/services.py`)
+- **Decorator Pattern** – декоратори доступу до подій (`events/decorators.py`)
+- **Proxy Pattern** – проксі для керування сесією користувача (`users/session_manager.py`)
+- **Facade (UI/API)** – `EventViewSet` та `EventListView` приховують складність доменної логіки (`events/views.py`, `events/ui_views.py`)
+
+**Заплановано / описано в документації:**
+
+- **Repository Pattern** – окремий репозиторій поверх ORM
+- **Unit of Work** – координація транзакцій між кількома агрегатами
+- **Factory Pattern** – фабрика для створення подій різних типів
+- **CQRS** – розділення команд (створення/оновлення) та запитів (читання)
+- Розширений **Observer Pattern** через кастомні сигнали подій
 
 ##  Автор
 

@@ -21,12 +21,14 @@
     <form method="get">
       <input type="hidden" name="view" value="{{ view }}" />
       
-      <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 12px; align-items: end;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 12px; align-items: end;">
         <div>
           <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Пошук</label>
           <input type="search" name="q" value="{{ q }}" placeholder="Пошук..." />
         </div>
         
+        {% if view != 'archived' %}
+        {% if view == 'my' %}
         <div>
           <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Статус</label>
           <select name="status">
@@ -36,12 +38,15 @@
             {% endfor %}
           </select>
         </div>
+        {% endif %}
+        {% endif %}
         
-        <div>
+        <div style="max-width: 220px;">
           <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Категорія</label>
           <input type="search" name="category" value="{{ category }}" />
         </div>
         
+        {% if view != 'archived' %}
         <div>
           <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Дата</label>
           <select name="date_filter">
@@ -52,8 +57,9 @@
             <option value="this_month" {% if date_filter == 'this_month' %}selected{% endif %}>Цей місяць</option>
           </select>
         </div>
+        {% endif %}
         
-        <div>
+        <div style="max-width: 220px;">
           <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Популярність</label>
           <select name="popularity">
             <option value="">Всі</option>
@@ -63,7 +69,8 @@
           </select>
         </div>
 
-        <div>
+        {% if view != 'archived' %}
+        <div style="max-width: 220px;">
           <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Місця</label>
           <select name="availability">
             <option value="">Всі</option>
@@ -71,27 +78,40 @@
             <option value="full" {% if availability == 'full' %}selected{% endif %}>Немає місць</option>
           </select>
         </div>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px;">
+        {% endif %}
+
         <div>
           <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Сортування</label>
-          <select name="sort">
-            <option value="date" {% if sort == 'date' or not sort %}selected{% endif %}>За датою створення</option>
-            <option value="popular" {% if sort == 'popular' %}selected{% endif %}>По популярності</option>
-            <option value="alphabet" {% if sort == 'alphabet' %}selected{% endif %}>За алфавітом</option>
-            <option value="event_date" {% if sort == 'event_date' %}selected{% endif %}>По даті події</option>
-            <option value="rsvp_count" {% if sort == 'rsvp_count' %}selected{% endif %}>По кількості RSVP</option>
-          </select>
-        </div>
-        
-        <div style="display: flex; gap: 8px; padding-top: 26px;">
-          <button type="submit">Застосувати</button>
-          {% if q or status or category or date_filter or popularity or availability or sort != 'date' %}
-            <a role="button" class="secondary" href="/events/?view={{ view }}">Скинути</a>
+          {% if view == 'archived' %}
+            <select name="sort" style="width: 100%; max-width: 260px;">
+              <option value="date" {% if sort == 'date' or not sort %}selected{% endif %}>За датою створення</option>
+              <option value="popular" {% if sort == 'popular' %}selected{% endif %}>По популярності</option>
+              <option value="alphabet" {% if sort == 'alphabet' %}selected{% endif %}>За алфавітом</option>
+              <option value="event_date" {% if sort == 'event_date' %}selected{% endif %}>По даті події</option>
+              <option value="rsvp_count" {% if sort == 'rsvp_count' %}selected{% endif %}>По кількості RSVP</option>
+            </select>
+          {% else %}
+            <div style="display: flex; gap: 8px; align-items: stretch;">
+              <select name="sort" style="flex: 2; min-width: 260px;">
+                <option value="date" {% if sort == 'date' or not sort %}selected{% endif %}>За датою створення</option>
+                <option value="popular" {% if sort == 'popular' %}selected{% endif %}>По популярності</option>
+                <option value="alphabet" {% if sort == 'alphabet' %}selected{% endif %}>За алфавітом</option>
+                <option value="event_date" {% if sort == 'event_date' %}selected{% endif %}>По даті події</option>
+                <option value="rsvp_count" {% if sort == 'rsvp_count' %}selected{% endif %}>По кількості RSVP</option>
+              </select>
+              <button type="submit">Застосувати</button>
+              <button type="button" class="secondary" onclick="window.location='/events/?view={{ view }}'">Скинути</button>
+            </div>
           {% endif %}
         </div>
       </div>
+
+      {% if view == 'archived' %}
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;">
+        <button type="submit" style="flex: 0 0 auto; width: auto; padding: 0 16px;">Застосувати</button>
+        <button type="button" class="secondary" onclick="window.location='/events/?view={{ view }}'" style="flex: 0 0 auto; width: auto; padding: 0 16px;">Скинути</button>
+      </div>
+      {% endif %}
     </form>
   </div>
   

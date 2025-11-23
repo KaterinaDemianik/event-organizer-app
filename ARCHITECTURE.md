@@ -408,13 +408,17 @@ Request → SecurityMiddleware
 |--------|------------|------|
 | **MVT** | Django framework | Вся структура |
 | **Layered** | Presentation/Application/Domain/Data | Структура папок |
-| **Service Layer** | EventArchiveService | `events/services.py` |
-| **Repository** | Django ORM + Specifications | `events/models.py` |
-| **REST API** | DRF ViewSets | `events/views.py` |
-| **Front Controller** | URLconf | `urls.py` |
-| **Template Method** | Class-Based Views | `ui_views.py` |
-| **Middleware** | Django Middleware | `settings.py` |
-| **Dependency Injection** | Settings, Apps | `settings.py` |
+| **Service Layer + Singleton** | `EventArchiveService` | `events/services.py` |
+| **Specification** | Фільтрація подій через об'єкти-специфікації | `events/specifications.py`, `events/ui_views.py` |
+| **Strategy** | Стратегії сортування списку подій | `events/strategies.py`, `events/ui_views.py` |
+| **Decorator** | Декоратори доступу до подій | `events/decorators.py` |
+| **Proxy** | Менеджер сесій користувача | `users/session_manager.py` |
+| **Repository (базовий рівень)** | Django ORM як вбудований репозиторій | `events/models.py` |
+| **REST API / Facade** | DRF ViewSets як фасад до доменного шару | `events/views.py` |
+| **Front Controller** | URLconf | `event_organizer/urls.py` |
+| **Template Method** | Class-Based Views | `events/ui_views.py` |
+| **Middleware / Chain of Responsibility** | Django Middleware | `event_organizer/settings.py` |
+| **Dependency Injection** | Settings, Apps | `event_organizer/settings.py` |
 
 ---
 

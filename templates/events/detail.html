@@ -74,7 +74,7 @@
           {% if event.capacity and rsvp_count >= event.capacity %}
             <p style="color: var(--muted);">Реєстрація недоступна: всі місця зайняті.</p>
           {% else %}
-            <a role="button" href="/events/{{ event.id }}/rsvp/">📝 Зареєструватися</a>
+            <a role="button" href="/events/{{ event.id }}/rsvp/">Зареєструватися</a>
           {% endif %}
         {% endif %}
         <a role="button" class="outline" href="/">← Назад</a>

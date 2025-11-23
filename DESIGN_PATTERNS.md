@@ -131,7 +131,9 @@ class UnitOfWork:
 
 ### 4. **Strategy Pattern** (Патерн Стратегія)
 
-**Статус:** Підготовлено до реалізації
+**Статус:** ✅ Реалізовано
+
+**Файли:** `events/strategies.py`, `events/ui_views.py` (`EventListView.get_queryset`)
 
 **Призначення:** Визначає сімейство алгоритмів і робить їх взаємозамінними.
 
@@ -291,16 +293,18 @@ class GetUpcomingEventsHandler:
 ## Поточний стан реалізації
 
 ### ✅ Реалізовано:
-1. **Specification Pattern** - повністю реалізовано і використовується
-2. **Facade Pattern** - використовується в ViewSets
-3. **Observer Pattern** - частково через Django Signals
+1. **Specification Pattern** — повністю реалізовано і використовується (`events/specifications.py`, `events/ui_views.py`)
+2. **Facade Pattern** — ViewSets та UI Views виступають фасадом до доменної логіки (`events/views.py`, `events/ui_views.py`)
+3. **Strategy Pattern** — стратегії сортування списку подій (`events/strategies.py`, `EventListView`)
+4. **Decorator Pattern** — декоратори доступу до подій (`events/decorators.py`)
+5. **Proxy Pattern** — проксі для роботи із сесією (`users/session_manager.py`)
+6. **Observer Pattern** — частково через вбудовані Django Signals
 
 ### 🔄 Підготовлено до реалізації:
-4. **Repository Pattern**
-5. **Unit of Work Pattern**
-6. **Strategy Pattern**
-7. **Factory Pattern**
-8. **CQRS Pattern**
+1. **Repository Pattern**
+2. **Unit of Work Pattern**
+3. **Factory Pattern**
+4. **CQRS Pattern**
 
 ---
 
