@@ -23,7 +23,7 @@ class Event(models.Model):
     capacity = models.PositiveIntegerField(
         null=True,
         blank=True,
-        help_text="Максимальна кількість учасників. Залиште порожнім, якщо без обмежень.",
+        help_text="Залиште порожнім, якщо без обмежень.",
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=DRAFT)
     category = models.CharField(
@@ -51,6 +51,12 @@ class Review(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="event_reviews")
     rating = models.PositiveSmallIntegerField()
     comment = models.TextField(blank=True)
+    image = models.ImageField(
+        upload_to="review_photos/",
+        null=True,
+        blank=True,
+        help_text="Необов'язково: додайте зображення до свого відгуку (скрін, фото з події тощо).",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

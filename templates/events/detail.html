@@ -119,9 +119,17 @@
                 </div>
                 <small class="muted">{{ review.created_at|date:"d.m.Y H:i" }}</small>
               </header>
-              {% if review.comment %}
-                <p style="margin-top:8px;">{{ review.comment|linebreaksbr }}</p>
-              {% endif %}
+              <div style="margin-top:8px;">
+                {% if review.image %}
+                  <img src="{{ review.image.url }}" alt="Фото з відгуку" 
+                       style="float:right; width:120px; height:120px; object-fit:cover; border-radius:8px; margin:0 0 8px 12px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15);" 
+                       onclick="openReviewImageModal('{{ review.image.url }}')">
+                {% endif %}
+                {% if review.comment %}
+                  <div style="overflow:hidden;">{{ review.comment|linebreaksbr }}</div>
+                {% endif %}
+                <div style="clear:both;"></div>
+              </div>
             </article>
           {% empty %}
             <p>Ще немає жодного відгуку.</p>
@@ -131,5 +139,30 @@
         <p style="margin-top:8px;">Ще немає жодного відгуку.</p>
       {% endif %}
     </section>
+
+    <div id="review-image-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:1000; overflow:auto; padding:20px;">
+      <div style="max-width:40vw; max-height:50vh; display:flex; justify-content:center; align-items:center;">
+        <img id="review-image-modal-img" src="" alt="Фото з відгуку" style="max-width:100%; max-height:100%; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.5);">
+      </div>
+    </div>
+
+    <script>
+      function openReviewImageModal(src) {
+        const modal = document.getElementById('review-image-modal');
+        const img = document.getElementById('review-image-modal-img');
+        if (modal && img) {
+          img.src = src;
+          modal.style.display = 'flex';
+        }
+      }
+
+      document.addEventListener('click', function (e) {
+        const modal = document.getElementById('review-image-modal');
+        if (!modal) return;
+        if (e.target === modal || e.target.id === 'review-image-modal-img') {
+          modal.style.display = 'none';
+        }
+      });
+    </script>
   </article>
 {% endblock %}

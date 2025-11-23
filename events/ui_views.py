@@ -491,7 +491,7 @@ def event_review_create_view(request, pk: int):
         return redirect("event_detail", pk=pk)
 
     if request.method == "POST":
-        form = ReviewForm(request.POST)
+        form = ReviewForm(request.POST, request.FILES)
         if form.is_valid():
             review = form.save(commit=False)
             review.event = event
