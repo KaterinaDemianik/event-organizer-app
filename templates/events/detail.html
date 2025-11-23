@@ -78,7 +78,9 @@
             </form>
           {% endif %}
         {% else %}
-          {% if event.capacity and rsvp_count >= event.capacity %}
+          {% if event_started %}
+            <p style="color: var(--muted);">Реєстрація недоступна: подія вже розпочалась.</p>
+          {% elif event.capacity and rsvp_count >= event.capacity %}
             <p style="color: var(--muted);">Реєстрація недоступна: всі місця зайняті.</p>
           {% else %}
             <a role="button" href="/events/{{ event.id }}/rsvp/">Зареєструватися</a>

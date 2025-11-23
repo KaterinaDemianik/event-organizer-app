@@ -447,6 +447,9 @@ class EventDetailView(DetailView):
         else:
             ctx["remaining_places"] = None
 
+        # Чи вже розпочалась подія (для приховання кнопки реєстрації)
+        ctx["event_started"] = event.starts_at <= timezone.now()
+
         # Відгуки та рейтинг
         from django.db.models import Avg, Count
 
@@ -563,6 +566,12 @@ def rsvp_view(request, pk: int):
     # Не дозволяємо реєструватися на скасовані або архівні події
     if event.status in {Event.CANCELLED, Event.ARCHIVED}:
         messages.info(request, "Реєстрація недоступна для цієї події.")
+        return redirect("event_detail", pk=pk)
+
+    # Не дозволяємо реєстрацію після початку події
+    from django.utils import timezone
+    if event.starts_at <= timezone.now():
+        messages.info(request, "Реєстрація недоступна: подія вже розпочалась.")
         return redirect("event_detail", pk=pk)
 
     # Якщо користувач вже зареєстрований
