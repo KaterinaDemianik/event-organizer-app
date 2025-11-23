@@ -462,8 +462,6 @@ class EventDetailView(DetailView):
         # Чи може поточний користувач залишити відгук
         can_review = False
         if self.request.user.is_authenticated:
-            from django.utils import timezone
-
             event_ended = event.ends_at <= timezone.now()
             has_rsvp = RSVP.objects.filter(event=event, user=self.request.user).exists()
             has_review = Review.objects.filter(event=event, user=self.request.user).exists()
