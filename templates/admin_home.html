@@ -331,7 +331,7 @@
             <td><strong>{{ rsvp.user.username }}</strong></td>
             <td><a href="/events/{{ rsvp.event.id }}/">{{ rsvp.event.title }}</a></td>
             <td>{{ rsvp.created_at|date:"d.m.Y H:i" }}</td>
-            <td><a href="/events/{{ rsvp.event.id }}/participants/">👥 Учасники</a></td>
+            <td><a href="/events/{{ rsvp.event.id }}/participants/">Учасники</a></td>
           </tr>
         {% endfor %}
       </tbody>

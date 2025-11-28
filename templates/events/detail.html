@@ -1,64 +1,96 @@
 {% extends "base.html" %}
 {% block title %}{{ event.title }} · Event Organizer{% endblock %}
 {% block content %}
-  <article class="card">
-    <header class="card-head">
-      <div class="card-title">
-        <h1 style="margin:0; font-size: 1.6rem;">{{ event.title }}</h1>
-        <span class="badge {{ event.status }}">{{ event.get_status_display }}</span>
+  <article class="card event-detail">
+    <!-- Заголовок та статус -->
+    <header class="event-detail-header">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 24px;">
+        <h1 style="margin: 0; font-size: 1.4rem; font-weight: 700; line-height: 1.3; color: var(--text);">{{ event.title }}</h1>
+        <span class="badge {{ event.status }}" style="font-size: 13px; padding: 6px 14px; white-space: nowrap;">{{ event.get_status_display }}</span>
       </div>
     </header>
     
-    <div class="event-meta" style="margin:16px 0;">
-      <span>{{ event.starts_at|date:"d.m.Y H:i" }} → {{ event.ends_at|date:"d.m.Y H:i" }}</span>
-      <span>📍 {{ event.location }}</span>
-      <span>👤 Організатор: {{ event.organizer.username }}</span>
-      {% if event.capacity %}
-        <span>👥 Учасники: {{ rsvp_count }} / {{ event.capacity }}</span>
-        <span>
-          {% if remaining_places and remaining_places > 0 %}
-             Вільних місць: {{ remaining_places }}
-          {% else %}
-             Вільних місць немає
-          {% endif %}
-        </span>
-      {% else %}
-        <span>👥 Учасники: {{ rsvp_count }}</span>
-      {% endif %}
+    <!-- Основна інформація -->
+    <div class="event-info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 28px; padding: 20px; background: var(--bg); border-radius: 12px;">
+      <div class="info-item">
+        <div style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Дата та час</div>
+        <div style="font-size: 15px; font-weight: 500; color: var(--text);">{{ event.starts_at|date:"d.m.Y H:i" }}</div>
+        <div style="font-size: 14px; color: var(--muted); margin-top: 2px;">до {{ event.ends_at|date:"d.m.Y H:i" }}</div>
+      </div>
+      
+      <div class="info-item">
+        <div style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Локація</div>
+        <div style="font-size: 15px; font-weight: 500; color: var(--text);">{{ event.location }}</div>
+      </div>
+      
+      <div class="info-item">
+        <div style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Організатор</div>
+        <div style="font-size: 15px; font-weight: 500; color: var(--text);">{{ event.organizer.username }}</div>
+      </div>
+      
+      <div class="info-item">
+        <div style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Учасники</div>
+        {% if event.capacity %}
+          <div style="font-size: 15px; font-weight: 500; color: var(--text);">{{ rsvp_count }} / {{ event.capacity }}</div>
+          <div style="font-size: 14px; color: var(--muted); margin-top: 2px;">
+            {% if remaining_places and remaining_places > 0 %}
+              Вільних місць: {{ remaining_places }}
+            {% else %}
+              Вільних місць немає
+            {% endif %}
+          </div>
+        {% else %}
+          <div style="font-size: 15px; font-weight: 500; color: var(--text);">{{ rsvp_count }}</div>
+          <div style="font-size: 14px; color: var(--muted); margin-top: 2px;">Необмежено</div>
+        {% endif %}
+      </div>
     </div>
     
-    <div style="margin:16px 0;">
-      <a href="{{ google_calendar_url }}" target="_blank" rel="noopener noreferrer" role="button" style="font-size:14px; display:inline-block;">
+    <!-- Кнопка Google Calendar -->
+    <div style="margin-bottom: 24px;">
+      <a href="{{ google_calendar_url }}" target="_blank" rel="noopener noreferrer" role="button" class="outline" style="font-size: 14px; display: inline-flex; align-items: center; gap: 8px;">
         Додати в Google Calendar
       </a>
     </div>
     
+    <!-- Статус повідомлення -->
     {% if event.status == 'cancelled' %}
-      <div class="flash warning" style="margin:16px 0;">
+      <div class="flash warning" style="margin-bottom: 24px;">
         <strong>Подію скасовано</strong><br>
         Ця подія була скасована організатором.
       </div>
     {% elif event.status == 'archived' %}
-      <div class="flash info" style="margin:16px 0;">
+      <div class="flash info" style="margin-bottom: 24px;">
         <strong>Подія в архіві</strong><br>
         Ця подія завершилась і переміщена в архів.
       </div>
     {% endif %}
     
-    <p style="margin:16px 0;">{{ event.description|linebreaksbr }}</p>
+    <!-- Опис події -->
+    <section style="margin-bottom: 28px;">
+      <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; color: var(--text);">Про подію</h3>
+      <div style="font-size: 15px; line-height: 1.7; color: var(--text);">{{ event.description|linebreaksbr }}</div>
+    </section>
     
+    <!-- Рейтинг -->
     {% if reviews_count %}
-      <div class="flash info" style="margin:16px 0;">
-        <strong>Рейтинг події:</strong>
-        ⭐ {{ avg_rating|floatformat:1 }} / 5 · {{ reviews_count }} відгук(ів)
+      <div style="margin-bottom: 28px; padding: 16px; background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1)); border-radius: 12px; border: 1px solid rgba(255, 193, 7, 0.3);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 2rem;">⭐</div>
+          <div>
+            <div style="font-size: 1.3rem; font-weight: 700; color: var(--text);">{{ avg_rating|floatformat:1 }} / 5</div>
+            <div style="font-size: 14px; color: var(--muted);">{{ reviews_count }} відгук(ів)</div>
+          </div>
+        </div>
       </div>
     {% endif %}
     
-    <div class="event-actions" style="margin-bottom: 16px;">
+    <!-- Дії з подією -->
+    <div class="event-actions" style="margin-bottom: 32px; display: flex; flex-wrap: wrap; gap: 12px; padding-top: 20px; border-top: 2px solid var(--border);">
       {% if user.is_authenticated %}
         {% if event.organizer == user or user.is_staff %}
           <!-- Організатор та адмін бачать кнопки редагування та скасування -->
-          <a role="button" href="/events/{{ event.id }}/participants/">👥 Учасники ({{ rsvp_count }})</a>
+          <a role="button" href="/events/{{ event.id }}/participants/">Учасники ({{ rsvp_count }})</a>
           {% if event.status != 'archived' %}
             <a role="button" href="/events/{{ event.id }}/edit/">Редагувати подію</a>
             {% if event.status != 'cancelled' %}
@@ -101,48 +133,51 @@
       {% endif %}
     </div>
     
-    <hr style="margin:24px 0;">
-    
-    <section>
-      <h2>Відгуки</h2>
+    <!-- Секція відгуків -->
+    <section style="margin-top: 40px; padding-top: 32px; border-top: 2px solid var(--border);">
+      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; color: var(--text);">Відгуки</h2>
       {% if user.is_authenticated and can_review %}
-        <p>Ви були учасником цієї події і вона вже завершилась. Ви можете залишити відгук.</p>
-        <a role="button" href="/events/{{ event.id }}/review/">Залишити відгук</a>
+        <div style="margin-bottom: 20px; padding: 16px; background: var(--bg); border-radius: 12px; border: 1px solid var(--border);">
+          <p style="margin-bottom: 12px; font-size: 15px;">Ви були учасником цієї події і вона вже завершилась. Ви можете залишити відгук.</p>
+          <a role="button" href="/events/{{ event.id }}/review/" style="font-size: 14px;">Залишити відгук</a>
+        </div>
       {% elif user.is_authenticated and not can_review %}
-        <p style="color: var(--muted); font-size: 14px;">Відгук можуть залишити лише учасники події після її завершення, і лише один раз.</p>
+        <p style="color: var(--muted); font-size: 14px; margin-bottom: 20px; padding: 12px; background: var(--bg); border-radius: 8px;">Відгук можуть залишити лише учасники події після її завершення, і лише один раз.</p>
       {% else %}
-        <p style="color: var(--muted); font-size: 14px;">Увійдіть, щоб мати можливість залишити відгук.</p>
+        <p style="color: var(--muted); font-size: 14px; margin-bottom: 20px; padding: 12px; background: var(--bg); border-radius: 8px;">Увійдіть, щоб мати можливість залишити відгук.</p>
       {% endif %}
 
       {% if reviews %}
-        <div style="margin-top:16px; display:flex; flex-direction:column; gap:12px;">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
           {% for review in reviews %}
-            <article class="card" style="margin:0;">
-              <header class="card-head">
-                <div class="card-title">
-                  <strong>{{ review.user.username }}</strong>
-                  <span class="badge">⭐ {{ review.rating }}/5</span>
+            <article style="padding: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+              <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 4px;">{{ review.user.username }}</div>
+                  <div style="font-size: 13px; color: var(--muted);">{{ review.created_at|date:"d.m.Y H:i" }}</div>
                 </div>
-                <small class="muted">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: rgba(255, 193, 7, 0.15); border-radius: 20px; font-size: 14px; font-weight: 600; color: #f57c00;">⭐ {{ review.rating }}/5</span>
               </header>
-              <div style="margin-top:8px;">
+              <div>
                 {% if review.image %}
                   <img src="{{ review.image.url }}" alt="Фото з відгуку" 
-                       style="float:right; width:120px; height:120px; object-fit:cover; border-radius:8px; margin:0 0 8px 12px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15);" 
-                       onclick="openReviewImageModal('{{ review.image.url }}')">
+                       style="float: right; width: 140px; height: 140px; object-fit: cover; border-radius: 12px; margin: 0 0 12px 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s;" 
+                       onclick="openReviewImageModal('{{ review.image.url }}')" 
+                       onmouseover="this.style.transform='scale(1.05)'" 
+                       onmouseout="this.style.transform='scale(1)'">
                 {% endif %}
                 {% if review.comment %}
-                  <div style="overflow:hidden;">{{ review.comment|linebreaksbr }}</div>
+                  <div style="font-size: 15px; line-height: 1.6; color: var(--text); overflow: hidden;">{{ review.comment|linebreaksbr }}</div>
                 {% endif %}
-                <div style="clear:both;"></div>
+                <div style="clear: both;"></div>
               </div>
             </article>
           {% empty %}
-            <p>Ще немає жодного відгуку.</p>
+            <p style="text-align: center; color: var(--muted); padding: 40px 20px; font-size: 15px;">Ще немає жодного відгуку</p>
           {% endfor %}
         </div>
       {% else %}
-        <p style="margin-top:8px;">Ще немає жодного відгуку.</p>
+        <p style="text-align: center; color: var(--muted); padding: 40px 20px; font-size: 15px;">Ще немає жодного відгуку</p>
       {% endif %}
     </section>
 
