@@ -17,7 +17,9 @@
   <header class="container">
     <nav class="topbar">
       <ul>
-        <li><a class="brand {% if request.path == '/' %}active{% endif %}" href="/">Event Organizer</a></li>
+        <li><a class="brand {% if request.path == '/' %}active{% endif %}" href="/">
+          <span class="brand-text">Event Organizer</span>
+        </a></li>
         {% if user.is_authenticated and not user.is_staff %}
           <li><a class="nav-link {% if request.path == '/' or request.path == '/events/' or '/events/?' in request.get_full_path %}active{% endif %}" href="/">Головна</a></li>
           <li><a class="nav-link {% if request.path == '/calendar/' %}active{% endif %}" href="/calendar/">Календар</a></li>

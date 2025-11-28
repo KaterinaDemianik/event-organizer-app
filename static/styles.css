@@ -147,7 +147,25 @@ header.container {
   white-space: nowrap;
 }
 .topbar a:hover { color: var(--link); }
-.topbar .brand { font-weight: 700; font-size: 20px; margin-right: 24px; }
+.topbar .brand { 
+  font-weight: 700; 
+  font-size: 26px; 
+  margin-right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+.topbar .brand:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+.topbar .brand .brand-text {
+  color: #1e40af;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  text-shadow: 0 2px 8px rgba(30, 64, 175, 0.15);
+}
 .topbar .nav-link { font-size: 15px; }
 .topbar .nav-link.active { color: var(--link); font-weight: 600; }
 .topbar .muted { 
