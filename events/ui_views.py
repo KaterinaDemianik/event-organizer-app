@@ -31,20 +31,16 @@ def home_view(request):
     """Головна сторінка - адмін панель для staff, список подій для користувачів"""
     
     if request.user.is_authenticated and request.user.is_staff:
-        # Статистика з фільтром по періоду
         from django.utils import timezone
         
         now = timezone.now()
         today = now.date()
         
-        # Отримуємо період фільтрації
         period = request.GET.get('period', 'all')
         date_from = request.GET.get('date_from', '')
         date_to = request.GET.get('date_to', '')
         
-        # Визначаємо дати для фільтрації
         if period == 'custom' and date_from:
-            # Власний період
             from datetime import datetime
             try:
                 start_date = timezone.make_aware(datetime.strptime(date_from, '%Y-%m-%d'))
@@ -84,7 +80,6 @@ def home_view(request):
             end_date = None
             period_label = "за весь час"
         
-        # Базові queryset'и з фільтрацією
         if start_date:
             events_qs = Event.objects.filter(created_at__gte=start_date)
             users_qs = User.objects.filter(date_joined__gte=start_date)
@@ -121,7 +116,6 @@ def home_view(request):
         
         tab = request.GET.get('tab', 'stats')
         
-        # Параметри фільтрації для вкладки "Події"
         q = request.GET.get('q', '')
         status_filter = request.GET.get('status', '')
         organizer_filter = request.GET.get('organizer', '')
@@ -130,28 +124,22 @@ def home_view(request):
         popularity_filter = request.GET.get('popularity', '')
         sort_by = request.GET.get('sort', 'date_desc')
         
-        # Фільтруємо події для вкладки "Події"
         events_qs = Event.objects.annotate(rsvp_count=Count('rsvps'))
         if tab == 'events':
-            # Пошук
             if q:
                 events_qs = events_qs.filter(
                     Q(title__icontains=q) | 
                     Q(description__icontains=q) | 
                     Q(location__icontains=q)
                 )
-            # Статус
             if status_filter:
                 events_qs = events_qs.filter(status=status_filter)
-            # Організатор
             if organizer_filter:
                 events_qs = events_qs.filter(organizer_id=organizer_filter)
 
-            # Категорія
             if category_filter:
                 events_qs = events_qs.filter(category__icontains=category_filter)
             
-            # Фільтр по даті
             if date_filter:
                 today = timezone.now().date()
                 
@@ -176,7 +164,6 @@ def home_view(request):
                         starts_at__month=today.month
                     )
             
-            # Фільтр по популярності
             if popularity_filter:
                 if popularity_filter == 'popular':
                     events_qs = events_qs.filter(rsvp_count__gte=5)
@@ -185,7 +172,6 @@ def home_view(request):
                 elif popularity_filter == 'none':
                     events_qs = events_qs.filter(rsvp_count=0)
             
-            # Сортування
             if sort_by == 'date_desc':
                 events_qs = events_qs.order_by('-created_at')
             elif sort_by == 'date_asc':
@@ -200,7 +186,6 @@ def home_view(request):
         events_count = events_qs.count()
         recent_events = events_qs[:100]
         
-        # Топ події - використовуємо фільтр періоду тільки на вкладці статистика
         if (tab == 'stats' or not tab) and start_date:
             top_events_qs = Event.objects.filter(created_at__gte=start_date)
             if end_date:
@@ -213,7 +198,6 @@ def home_view(request):
         recent_rsvps = RSVP.objects.select_related('user', 'event').order_by('-created_at')[:50]
         all_users = User.objects.all().order_by('username')
         
-        # Унікальні категорії для фільтрів (адмін)
         category_options = (
             Event.objects.exclude(category="")
             .values_list("category", flat=True)
@@ -245,7 +229,6 @@ def home_view(request):
         
         return render(request, 'admin_home.html', context)
     else:
-        # Звичайні користувачі бачать список подій
         return redirect('event_list')
 
 
@@ -256,10 +239,8 @@ class EventListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        # Перед формуванням списку — автоматично архівуємо завершені події
         EventArchiveService().archive_past_events()
 
-        # Додаємо анотацію з кількістю RSVP та кількістю вільних місць
         from django.db.models import Case, When, Value, IntegerField
         from django.db.models.functions import Greatest, Cast
         
@@ -279,16 +260,13 @@ class EventListView(ListView):
             .order_by("-starts_at")
         )
         
-        # Фільтрація по вкладках
         view = self.request.GET.get("view", "all")
         
         if view == "my" and self.request.user.is_authenticated:
-            # Мої події - де я організатор (чернетки + опубліковані + скасовані, але не архівні)
             qs = qs.filter(
                 organizer=self.request.user
             ).exclude(status=Event.ARCHIVED)
         elif view == "upcoming" and self.request.user.is_authenticated:
-            # Заплановані - майбутні опубліковані події, на які користувач зареєстрований
             now = timezone.now()
             qs = qs.filter(
                 starts_at__gte=now,
@@ -296,20 +274,15 @@ class EventListView(ListView):
                 rsvps__user=self.request.user
             ).distinct()
         elif view == "archived" and self.request.user.is_authenticated:
-            # Архів - завершені події, які організовував або відвідав
             if self.request.user.is_staff:
-                # Адміни бачать всі архівні події
                 qs = qs.filter(status=Event.ARCHIVED)
             else:
-                # Звичайний користувач бачить архівні події, які організовував або на які був зареєстрований
                 qs = qs.filter(status=Event.ARCHIVED).filter(
                     Q(organizer=self.request.user) | Q(rsvps__user=self.request.user)
                 ).distinct()
-        # view == "all" - всі опубліковані події
         elif view == "all":
             qs = qs.filter(status=Event.PUBLISHED)
         
-        # Збираємо специфікації на основі параметрів запиту
         specs = []
         
         q = self.request.GET.get("q")
@@ -326,12 +299,10 @@ class EventListView(ListView):
         
         filtered_qs = apply_specifications(qs, *specs)
 
-        # Категорія
         category = self.request.GET.get("category")
         if category:
             filtered_qs = filtered_qs.filter(category__icontains=category)
         
-        # Фільтр по даті
         date_filter = self.request.GET.get("date_filter")
         if date_filter:
             today = timezone.now().date()
@@ -353,7 +324,6 @@ class EventListView(ListView):
                     starts_at__month=today.month
                 )
         
-        # Фільтр по популярності
         popularity = self.request.GET.get("popularity")
         if popularity:
             if popularity == 'popular':
@@ -363,24 +333,19 @@ class EventListView(ListView):
             elif popularity == 'none':
                 filtered_qs = filtered_qs.filter(rsvp_count=0)
 
-        # Фільтр по наявності місць
         availability = self.request.GET.get("availability")
         if availability == "available":
-            # Є місця: або немає обмеження, або записів менше за місткість
             filtered_qs = filtered_qs.filter(
                 Q(capacity__isnull=True) | Q(capacity__gt=F("rsvp_count"))
             )
         elif availability == "full":
-            # Немає місць: місткість задана і вже заповнена або переповнена
             filtered_qs = filtered_qs.filter(
                 capacity__isnull=False,
                 capacity__lte=F("rsvp_count"),
             )
 
-        # Застосовуємо стратегію сортування
         sort_slug = self.request.GET.get("sort", "date")
         
-        # Додаткові варіанти сортування
         if sort_slug == "popular":
             return filtered_qs.order_by('-rsvp_count', '-created_at')
         elif sort_slug == "alphabet":
@@ -407,7 +372,6 @@ class EventListView(ListView):
         ctx["sort_choices"] = get_sort_choices()
         ctx["category"] = self.request.GET.get("category", "")
 
-        # Всі доступні категорії для фільтрів (динамічно з БД)
         ctx["category_choices"] = (
             Event.objects.exclude(category="")
             .values_list("category", flat=True)
@@ -421,7 +385,6 @@ class EventListView(ListView):
             (Event.ARCHIVED, "Архів"),
         ]
 
-        # Популярні теги (категорії) серед опублікованих подій
         popular_tags_qs = (
             Event.objects.filter(status=Event.PUBLISHED)
             .exclude(category="")
@@ -452,20 +415,16 @@ class EventDetailView(DetailView):
             user_rsvp = None
             ctx["user_rsvp"] = None
 
-        # Кількість учасників
         ctx["rsvp_count"] = RSVP.objects.filter(event=event).count()
 
-        # Скільки місць залишилось (для зручного відображення в шаблоні)
         if event.capacity is not None:
             remaining = event.capacity - ctx["rsvp_count"]
             ctx["remaining_places"] = remaining if remaining > 0 else 0
         else:
             ctx["remaining_places"] = None
 
-        # Чи вже розпочалась подія (для приховання кнопки реєстрації)
         ctx["event_started"] = event.starts_at <= timezone.now()
 
-        # Відгуки та рейтинг
         from django.db.models import Avg, Count
 
         reviews_qs = event.reviews.select_related("user")
@@ -474,7 +433,6 @@ class EventDetailView(DetailView):
         ctx["avg_rating"] = agg["avg_rating"]
         ctx["reviews_count"] = agg["reviews_count"]
 
-        # Чи може поточний користувач залишити відгук
         can_review = False
         if self.request.user.is_authenticated:
             event_ended = event.ends_at <= timezone.now()
@@ -484,10 +442,8 @@ class EventDetailView(DetailView):
 
         ctx["can_review"] = can_review
         
-        # Генеруємо URL для додавання події в Google Calendar
         from urllib.parse import urlencode
         
-        # Форматуємо дати в UTC для Google Calendar (формат: 20251124T183000Z)
         start_utc = event.starts_at.strftime('%Y%m%dT%H%M%SZ')
         end_utc = event.ends_at.strftime('%Y%m%dT%H%M%SZ')
         
@@ -508,17 +464,14 @@ class EventDetailView(DetailView):
 def event_review_create_view(request, pk: int):
     event = get_object_or_404(Event, pk=pk)
 
-    # Перевіряємо, що подія вже завершилась
     if event.ends_at > timezone.now():
         messages.error(request, "Ви можете залишити відгук лише після завершення події.")
         return redirect("event_detail", pk=pk)
 
-    # Перевіряємо, що користувач був учасником події
     if not RSVP.objects.filter(event=event, user=request.user).exists():
         messages.error(request, "Ви можете залишити відгук лише як учасник цієї події.")
         return redirect("event_detail", pk=pk)
 
-    # Перевіряємо, що відгук ще не залишено
     if Review.objects.filter(event=event, user=request.user).exists():
         messages.info(request, "Ви вже залишили відгук для цієї події.")
         return redirect("event_detail", pk=pk)
@@ -550,8 +503,6 @@ class EventCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
-        # Для адміна organizer вже встановлено з форми
-        # Для звичайних користувачів ставимо автоматично
         if not self.request.user.is_staff:
             form.instance.organizer = self.request.user
         resp = super().form_valid(form)
@@ -574,11 +525,9 @@ class EventUpdateView(LoginRequiredMixin, UpdateView):
     
     def dispatch(self, request, *args, **kwargs):
         event = self.get_object()
-        # Перевіряємо, чи користувач є організатором або адміном
         if event.organizer != request.user and not request.user.is_staff:
             messages.error(request, "Ви не можете редагувати цю подію")
             return redirect("event_detail", pk=event.pk)
-        # Перевіряємо, чи подія не є архівною
         if event.status == Event.ARCHIVED:
             messages.error(request, "Архівну подію не можна редагувати")
             return redirect("event_detail", pk=event.pk)
@@ -594,24 +543,20 @@ class EventUpdateView(LoginRequiredMixin, UpdateView):
 def rsvp_view(request, pk: int):
     event = get_object_or_404(Event, pk=pk)
 
-    # Не дозволяємо реєструватися на скасовані або архівні події
     if event.status in {Event.CANCELLED, Event.ARCHIVED}:
         messages.info(request, "Реєстрація недоступна для цієї події.")
         return redirect("event_detail", pk=pk)
 
-    # Не дозволяємо реєстрацію після початку події
     from django.utils import timezone
     if event.starts_at <= timezone.now():
         messages.info(request, "Реєстрація недоступна: подія вже розпочалась.")
         return redirect("event_detail", pk=pk)
 
-    # Якщо користувач вже зареєстрований
     existing = RSVP.objects.filter(user=request.user, event=event)
     if existing.exists():
         messages.info(request, "Ви вже підтвердили участь у цій події")
         return redirect("event_detail", pk=pk)
 
-    # Перевірка ліміту місць
     if event.capacity is not None:
         current = RSVP.objects.filter(event=event).count()
         if current >= event.capacity:
@@ -628,7 +573,6 @@ def rsvp_cancel_view(request, pk: int):
     if request.method == "POST":
         event = get_object_or_404(Event, pk=pk)
 
-        # Забороняємо скасовувати участь у архівних подіях
         if event.status == Event.ARCHIVED:
             messages.info(request, "Неможливо скасувати участь у архівній події")
             return redirect("event_detail", pk=pk)
@@ -647,22 +591,18 @@ def event_cancel_view(request, pk: int):
     if request.method == "POST":
         event = get_object_or_404(Event, pk=pk)
         
-        # Перевіряємо, чи користувач є організатором або адміном
         if event.organizer != request.user and not request.user.is_staff:
             messages.error(request, "Ви не можете скасувати цю подію")
             return redirect("event_detail", pk=pk)
         
-        # Перевіряємо, чи подія не є архівною
         if event.status == Event.ARCHIVED:
             messages.error(request, "Архівну подію не можна скасувати")
             return redirect("event_detail", pk=pk)
         
-        # Перевіряємо, чи подія вже не скасована
         if event.status == Event.CANCELLED:
             messages.info(request, "Ця подія вже скасована")
             return redirect("event_detail", pk=pk)
         
-        # Змінюємо статус на "cancelled"
         event.status = Event.CANCELLED
         event.save()
         
@@ -677,7 +617,6 @@ def event_participants_view(request, pk: int):
     """Список учасників події"""
     event = get_object_or_404(Event, pk=pk)
     
-    # Тільки організатор або адмін можуть бачити список
     if event.organizer != request.user and not request.user.is_staff:
         messages.error(request, "Ви не маєте доступу до списку учасників")
         return redirect("event_detail", pk=pk)
@@ -699,16 +638,11 @@ class CalendarView(ListView):
     context_object_name = "events"
 
     def get_queryset(self):
-        # Показуємо тільки релевантні події для користувача:
-        # 1. Події, які він організовує (всі статуси)
-        # 2. Опубліковані події, на які він зареєстрований
         if self.request.user.is_authenticated:
             from tickets.models import RSVP
             
-            # Події користувача як організатора
             user_events = Q(organizer=self.request.user)
             
-            # Опубліковані події, на які користувач зареєстрований
             registered_events = Q(
                 status=Event.PUBLISHED,
                 rsvps__user=self.request.user
@@ -718,13 +652,11 @@ class CalendarView(ListView):
                 user_events | registered_events
             ).distinct().order_by("starts_at")
         else:
-            # Для неавторизованих користувачів показуємо тільки опубліковані події
             return Event.objects.filter(status=Event.PUBLISHED).order_by("starts_at")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Серіалізуємо події для JavaScript
         events_data = []
         for event in self.get_queryset():
             events_data.append({

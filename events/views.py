@@ -14,7 +14,6 @@ from .specifications import (
 from tickets.models import RSVP
 from tickets.serializers import RSVPSerializer
 
-# Create your views here.
 
 class IsAuthenticatedOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
     pass

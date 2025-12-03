@@ -39,4 +39,3 @@ class EventReviewPermissionsTests(TestCase):
         resp = self.client.post(url, {"rating": "5", "comment": "Great"})
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(Review.objects.filter(user=other_user, event=self.event).count(), 1)
-

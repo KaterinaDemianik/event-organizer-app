@@ -47,7 +47,6 @@ class EventForm(forms.ModelForm):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
-        # Локалізуємо назви деяких полів форми
         if "capacity" in self.fields:
             self.fields["capacity"].label = "Максимальна кількість учасників"
         if "status" in self.fields:
@@ -55,7 +54,6 @@ class EventForm(forms.ModelForm):
         if "category" in self.fields:
             self.fields["category"].label = "Категорія події"
 
-        # При створенні події дозволяємо вибирати тільки Чернетка / Опубліковано
         if "status" in self.fields and not getattr(self.instance, "pk", None):
             allowed_statuses = {Event.DRAFT, Event.PUBLISHED}
             self.fields["status"].choices = [
@@ -64,7 +62,6 @@ class EventForm(forms.ModelForm):
                 if value in allowed_statuses
             ]
 
-        # Якщо користувач - адмін, показуємо поле organizer
         if user and user.is_staff:
             self.fields['organizer'] = forms.ModelChoiceField(
                 queryset=User.objects.all(),
@@ -94,7 +91,6 @@ class EventForm(forms.ModelForm):
                     "Дата закінчення має бути пізніше дати початку події."
                 )
 
-        # Перевірка місткості
         if capacity is not None:
             if capacity <= 0:
                 self.add_error("capacity", "Місткість має бути додатним числом або порожньою (без обмежень).")

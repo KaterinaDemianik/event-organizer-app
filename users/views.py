@@ -22,7 +22,6 @@ class LoginView(DjangoLoginView):
     template_name = "registration/login.html"
     
     def dispatch(self, request, *args, **kwargs):
-        # Якщо користувач вже авторизований, перенаправляємо на головну
         if request.user.is_authenticated:
             return redirect('home')
         return super().dispatch(request, *args, **kwargs)
@@ -34,7 +33,6 @@ class SignupView(FormView):
     success_url = reverse_lazy("home")
     
     def dispatch(self, request, *args, **kwargs):
-        # Якщо користувач вже авторизований, перенаправляємо на головну
         if request.user.is_authenticated:
             return redirect('home')
         return super().dispatch(request, *args, **kwargs)
@@ -62,13 +60,11 @@ class ProfileView(LoginRequiredMixin, FormView):
         base_rsvps = RSVP.objects.filter(user=user)
         ctx["rsvp_count"] = base_rsvps.count()
 
-        # Події користувача як організатора
         my_events = Event.objects.filter(organizer=user)
         ctx["my_events_count"] = my_events.count()
         ctx["my_published_events_count"] = my_events.filter(status=Event.PUBLISHED).count()
         ctx["my_archived_events_count"] = my_events.filter(status=Event.ARCHIVED).count()
 
-        # RSVP користувача: майбутні / минулі
         now = timezone.now()
         ctx["upcoming_rsvps_count"] = base_rsvps.filter(event__ends_at__gte=now).count()
         ctx["past_rsvps_count"] = base_rsvps.filter(event__ends_at__lt=now).count()
@@ -76,7 +72,6 @@ class ProfileView(LoginRequiredMixin, FormView):
         ctx["recent_rsvps"] = base_rsvps.select_related("event").order_by("-created_at")[:5]
         ctx["recent_events"] = my_events.order_by("-created_at")[:5]
 
-        # Відгуки про події користувача (як організатора)
         my_events_reviews = Review.objects.filter(event__organizer=user)
         agg = my_events_reviews.aggregate(
             avg_rating=Avg("rating"),
@@ -85,10 +80,8 @@ class ProfileView(LoginRequiredMixin, FormView):
         ctx["my_events_avg_rating"] = agg["avg_rating"]
         ctx["my_events_reviews_count"] = agg["reviews_count"]
 
-        # Відгуки, які залишив користувач
         ctx["my_reviews_count"] = Review.objects.filter(user=user).count()
 
-        # Вік користувача за датою народження (якщо вказана)
         profile = getattr(user, "profile", None)
         age = None
         if profile and profile.birth_date:

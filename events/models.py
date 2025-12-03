@@ -66,4 +66,3 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Review({self.user_id} -> {self.event_id}, rating={self.rating})"
-

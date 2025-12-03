@@ -24,10 +24,8 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, Sp
 from django.views.generic.base import RedirectView
 from users.admin_site import CustomAdminSite
 
-# Створюємо кастомний admin site
 admin_site = CustomAdminSite(name='custom_admin')
 
-# Реєструємо всі моделі
 from django.contrib.auth.models import User, Group
 from events.models import Event
 from tickets.models import RSVP
@@ -40,11 +38,8 @@ admin_site.register(Event, EventAdmin)
 admin_site.register(RSVP, RSVPAdmin)
 
 urlpatterns = [
-    # UI routes
     path("", include("events.ui_urls")),
-    # Custom auth views (login, signup, profile)
     path("accounts/", include("users.urls")),
-    # Django auth views (logout, password reset, etc.) - без login
     path("accounts/logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("accounts/password_change/", auth_views.PasswordChangeView.as_view(), name="password_change"),
     path("accounts/password_change/done/", auth_views.PasswordChangeDoneView.as_view(), name="password_change_done"),
@@ -53,11 +48,9 @@ urlpatterns = [
     path("accounts/reset/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
     path("accounts/reset/done/", auth_views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
     path("admin/", admin_site.urls),
-    # API schema and docs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
-    # App routes
     path("api/users/", include("users.urls")),
     path("api/events/", include("events.urls")),
     path("api/tickets/", include("tickets.urls")),

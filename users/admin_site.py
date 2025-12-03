@@ -24,7 +24,6 @@ class CustomAdminSite(AdminSite):
         
         extra_context = extra_context or {}
         
-        # Загальна статистика
         extra_context.update({
             'total_events': Event.objects.count(),
             'published_events': Event.objects.filter(status=Event.PUBLISHED).count(),
@@ -40,18 +39,14 @@ class CustomAdminSite(AdminSite):
             'rsvps_month': RSVP.objects.filter(created_at__gte=month_ago).count(),
         })
         
-        # Топ подій
         extra_context['top_events'] = Event.objects.annotate(
             rsvp_count=Count('rsvps')
         ).order_by('-rsvp_count')[:5]
         
-        # Останні події
         extra_context['recent_events'] = Event.objects.order_by('-created_at')[:5]
         
-        # Останні користувачі
         extra_context['recent_users'] = User.objects.order_by('-date_joined')[:5]
         
-        # Останні RSVP
         extra_context['recent_rsvps'] = RSVP.objects.select_related(
             'user', 'event'
         ).order_by('-created_at')[:10]

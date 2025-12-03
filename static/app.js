@@ -34,7 +34,7 @@
     if (savedScroll) {
       setTimeout(function() {
         window.scrollTo(0, parseInt(savedScroll, 10));
-      }, 50); // Невелика затримка для коректного відновлення
+      }, 50);  // Невелика затримка для коректного відновлення
       sessionStorage.removeItem(SCROLL_KEY);
     }
   });
@@ -44,11 +44,11 @@
     sessionStorage.setItem(SCROLL_KEY, window.pageYOffset || document.documentElement.scrollTop);
   });
   
-  // Зберігаємо позицію при кліку на посилання/кнопки форм
+  // Зберігаємо позицію при кліку на посилання. Ігноруємо посилання, що відкриваються в новій вкладці
   document.addEventListener('click', function(e) {
-    const link = e.target.closest('a[href], button[type="submit"]');
-    if (link && !link.target) { // Ігноруємо посилання, що відкриваються в новій вкладці
-      sessionStorage.setItem(SCROLL_KEY, window.pageYOffset || document.documentElement.scrollTop);
-    }
+    const a = e.target.closest('a');
+    if (!a) return;
+    if (a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    sessionStorage.setItem(SCROLL_KEY, window.pageYOffset || document.documentElement.scrollTop);
   });
 })();

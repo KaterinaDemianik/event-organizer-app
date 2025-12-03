@@ -2,7 +2,7 @@
 {% block title %}{{ event.title }} · Event Organizer{% endblock %}
 {% block content %}
   <article class="card event-detail">
-    <!-- Заголовок та статус -->
+    
     <header class="event-detail-header">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 24px;">
         <h1 style="margin: 0; font-size: 1.4rem; font-weight: 700; line-height: 1.3; color: var(--text);">{{ event.title }}</h1>
@@ -10,7 +10,7 @@
       </div>
     </header>
     
-    <!-- Основна інформація -->
+    
     <div class="event-info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 28px; padding: 20px; background: var(--bg); border-radius: 12px;">
       <div class="info-item">
         <div style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Дата та час</div>
@@ -46,14 +46,14 @@
       </div>
     </div>
     
-    <!-- Кнопка Google Calendar -->
+    
     <div style="margin-bottom: 24px;">
       <a href="{{ google_calendar_url }}" target="_blank" rel="noopener noreferrer" role="button" class="outline" style="font-size: 14px; display: inline-flex; align-items: center; gap: 8px;">
         Додати в Google Calendar
       </a>
     </div>
     
-    <!-- Статус повідомлення -->
+    
     {% if event.status == 'cancelled' %}
       <div class="flash warning" style="margin-bottom: 24px;">
         <strong>Подію скасовано</strong><br>
@@ -66,13 +66,13 @@
       </div>
     {% endif %}
     
-    <!-- Опис події -->
+    
     <section style="margin-bottom: 28px;">
       <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; color: var(--text);">Про подію</h3>
       <div style="font-size: 15px; line-height: 1.7; color: var(--text);">{{ event.description|linebreaksbr }}</div>
     </section>
     
-    <!-- Рейтинг -->
+    
     {% if reviews_count %}
       <div style="margin-bottom: 28px; padding: 16px; background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1)); border-radius: 12px; border: 1px solid rgba(255, 193, 7, 0.3);">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -85,34 +85,34 @@
       </div>
     {% endif %}
     
-    <!-- Дії з подією -->
+    
     <div class="event-actions" style="margin-bottom: 32px; display: flex; flex-wrap: wrap; gap: 12px; padding-top: 20px; border-top: 2px solid var(--border);">
       {% if user.is_authenticated %}
         {% if event.organizer == user or user.is_staff %}
-          <!-- Організатор та адмін бачать кнопки редагування та скасування -->
-          <a role="button" href="/events/{{ event.id }}/participants/">Учасники ({{ rsvp_count }})</a>
+          
+          <a role="button" href="/events/{{ event.id }}/participants/" style="background: #3b82f6; border-color: #3b82f6;">Учасники ({{ rsvp_count }})</a>
           {% if event.status != 'archived' %}
-            <a role="button" href="/events/{{ event.id }}/edit/">Редагувати подію</a>
+            <a role="button" href="/events/{{ event.id }}/edit/" style="background: #60a5fa; border-color: #60a5fa;">Редагувати подію</a>
             {% if event.status != 'cancelled' %}
               <form method="post" action="/events/{{ event.id }}/cancel/" style="display:inline; margin:0;" onsubmit="return confirm('Ви впевнені, що хочете скасувати цю подію?');">
                 {% csrf_token %}
-                <button type="submit" class="outline" style="background:#dc3545; border-color:#dc3545; color:#fff;">Скасувати подію</button>
+                <button type="submit" class="outline" style="color: #f97373; border-color: #fca5a5; background: transparent;">Скасувати подію</button>
               </form>
             {% endif %}
           {% endif %}
-          <a role="button" class="outline" href="/">← Назад</a>
+          <a role="button" class="outline" href="/" style="color: var(--muted); border-color: var(--border);">← Назад</a>
         {% else %}
-        <!-- Звичайні користувачі бачать RSVP -->
+        
         {% if event.status == 'cancelled' %}
           <p style="color: var(--muted);">Реєстрація недоступна - подію скасовано</p>
         {% elif user_rsvp %}
           {% if event.status == 'archived' %}
-            <button disabled class="rsvp-registered">✓ Ви відвідали цю подію</button>
+            <button disabled style="background: #dbeafe; border-color: #93c5fd; color: #1e40af;">✓ Ви відвідали цю подію</button>
           {% else %}
-            <button disabled class="rsvp-registered">✓ Ви зареєстровані</button>
+            <button disabled style="background: #dbeafe; border-color: #93c5fd; color: #1e40af;">✓ Ви зареєстровані</button>
             <form method="post" action="/events/{{ event.id }}/rsvp/cancel/" style="display:inline; margin:0;">
               {% csrf_token %}
-              <button type="submit" class="outline">Скасувати участь</button>
+              <button type="submit" class="outline" style="color: #f97373; border-color: #fca5a5; background: transparent;">Скасувати участь</button>
             </form>
           {% endif %}
         {% else %}
@@ -121,19 +121,19 @@
           {% elif event.capacity and rsvp_count >= event.capacity %}
             <p style="color: var(--muted);">Реєстрація недоступна: всі місця зайняті.</p>
           {% else %}
-            <a role="button" href="/events/{{ event.id }}/rsvp/">Зареєструватися</a>
+            <a role="button" href="/events/{{ event.id }}/rsvp/" style="background: #3b82f6; border-color: #3b82f6;">Зареєструватися</a>
           {% endif %}
         {% endif %}
-        <a role="button" class="outline" href="/">← Назад</a>
+        <a role="button" class="outline" href="/" style="color: var(--muted); border-color: var(--border);">← Назад</a>
         {% endif %}
       {% else %}
-        <!-- Неавторизовані користувачі -->
-        <a role="button" href="/accounts/login/?next=/events/{{ event.id }}/">Увійти для реєстрації</a>
-        <a role="button" class="outline" href="/">← Назад</a>
+        
+        <a role="button" href="/accounts/login/?next=/events/{{ event.id }}/" style="background: #3b82f6; border-color: #3b82f6;">Увійти для реєстрації</a>
+        <a role="button" class="outline" href="/" style="color: var(--muted); border-color: var(--border);">← Назад</a>
       {% endif %}
     </div>
     
-    <!-- Секція відгуків -->
+    
     <section style="margin-top: 40px; padding-top: 32px; border-top: 2px solid var(--border);">
       <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; color: var(--text);">Відгуки</h2>
       {% if user.is_authenticated and can_review %}

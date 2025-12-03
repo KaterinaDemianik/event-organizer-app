@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Скрипт для завантаження тестових даних в MySQL базу
 """
@@ -15,7 +14,6 @@ from datetime import datetime, timedelta
 
 User = get_user_model()
 
-# Створюємо тестових користувачів
 print("Створюємо користувачів...")
 katerina, _ = User.objects.get_or_create(
     username='Katerina_demianik',
@@ -33,7 +31,6 @@ user2.save()
 
 print(f"✓ Користувачі створені: {katerina.username}, {user2.username}")
 
-# Створюємо події
 print("\nСтворюємо події...")
 now = datetime.now()
 
@@ -75,7 +72,6 @@ event3, _ = Event.objects.get_or_create(
 
 print(f"✓ Події створені: {event1.title}, {event2.title}, {event3.title}")
 
-# Створюємо RSVP
 print("\nСтворюємо реєстрації...")
 rsvp1, created1 = RSVP.objects.get_or_create(user=katerina, event=event1)
 rsvp2, created2 = RSVP.objects.get_or_create(user=user2, event=event1)

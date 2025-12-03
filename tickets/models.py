@@ -13,5 +13,3 @@ class RSVP(models.Model):
 
     def __str__(self):
         return f"RSVP({self.user_id} -> {self.event_id})"
-
-# Create your models here.

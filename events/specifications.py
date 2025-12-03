@@ -72,7 +72,6 @@ class NotSpecification(Specification):
         return ~self.spec.to_queryset_filter()
 
 
-# Конкретні специфікації для подій
 
 class EventByStatusSpecification(Specification):
     """Фільтрація подій за статусом"""

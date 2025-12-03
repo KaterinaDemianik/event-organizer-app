@@ -19,7 +19,6 @@ def admin_dashboard(request):
     week_ago = now - timedelta(days=7)
     month_ago = now - timedelta(days=30)
     
-    # Загальна статистика
     stats = {
         'total_events': Event.objects.count(),
         'published_events': Event.objects.filter(status=Event.PUBLISHED).count(),
@@ -35,18 +34,14 @@ def admin_dashboard(request):
         'rsvps_month': RSVP.objects.filter(created_at__gte=month_ago).count(),
     }
     
-    # Топ подій по кількості RSVP
     top_events = Event.objects.annotate(
         rsvp_count=Count('rsvps')
     ).order_by('-rsvp_count')[:5]
     
-    # Останні події
     recent_events = Event.objects.order_by('-created_at')[:5]
     
-    # Останні користувачі
     recent_users = User.objects.order_by('-date_joined')[:5]
     
-    # Останні RSVP
     recent_rsvps = RSVP.objects.select_related('user', 'event').order_by('-created_at')[:10]
     
     context = {
@@ -67,7 +62,6 @@ def admin_events_list(request):
         rsvp_count=Count('rsvps')
     ).select_related('organizer').order_by('-created_at')
     
-    # Фільтри
     status = request.GET.get('status')
     if status:
         events = events.filter(status=status)
