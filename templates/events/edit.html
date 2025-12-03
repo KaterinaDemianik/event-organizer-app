@@ -116,7 +116,7 @@
         
         <div style="display: flex; gap: 12px; justify-content: center; padding-top: 8px; border-top: 1px solid var(--border); margin-top: 24px; padding-top: 24px;">
           <button type="submit" style="width: auto !important; min-width: auto; flex: 0 0 auto;">Зберегти зміни</button>
-          <a role="button" class="outline" href="/events/{{ event.id }}/" style="width: auto !important; min-width: auto; flex: 0 0 auto;">Скасувати</a>
+          <a role="button" class="outline" href="{{ request.META.HTTP_REFERER|default:'/events/' }}" style="width: auto !important; min-width: auto; flex: 0 0 auto;">Скасувати</a>
         </div>
       </form>
     </article>

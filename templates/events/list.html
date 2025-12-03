@@ -169,11 +169,11 @@
           </header>
           <p>{{ e.description|truncatechars:160 }}</p>
           <footer class="card-actions">
-            <a role="button" href="/events/{{ e.id }}/">Детальніше</a>
+            <a role="button" href="/events/{{ e.id }}/?from_view={{ view|default:'all' }}">Детальніше</a>
             {% if user.is_authenticated %}
               {% if e.organizer == user or user.is_staff %}
                 {% if e.status != 'archived' %}
-                  <a role="button" class="outline" href="/events/{{ e.id }}/edit/">Редагувати</a>
+                  <a role="button" class="outline" href="/events/{{ e.id }}/edit/?from_view={{ view|default:'all' }}">Редагувати</a>
                 {% endif %}
               {% endif %}
             {% endif %}
@@ -183,8 +183,16 @@
     </div>
   {% else %}
     <article class="empty">
-      <p>Поки що подій немає.</p>
-      <a role="button" href="/events/create/">Створити першу</a>
+      {% if view == 'upcoming' %}
+        <p>Ви ще не зареєструвалися на жодну подію.</p>
+        <a role="button" href="/events/?view=all">Переглянути доступні події</a>
+      {% elif view == 'my' %}
+        <p>Ви ще не створили жодної події.</p>
+        <a role="button" href="/events/create/">Створити першу</a>
+      {% else %}
+        <p>Поки що подій немає.</p>
+        <a role="button" href="/events/create/">Створити першу</a>
+      {% endif %}
     </article>
   {% endif %}
 

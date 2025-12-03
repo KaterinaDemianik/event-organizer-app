@@ -100,7 +100,7 @@
               </form>
             {% endif %}
           {% endif %}
-          <a role="button" class="outline" href="/" style="color: var(--muted); border-color: var(--border);">← Назад</a>
+          <a role="button" class="outline" href="{{ request.META.HTTP_REFERER|default:'/events/' }}" style="color: var(--muted); border-color: var(--border);">← Назад</a>
         {% else %}
         
         {% if event.status == 'cancelled' %}
@@ -124,12 +124,12 @@
             <a role="button" href="/events/{{ event.id }}/rsvp/" style="background: #3b82f6; border-color: #3b82f6;">Зареєструватися</a>
           {% endif %}
         {% endif %}
-        <a role="button" class="outline" href="/" style="color: var(--muted); border-color: var(--border);">← Назад</a>
+        <a role="button" class="outline" href="{{ request.META.HTTP_REFERER|default:'/events/' }}" style="color: var(--muted); border-color: var(--border);">← Назад</a>
         {% endif %}
       {% else %}
         
         <a role="button" href="/accounts/login/?next=/events/{{ event.id }}/" style="background: #3b82f6; border-color: #3b82f6;">Увійти для реєстрації</a>
-        <a role="button" class="outline" href="/" style="color: var(--muted); border-color: var(--border);">← Назад</a>
+        <a role="button" class="outline" href="{{ request.META.HTTP_REFERER|default:'/events/' }}" style="color: var(--muted); border-color: var(--border);">← Назад</a>
       {% endif %}
     </div>
     

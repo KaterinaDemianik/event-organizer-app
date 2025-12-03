@@ -41,7 +41,7 @@
 
     <div style="margin-top: 20px;">
       <a role="button" class="outline" href="/events/{{ event.id }}/">← Назад до події</a>
-      <a role="button" class="outline" href="/">Головна</a>
+      <a role="button" class="outline" href="{{ request.META.HTTP_REFERER|default:'/events/' }}">Назад до списку</a>
     </div>
   </article>
 {% endblock %}
