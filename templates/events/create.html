@@ -4,7 +4,7 @@
 {% block content %}
   <div style="max-width: var(--content-width); width: 100%; margin: 0 auto; padding: 20px 0;">
     <article class="card" style="padding: 40px; width: 100%;">
-      <h2 style="margin: 0 0 24px 0; font-size: 28px; font-weight: 600;">Створення події</h2>
+      <h2 style="margin: 0 0 24px 0; font-size: 1.4rem; font-weight: 600;">Створення події</h2>
       {% if not user.is_authenticated %}
         <p>Потрібен вхід у систему. <a href="/accounts/login/?next=/events/create/">Увійти</a></p>
       {% else %}
