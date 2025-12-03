@@ -30,6 +30,7 @@ class SortByPopularityStrategy(SortStrategy):
     label = "Найпопулярніші"
 
     def sort(self, queryset: QuerySet) -> QuerySet:
+        # Передбачається, що queryset вже має анотацію rsvp_count з фільтром status='going'
         return queryset.order_by("-rsvp_count", "-starts_at")
 
 

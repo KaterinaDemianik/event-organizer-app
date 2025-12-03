@@ -47,7 +47,8 @@ class EventViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """Додаємо анотацію з кількістю RSVP до кожної події"""
-        return Event.objects.annotate(rsvp_count=Count('rsvps')).order_by("-starts_at")
+        from django.db.models import Q
+        return Event.objects.annotate(rsvp_count=Count('rsvps', filter=Q(rsvps__status='going'), distinct=True)).order_by("-starts_at")
 
     def perform_create(self, serializer):
         serializer.save(organizer=self.request.user)

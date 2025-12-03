@@ -124,7 +124,7 @@ def home_view(request):
         popularity_filter = request.GET.get('popularity', '')
         sort_by = request.GET.get('sort', 'date_desc')
         
-        events_qs = Event.objects.annotate(rsvp_count=Count('rsvps'))
+        events_qs = Event.objects.annotate(rsvp_count=Count('rsvps', filter=Q(rsvps__status='going'), distinct=True))
         if tab == 'events':
             if q:
                 events_qs = events_qs.filter(
@@ -190,9 +190,9 @@ def home_view(request):
             top_events_qs = Event.objects.filter(created_at__gte=start_date)
             if end_date:
                 top_events_qs = top_events_qs.filter(created_at__lte=end_date)
-            top_events = top_events_qs.annotate(rsvp_count=Count('rsvps')).order_by('-rsvp_count')[:5]
+            top_events = top_events_qs.annotate(rsvp_count=Count('rsvps', filter=Q(rsvps__status='going'), distinct=True)).order_by('-rsvp_count')[:5]
         else:
-            top_events = Event.objects.annotate(rsvp_count=Count('rsvps')).order_by('-rsvp_count')[:5]
+            top_events = Event.objects.annotate(rsvp_count=Count('rsvps', filter=Q(rsvps__status='going'), distinct=True)).order_by('-rsvp_count')[:5]
         
         recent_users = User.objects.order_by('-date_joined')[:50]
         recent_rsvps = RSVP.objects.select_related('user', 'event').order_by('-created_at')[:50]
@@ -246,7 +246,7 @@ class EventListView(ListView):
         
         qs = (
             Event.objects
-            .annotate(rsvp_count=Count("rsvps"))
+            .annotate(rsvp_count=Count("rsvps", filter=Q(rsvps__status="going"), distinct=True))
             .annotate(
                 remaining_places=Case(
                     When(capacity__isnull=True, then=Value(None)),
@@ -415,7 +415,7 @@ class EventDetailView(DetailView):
             user_rsvp = None
             ctx["user_rsvp"] = None
 
-        ctx["rsvp_count"] = RSVP.objects.filter(event=event).count()
+        ctx["rsvp_count"] = RSVP.objects.filter(event=event, status="going").count()
 
         if event.capacity is not None:
             remaining = event.capacity - ctx["rsvp_count"]
@@ -558,7 +558,7 @@ def rsvp_view(request, pk: int):
         return redirect("event_detail", pk=pk)
 
     if event.capacity is not None:
-        current = RSVP.objects.filter(event=event).count()
+        current = RSVP.objects.filter(event=event, status="going").count()
         if current >= event.capacity:
             messages.warning(request, "Реєстрація недоступна: всі місця зайняті.")
             return redirect("event_detail", pk=pk)

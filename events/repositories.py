@@ -58,7 +58,7 @@ class EventRepository:
 
     def get_with_rsvp_count(self) -> QuerySet[Event]:
         """Повертає події з анотацією кількості учасників"""
-        return Event.objects.annotate(rsvp_count=Count('rsvps'))
+        return Event.objects.annotate(rsvp_count=Count('rsvps', filter=Q(rsvps__status='going'), distinct=True))
 
     def search(self, query: str) -> QuerySet[Event]:
         """Пошук подій за назвою, описом або локацією"""

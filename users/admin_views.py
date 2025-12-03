@@ -34,8 +34,9 @@ def admin_dashboard(request):
         'rsvps_month': RSVP.objects.filter(created_at__gte=month_ago).count(),
     }
     
+    from django.db.models import Q
     top_events = Event.objects.annotate(
-        rsvp_count=Count('rsvps')
+        rsvp_count=Count('rsvps', filter=Q(rsvps__status='going'), distinct=True)
     ).order_by('-rsvp_count')[:5]
     
     recent_events = Event.objects.order_by('-created_at')[:5]
@@ -58,8 +59,9 @@ def admin_dashboard(request):
 @staff_member_required
 def admin_events_list(request):
     """Список всіх подій для адміна"""
+    from django.db.models import Q
     events = Event.objects.annotate(
-        rsvp_count=Count('rsvps')
+        rsvp_count=Count('rsvps', filter=Q(rsvps__status='going'), distinct=True)
     ).select_related('organizer').order_by('-created_at')
     
     status = request.GET.get('status')

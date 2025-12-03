@@ -39,8 +39,9 @@ class CustomAdminSite(AdminSite):
             'rsvps_month': RSVP.objects.filter(created_at__gte=month_ago).count(),
         })
         
+        from django.db.models import Q
         extra_context['top_events'] = Event.objects.annotate(
-            rsvp_count=Count('rsvps')
+            rsvp_count=Count('rsvps', filter=Q(rsvps__status='going'), distinct=True)
         ).order_by('-rsvp_count')[:5]
         
         extra_context['recent_events'] = Event.objects.order_by('-created_at')[:5]
