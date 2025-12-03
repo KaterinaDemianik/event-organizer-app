@@ -1,4 +1,4 @@
-# 🏗️ Архітектурні патерни Event Organizer
+#  Архітектурні патерни Event Organizer
 
 ## Огляд архітектури
 
@@ -115,12 +115,15 @@ events/
 ├── models.py        # Доменні моделі
 ├── services.py      # Бізнес-логіка (Singleton)
 ├── specifications.py # Бізнес-правила (Specification)
-└── strategies.py    # Алгоритми (Strategy)
+├── strategies.py    # Алгоритми (Strategy)
+├── factories.py     # Фабрики створення (Factory)
+└── builders.py      # Будівельники (Builder)
 ```
 
 #### **Data Access Layer**
 ```
 events/
+├── repositories.py  # Репозиторії (Repository)
 └── models.py        # Django ORM
 ```
 
@@ -151,9 +154,9 @@ class EventArchiveService(metaclass=SingletonMeta):
 ```
 
 **Переваги:**
-- ✅ Відокремлення бізнес-логіки від контролерів
-- ✅ Повторне використання логіки
-- ✅ Легше тестувати
+- Відокремлення бізнес-логіки від контролерів
+- Повторне використання логіки
+- Легше тестувати
 
 ---
 
@@ -161,31 +164,36 @@ class EventArchiveService(metaclass=SingletonMeta):
 
 **Призначення:** Абстракція доступу до даних.
 
-### Концептуальна реалізація:
+### Реалізовано:
 
 ```python
-# events/repositories.py (концепт)
-class EventRepository:
-    """Абстракція для роботи з подіями"""
-    
-    def get_all(self) -> QuerySet:
-        return Event.objects.all()
-    
-    def find_by_specification(self, spec: Specification) -> QuerySet:
-        return Event.objects.filter(spec.to_queryset_filter())
-    
-    def save(self, event: Event) -> Event:
-        event.save()
-        return event
-    
-    def delete(self, event: Event):
-        event.delete()
+# events/repositories.py
+from events.repositories import EventRepository
+
+repo = EventRepository()
+
+event = repo.get_by_id(1)
+all_events = repo.get_all()
+published = repo.get_published()
+upcoming = repo.get_upcoming()
+user_events = repo.get_by_organizer(user)
+
+from events.specifications import PublishedEventsSpecification
+filtered = repo.find_by_specification(PublishedEventsSpecification())
+
+search_results = repo.search("конференція")
+with_rsvp = repo.get_with_rsvp_count()
+archived = repo.get_archived()
+
+repo.save(event)
+repo.delete(event)
 ```
 
 **Переваги:**
-- ✅ Зміна БД без зміни бізнес-логіки
-- ✅ Централізація запитів
-- ✅ Легше тестувати (mock repository)
+- Зміна БД без зміни бізнес-логіки
+- Централізація запитів
+- Легше тестувати (mock repository)
+- Відокремлення бізнес-логіки від ORM
 
 ---
 
@@ -280,9 +288,9 @@ urlpatterns = [
 ```
 
 **Переваги:**
-- ✅ Централізована маршрутизація
-- ✅ Middleware обробка
-- ✅ Єдина точка входу
+- Централізована маршрутизація
+- Middleware обробка
+- Єдина точка входу
 
 ---
 
@@ -409,11 +417,13 @@ Request → SecurityMiddleware
 | **MVT** | Django framework | Вся структура |
 | **Layered** | Presentation/Application/Domain/Data | Структура папок |
 | **Service Layer + Singleton** | `EventArchiveService` | `events/services.py` |
-| **Specification** | Фільтрація подій через об'єкти-специфікації | `events/specifications.py`, `events/ui_views.py` |
-| **Strategy** | Стратегії сортування списку подій | `events/strategies.py`, `events/ui_views.py` |
+| **Specification** | Фільтрація подій через об'єкти-специфікації | `events/specifications.py` |
+| **Strategy** | Стратегії сортування списку подій | `events/strategies.py` |
+| **Factory** | Створення подій різних типів | `events/factories.py` |
+| **Builder** | Поетапне створення складних подій | `events/builders.py` |
 | **Decorator** | Декоратори доступу до подій | `events/decorators.py` |
 | **Proxy** | Менеджер сесій користувача | `users/session_manager.py` |
-| **Repository (базовий рівень)** | Django ORM як вбудований репозиторій | `events/models.py` |
+| **Repository** | Абстракція доступу до даних | `events/repositories.py` |
 | **REST API / Facade** | DRF ViewSets як фасад до доменного шару | `events/views.py` |
 | **Front Controller** | URLconf | `event_organizer/urls.py` |
 | **Template Method** | Class-Based Views | `events/ui_views.py` |

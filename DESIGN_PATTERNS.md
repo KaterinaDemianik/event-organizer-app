@@ -1,4 +1,8 @@
-# Design Patterns в Event Organizer App
+# Патерни проектування в Event Organizer App
+
+## Огляд
+
+Цей проект демонструє практичне застосування 10+ патернів проектування для створення масштабованого та підтримуваного веб-додатку.
 
 ## Реалізовані патерни
 
@@ -61,34 +65,36 @@ filtered_events = apply_specifications(
 
 ### 2. **Repository Pattern** (Патерн Репозиторій)
 
-**Статус:** Підготовлено до реалізації
+**Статус:** Реалізовано
 
-**Призначення:** Абстрагує доступ до даних, надаючи колекціє-подібний інтерфейс.
+**Файл:** `events/repositories.py`
 
-**План реалізації:**
+**Призначення:** Абстрагує доступ до даних, надаючи колекціє-подібний інтерфейс. Відокремлює бізнес-логіку від деталей роботи з БД.
+
+**Реалізація:**
 
 ```python
-# events/repositories.py (майбутній файл)
+from events.repositories import EventRepository
 
-class EventRepository:
-    """Репозиторій для роботи з подіями"""
-    
-    def get_by_id(self, event_id: int) -> Event:
-        return Event.objects.get(pk=event_id)
-    
-    def get_all(self) -> QuerySet:
-        return Event.objects.all()
-    
-    def find_by_specification(self, spec: Specification) -> QuerySet:
-        return Event.objects.filter(spec.to_queryset_filter())
-    
-    def save(self, event: Event) -> Event:
-        event.save()
-        return event
-    
-    def delete(self, event: Event):
-        event.delete()
+repo = EventRepository()
+
+event = repo.get_by_id(1)
+all_events = repo.get_all()
+published = repo.get_published()
+upcoming = repo.get_upcoming()
+
+from events.specifications import PublishedEventsSpecification
+filtered = repo.find_by_specification(PublishedEventsSpecification())
+
+repo.save(event)
+repo.delete(event)
 ```
+
+**Переваги:**
+- Відокремлення бізнес-логіки від ORM
+- Легке тестування (можна замокати репозиторій)
+- Єдина точка доступу до даних
+- Можливість змінити БД без зміни бізнес-логіки
 
 ---
 
@@ -131,7 +137,7 @@ class UnitOfWork:
 
 ### 4. **Strategy Pattern** (Патерн Стратегія)
 
-**Статус:** ✅ Реалізовано
+**Статус:** Реалізовано
 
 **Файли:** `events/strategies.py`, `events/ui_views.py` (`EventListView.get_queryset`)
 
@@ -198,36 +204,55 @@ def notify_subscribers(sender, event, **kwargs):
 
 ### 6. **Factory Pattern** (Патерн Фабрика)
 
-**Статус:** Підготовлено до реалізації
+**Статус:** Реалізовано
 
-**Призначення:** Створює об'єкти без вказівки точного класу.
+**Файл:** `events/factories.py`
 
-**Приклад (фабрика для створення подій різних типів):**
+**Призначення:** Створює об'єкти без вказівки точного класу. Інкапсулює логіку створення подій різних типів.
+
+**Реалізація:**
 
 ```python
-# events/factories.py (майбутній файл)
+from events.factories import EventFactory
+from django.utils import timezone
+from datetime import timedelta
 
-class EventFactory:
-    """Фабрика для створення подій"""
-    
-    @staticmethod
-    def create_conference(title, organizer, **kwargs):
-        return Event.objects.create(
-            title=title,
-            organizer=organizer,
-            event_type='conference',
-            **kwargs
-        )
-    
-    @staticmethod
-    def create_workshop(title, organizer, **kwargs):
-        return Event.objects.create(
-            title=title,
-            organizer=organizer,
-            event_type='workshop',
-            **kwargs
-        )
+conference = EventFactory.create_conference(
+    title="Django Conference 2025",
+    organizer=user,
+    starts_at=timezone.now() + timedelta(days=30),
+    duration_days=3,
+    location="Київ",
+    capacity=500
+)
+
+workshop = EventFactory.create_workshop(
+    title="Python для початківців",
+    organizer=user,
+    starts_at=timezone.now() + timedelta(days=7),
+    duration_hours=2,
+    location="Онлайн",
+    capacity=20
+)
+
+meetup = EventFactory.create_meetup(
+    title="Django Meetup",
+    organizer=user,
+    starts_at=timezone.now() + timedelta(days=14),
+    location="Львів"
+)
+
+quick = EventFactory.create_quick_event(
+    title="Швидка зустріч",
+    organizer=user,
+    days_from_now=3
+)
 ```
+
+**Переваги:**
+- Спрощує створення подій з типовими налаштуваннями
+- Зменшує дублювання коду
+- Легко додавати нові типи подій
 
 ---
 
@@ -290,21 +315,74 @@ class GetUpcomingEventsHandler:
 
 ---
 
+### 11. **Builder Pattern** (Патерн Будівельник)
+
+**Статус:** Реалізовано
+
+**Файл:** `events/builders.py`
+
+**Призначення:** Дозволяє поетапно створювати складні об'єкти. Відокремлює конструювання від представлення.
+
+**Реалізація:**
+
+```python
+from events.builders import EventBuilder, ConferenceEventBuilder
+from django.utils import timezone
+from datetime import timedelta
+
+event = (EventBuilder()
+    .with_title("Конференція Django")
+    .with_organizer(user)
+    .with_description("Велика конференція для розробників")
+    .with_location("Київ, Палац спорту")
+    .with_coordinates(50.4501, 30.5234)
+    .with_dates(
+        starts_at=timezone.now() + timedelta(days=30),
+        ends_at=timezone.now() + timedelta(days=33)
+    )
+    .with_capacity(500)
+    .with_category("Конференція")
+    .as_published()
+    .build()
+)
+
+conference = (ConferenceEventBuilder()
+    .with_title("Велика конференція")
+    .with_organizer(user)
+    .with_large_capacity()
+    .with_dates(start, end)
+    .build()
+)
+```
+
+**Переваги:**
+- Гнучке створення складних об'єктів
+- Читабельний код (fluent interface)
+- Можливість створювати різні представлення одного об'єкта
+- Валідація перед створенням
+
+---
+
 ## Поточний стан реалізації
 
-### ✅ Реалізовано:
-1. **Specification Pattern** — повністю реалізовано і використовується (`events/specifications.py`, `events/ui_views.py`)
-2. **Facade Pattern** — ViewSets та UI Views виступають фасадом до доменної логіки (`events/views.py`, `events/ui_views.py`)
-3. **Strategy Pattern** — стратегії сортування списку подій (`events/strategies.py`, `EventListView`)
-4. **Decorator Pattern** — декоратори доступу до подій (`events/decorators.py`)
-5. **Proxy Pattern** — проксі для роботи із сесією (`users/session_manager.py`)
-6. **Observer Pattern** — частково через вбудовані Django Signals
+### Повністю реалізовано (11 патернів):
 
-### 🔄 Підготовлено до реалізації:
-1. **Repository Pattern**
-2. **Unit of Work Pattern**
-3. **Factory Pattern**
-4. **CQRS Pattern**
+1. **Specification Pattern** — гнучка фільтрація подій (`events/specifications.py`)
+2. **Repository Pattern** — абстракція доступу до даних (`events/repositories.py`)
+3. **Strategy Pattern** — стратегії сортування (`events/strategies.py`)
+4. **Factory Pattern** — створення подій різних типів (`events/factories.py`)
+5. **Builder Pattern** — поетапне створення складних подій (`events/builders.py`)
+6. **Singleton Pattern** — сервіс архівування (`events/services.py`)
+7. **Decorator Pattern** — декоратори доступу (`events/decorators.py`)
+8. **Proxy Pattern** — управління сесіями (`users/session_manager.py`)
+9. **Facade Pattern** — ViewSets та UI Views (`events/views.py`, `events/ui_views.py`)
+10. **Observer Pattern** — Django Signals (вбудовані)
+11. **Service Layer Pattern** — бізнес-логіка в сервісах (`events/services.py`)
+
+### Підготовлено до розширення:
+1. **Unit of Work Pattern** — координація транзакцій
+2. **CQRS Pattern** — розділення команд та запитів
+3. **Command Pattern** — інкапсуляція запитів
 
 ---
 
@@ -364,7 +442,7 @@ def test_combined_specifications():
 
 ### 9. **Decorator Pattern** (Патерн Декоратор)
 
-**Статус:** ✅ Реалізовано
+**Статус:** Реалізовано
 
 **Призначення:** Динамічно додає нову функціональність до об'єктів.
 
@@ -383,7 +461,7 @@ def event_cancel_view(request, pk):
 
 ### 10. **Proxy Pattern** (Патерн Замісник)
 
-**Статус:** ✅ Реалізовано
+**Статус:** Реалізовано
 
 **Призначення:** Надає замінник для управління доступом до об'єкта.
 
