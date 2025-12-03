@@ -42,6 +42,11 @@ class EventForm(forms.ModelForm):
             "category",
             "capacity",
         ]
+        labels = {
+            "title": "Назва події",
+            "description": "Опис події",
+            "location": "Локація",
+        }
     
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
