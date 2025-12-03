@@ -531,11 +531,32 @@ class EventUpdateView(LoginRequiredMixin, UpdateView):
         if event.status == Event.ARCHIVED:
             messages.error(request, "Архівну подію не можна редагувати")
             return redirect("event_detail", pk=event.pk)
+        
+        # Зберегти попередні значення для порівняння
+        self.old_event_data = {
+            'title': event.title,
+            'description': event.description,
+            'location': event.location,
+            'starts_at': event.starts_at,
+            'ends_at': event.ends_at,
+        }
+        
         return super().dispatch(request, *args, **kwargs)
     
     def form_valid(self, form):
         resp = super().form_valid(form)
         messages.success(self.request, "Подію оновлено успішно")
+        
+        # Створити сповіщення для учасників про зміни
+        from notifications.services import NotificationService
+        notifications_count = NotificationService.create_event_update_notification(
+            self.object,
+            self.old_event_data
+        )
+        
+        if notifications_count > 0:
+            messages.info(self.request, f"Сповіщення надіслано {notifications_count} учасникам")
+        
         return resp
 
 
@@ -606,7 +627,14 @@ def event_cancel_view(request, pk: int):
         event.status = Event.CANCELLED
         event.save()
         
+        # Створити сповіщення для учасників про скасування
+        from notifications.services import NotificationService
+        notifications_count = NotificationService.create_event_cancelled_notification(event)
+        
         messages.success(request, f"Подію '{event.title}' скасовано")
+        if notifications_count > 0:
+            messages.info(request, f"Сповіщення про скасування надіслано {notifications_count} учасникам")
+        
         return redirect("event_detail", pk=pk)
     
     return redirect("event_detail", pk=pk)

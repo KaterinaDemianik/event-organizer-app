@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Сповіщення · Event Organizer{% endblock %}
+
+{% block content %}
+  <div style="max-width: 900px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="margin: 0;">Сповіщення</h2>
+      {% if notifications %}
+        <form method="post" action="{% url 'notifications_mark_all_read' %}" style="margin: 0;">
+          {% csrf_token %}
+          <button type="submit" class="outline" style="font-size: 14px;">Позначити всі як прочитані</button>
+        </form>
+      {% endif %}
+    </div>
+
+    {% if notifications %}
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        {% for notification in notifications %}
+          <article class="card" style="padding: 20px; {% if not notification.is_read %}border-left: 4px solid #3b82f6; background: rgba(59, 130, 246, 0.05);{% endif %}">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
+              <div style="flex: 1;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                  <span style="font-size: 20px;">
+                    {% if notification.notification_type == 'event_cancelled' %}
+                    {% elif notification.notification_type == 'event_time_changed' %}
+                    {% elif notification.notification_type == 'event_location_changed' %}
+                    {% else %}
+                    {% endif %}
+                  </span>
+                  <strong style="font-size: 15px; color: var(--text);">{{ notification.get_notification_type_display }}</strong>
+                  {% if not notification.is_read %}
+                    <span style="background: #3b82f6; color: white; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 600;">НОВЕ</span>
+                  {% endif %}
+                </div>
+                
+                <p style="margin: 8px 0; font-size: 14px; line-height: 1.6; white-space: pre-line;">{{ notification.message }}</p>
+                
+                <div style="display: flex; align-items: center; gap: 16px; margin-top: 12px;">
+                  <small style="color: var(--muted); font-size: 13px;">
+                    {{ notification.created_at|date:"d.m.Y H:i" }}
+                  </small>
+                  <a href="/events/{{ notification.event.id }}/" style="font-size: 13px; color: var(--link); text-decoration: none; font-weight: 500;">
+                    Переглянути подію →
+                  </a>
+                </div>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <article class="empty">
+        <p style="font-size: 16px; color: var(--muted);">У вас поки що немає сповіщень</p>
+        <a role="button" href="/events/">Переглянути події</a>
+      </article>
+    {% endif %}
+  </div>
+{% endblock %}
