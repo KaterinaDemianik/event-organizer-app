@@ -225,6 +225,106 @@
       color: var(--muted);
       border-right: 1px solid var(--muted-border-color);
     }
+    
+    /* Mobile responsiveness for calendar */
+    @media (max-width: 768px) {
+      .card-title {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px;
+      }
+      
+      .card-title h1 {
+        font-size: 1.2rem !important;
+      }
+      
+      .card-title > div {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+      
+      .view-btn, .calendar-nav-btn {
+        font-size: 12px;
+        padding: 5px 10px;
+      }
+      
+      .calendar-controls {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch !important;
+      }
+      
+      .calendar-controls > div {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+      }
+      
+      .calendar-controls h2 {
+        font-size: 1rem !important;
+        text-align: center;
+      }
+      
+      .calendar-header {
+        font-size: 11px;
+        padding: 4px 2px;
+      }
+      
+      .calendar-day {
+        min-height: 35px;
+        padding: 2px;
+        font-size: 10px;
+      }
+      
+      .day-number {
+        font-size: 12px;
+      }
+      
+      .event-item {
+        font-size: 9px;
+        padding: 1px 3px;
+      }
+      
+      .week-grid {
+        grid-template-columns: 50px repeat(7, minmax(0, 1fr));
+      }
+      
+      .time-slot {
+        font-size: 10px;
+        padding: 2px 4px;
+      }
+    }
+    
+    @media (max-width: 375px) {
+      .card-title h1 {
+        font-size: 1.1rem !important;
+      }
+      
+      .view-btn, .calendar-nav-btn {
+        font-size: 11px;
+        padding: 4px 8px;
+      }
+      
+      .calendar-header {
+        font-size: 10px;
+        padding: 3px 1px;
+      }
+      
+      .calendar-day {
+        min-height: 30px;
+        font-size: 9px;
+      }
+      
+      .day-number {
+        font-size: 11px;
+      }
+      
+      .event-item {
+        font-size: 8px;
+        padding: 1px 2px;
+      }
+    }
   </style>
 
   <script>

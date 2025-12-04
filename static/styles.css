@@ -427,3 +427,142 @@ input[type="search"]::-webkit-search-results-decoration { -webkit-appearance: no
 :root[data-theme='dark'] .badge.draft { background:#332a12; color:#ffd99b; border-color:#5a471c; }
 :root[data-theme='dark'] .badge.published { background:#0e2a3a; color:#9ecbff; border-color:#1e4763; }
 :root[data-theme='dark'] .badge.cancelled { background:#3a1212; color:#ffb4b4; border-color:#5a1e1e; }
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  main.container {
+    padding: 16px 12px;
+    padding-top: 24px;
+  }
+  
+  header.container {
+    padding: 0 12px;
+  }
+  
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 0;
+    gap: 12px;
+  }
+  
+  .topbar nav {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .topbar nav ul {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding-bottom: 4px;
+  }
+  
+  .topbar nav ul li {
+    white-space: nowrap;
+  }
+  
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  article {
+    padding: 12px;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.25rem;
+  }
+  
+  .card-title {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px;
+  }
+  
+  .card-title > div {
+    width: 100%;
+  }
+  
+  /* Фільтри на мобільних */
+  .filters {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+  
+  .filters > div {
+    width: 100% !important;
+  }
+  
+  /* Кнопки */
+  button, .btn, a.btn {
+    font-size: 14px;
+    padding: 8px 14px;
+  }
+  
+  /* Таблиці */
+  table {
+    font-size: 13px;
+  }
+  
+  table th, table td {
+    padding: 8px 6px;
+  }
+  
+  /* Форми */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  input[type="time"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px; /* Запобігає zoom на iOS */
+  }
+}
+
+/* Для дуже маленьких екранів (iPhone SE) */
+@media (max-width: 375px) {
+  body {
+    font-size: 13px;
+  }
+  
+  main.container {
+    padding: 12px 8px;
+  }
+  
+  header.container {
+    padding: 0 8px;
+  }
+  
+  .topbar nav ul {
+    gap: 6px;
+  }
+  
+  .topbar nav ul li a {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  
+  article {
+    padding: 10px;
+  }
+  
+  h1 {
+    font-size: 1.3rem;
+  }
+  
+  h2 {
+    font-size: 1.1rem;
+  }
+}
