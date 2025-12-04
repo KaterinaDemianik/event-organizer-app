@@ -8,7 +8,7 @@
         <div style="display:flex; gap:8px; align-items:center;">
           <button id="month-view" class="view-btn active" onclick="switchView('month')">Місяць</button>
           <button id="week-view" class="view-btn" onclick="switchView('week')">Тиждень</button>
-          <button onclick="exportCalendar()" style="font-size:14px;">Експортувати в Google Calendar</button>
+          <button onclick="exportCalendar()" class="calendar-nav-btn calendar-nav-btn-primary">Експортувати в Google Calendar</button>
         </div>
       </div>
     </header>
@@ -19,11 +19,11 @@
 
     <div class="calendar-controls" style="margin:16px 0; display:flex; justify-content:space-between; align-items:center;">
       <div>
-        <button onclick="previousPeriod()" style="margin-right:8px;">‹ Назад</button>
-        <button onclick="nextPeriod()">Вперед ›</button>
+        <button onclick="previousPeriod()" class="calendar-nav-btn" style="margin-right:6px;">‹ Назад</button>
+        <button onclick="nextPeriod()" class="calendar-nav-btn">Вперед ›</button>
       </div>
       <h2 id="current-period" style="margin:0; font-size:1.2rem;"></h2>
-      <button onclick="goToToday()" style="font-size:14px;">Сьогодні</button>
+      <button onclick="goToToday()" class="calendar-nav-btn">Сьогодні</button>
     </div>
 
     <div id="calendar-container" style="margin-bottom: 12px;">
@@ -52,13 +52,49 @@
   </article>
 
   <style>
+    .calendar-nav-btn {
+      padding: 4px 10px;
+      font-size: 13px;
+      border-radius: 4px;
+      border: none !important;
+      background: transparent !important;
+      color: var(--color) !important;
+      cursor: pointer;
+      font-weight: 600;
+      transition: color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .calendar-nav-btn:hover {
+      background: rgba(17, 88, 199, 0.08) !important;
+      color: #1158c7 !important;
+    }
+
+    .calendar-nav-btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .calendar-nav-btn-primary:hover {
+      background: #1158c7;
+      color: #ffffff;
+    }
+
     .view-btn {
       padding: 6px 12px;
-      border: 1px solid var(--muted-border-color);
-      background: var(--card-background-color);
       border-radius: 4px;
+      border: none !important;
+      background: transparent !important;
       cursor: pointer;
       font-size: 14px;
+      color: var(--color) !important;
+      font-weight: 600;
+      transition: color 0.15s ease, background-color 0.15s ease;
+    }
+    
+    .view-btn:hover {
+      background: rgba(17, 88, 199, 0.08) !important;
+      color: #1158c7 !important;
     }
     
     .view-btn.active {

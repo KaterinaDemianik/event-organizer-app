@@ -5,10 +5,10 @@
 
   
   <div class="tabs-nav">
-    <a href="/?tab=stats" class="tab-link {% if tab == 'stats' or not tab %}active{% endif %}">📊 Статистика</a>
+    <a href="/?tab=stats" class="tab-link {% if tab == 'stats' or not tab %}active{% endif %}">Статистика</a>
     <a href="/?tab=events" class="tab-link {% if tab == 'events' %}active{% endif %}">Події</a>
-    <a href="/?tab=users" class="tab-link {% if tab == 'users' %}active{% endif %}">👥 Користувачі</a>
-    <a href="/?tab=rsvps" class="tab-link {% if tab == 'rsvps' %}active{% endif %}">📝 RSVP</a>
+    <a href="/?tab=users" class="tab-link {% if tab == 'users' %}active{% endif %}">Користувачі</a>
+    <a href="/?tab=rsvps" class="tab-link {% if tab == 'rsvps' %}active{% endif %}">RSVP</a>
   </div>
 
   {% if tab == 'stats' or not tab %}
@@ -136,9 +136,9 @@
   {% if tab == 'events' %}
   
   <div class="admin-section">
-    <h2>🎫 Управління подіями</h2>
+    <h2>Управління подіями</h2>
     <div style="margin-bottom: 16px;">
-      <a role="button" href="/events/create/">➕ Створити подію</a>
+      <a role="button" href="/events/create/">Створити подію</a>
     </div>
     
     
@@ -281,9 +281,9 @@
   {% if tab == 'users' %}
   
   <div class="admin-section">
-    <h2>👥 Управління користувачами</h2>
+    <h2>Управління користувачами</h2>
     <div style="margin-bottom: 16px;">
-      <a role="button" href="/accounts/admin/create-user/">➕ Створити користувача</a>
+      <a role="button" href="/accounts/admin/create-user/">Створити користувача</a>
     </div>
     <table>
       <thead>
@@ -315,7 +315,7 @@
   {% if tab == 'rsvps' %}
   
   <div class="admin-section">
-    <h2>📝 Управління реєстраціями</h2>
+    <h2>Управління реєстраціями</h2>
     <table>
       <thead>
         <tr>

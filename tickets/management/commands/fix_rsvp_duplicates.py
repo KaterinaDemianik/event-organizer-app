@@ -60,6 +60,6 @@ class Command(BaseCommand):
         
         self.stdout.write(
             self.style.SUCCESS(
-                f"\n✅ Всього видалено {total_deleted} записів RSVP"
+                f"\n Всього видалено {total_deleted} записів RSVP"
             )
         )
