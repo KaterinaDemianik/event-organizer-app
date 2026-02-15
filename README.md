@@ -88,8 +88,3 @@ python manage.py runserver
 
 ### Детальна документація:
 Див. [DESIGN_PATTERNS.md](DESIGN_PATTERNS.md) для повного опису кожного патерну з прикладами коду.
-
-##  Автор
-
-**Демʼянік Катерина**  
-GitHub: [@KaterinaDemianik](https://github.com/KaterinaDemianik)
