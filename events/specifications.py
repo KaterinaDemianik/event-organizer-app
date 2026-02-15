@@ -4,8 +4,6 @@ Specification Pattern для фільтрації подій.
 """
 from abc import ABC, abstractmethod
 from django.db.models import Q, QuerySet
-from typing import Optional
-from datetime import datetime
 
 
 class Specification(ABC):
@@ -110,52 +108,6 @@ class EventByLocationSpecification(Specification):
     
     def to_queryset_filter(self) -> Q:
         return Q(location__icontains=self.location)
-
-
-class EventByDateRangeSpecification(Specification):
-    """Фільтрація подій за діапазоном дат"""
-    
-    def __init__(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
-        self.start_date = start_date
-        self.end_date = end_date
-    
-    def is_satisfied_by(self, event) -> bool:
-        if self.start_date and event.starts_at < self.start_date:
-            return False
-        if self.end_date and event.starts_at > self.end_date:
-            return False
-        return True
-    
-    def to_queryset_filter(self) -> Q:
-        q = Q()
-        if self.start_date:
-            q &= Q(starts_at__gte=self.start_date)
-        if self.end_date:
-            q &= Q(starts_at__lte=self.end_date)
-        return q
-
-
-class PublishedEventsSpecification(Specification):
-    """Фільтрація тільки опублікованих подій"""
-    
-    def is_satisfied_by(self, event) -> bool:
-        return event.status == 'published'
-    
-    def to_queryset_filter(self) -> Q:
-        return Q(status='published')
-
-
-class UpcomingEventsSpecification(Specification):
-    """Фільтрація майбутніх подій"""
-    
-    def __init__(self, from_date: Optional[datetime] = None):
-        self.from_date = from_date or datetime.now()
-    
-    def is_satisfied_by(self, event) -> bool:
-        return event.starts_at >= self.from_date
-    
-    def to_queryset_filter(self) -> Q:
-        return Q(starts_at__gte=self.from_date)
 
 
 def apply_specifications(queryset: QuerySet, *specs: Specification) -> QuerySet:

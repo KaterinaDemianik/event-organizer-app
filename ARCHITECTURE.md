@@ -113,17 +113,16 @@ events/
 ```
 events/
 ├── models.py        # Доменні моделі
-├── services.py      # Бізнес-логіка (Singleton)
+├── services.py      # Бізнес-логіка (Singleton + Service Layer)
 ├── specifications.py # Бізнес-правила (Specification)
 ├── strategies.py    # Алгоритми (Strategy)
-├── factories.py     # Фабрики створення (Factory)
-└── builders.py      # Будівельники (Builder)
+├── signals.py       # Реакція на події (Observer)
+└── decorators.py    # Контроль доступу (Decorator)
 ```
 
 #### **Data Access Layer**
 ```
 events/
-├── repositories.py  # Репозиторії (Repository)
 └── models.py        # Django ORM
 ```
 
@@ -160,40 +159,40 @@ class EventArchiveService(metaclass=SingletonMeta):
 
 ---
 
-## 4. Repository Pattern
+## 4. Observer Pattern (Django Signals)
 
-**Призначення:** Абстракція доступу до даних.
+**Призначення:** Реагування на зміни в системі без жорстких залежностей.
 
 ### Реалізовано:
 
 ```python
-# events/repositories.py
-from events.repositories import EventRepository
+# events/signals.py
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 
-repo = EventRepository()
+@receiver(post_save, sender=Event)
+def event_post_save(sender, instance, created, **kwargs):
+    """Обробляє зміни в події після збереження"""
+    if not created:
+        # Перевіряємо зміну статусу на CANCELLED
+        if instance.status == Event.CANCELLED:
+            NotificationService.create_event_cancelled_notification(instance)
 
-event = repo.get_by_id(1)
-all_events = repo.get_all()
-published = repo.get_published()
-upcoming = repo.get_upcoming()
-user_events = repo.get_by_organizer(user)
-
-from events.specifications import PublishedEventsSpecification
-filtered = repo.find_by_specification(PublishedEventsSpecification())
-
-search_results = repo.search("конференція")
-with_rsvp = repo.get_with_rsvp_count()
-archived = repo.get_archived()
-
-repo.save(event)
-repo.delete(event)
+@receiver(post_save, sender=RSVP)
+def rsvp_created(sender, instance, created, **kwargs):
+    """Сповіщає організатора про нову реєстрацію"""
+    if created:
+        Notification.objects.create(
+            user=instance.event.organizer,
+            notification_type=Notification.RSVP_CONFIRMED,
+            message=f"Новий учасник: {instance.user.username}"
+        )
 ```
 
 **Переваги:**
-- Зміна БД без зміни бізнес-логіки
-- Централізація запитів
-- Легше тестувати (mock repository)
-- Відокремлення бізнес-логіки від ORM
+- Слабке зчеплення компонентів
+- Автоматичне сповіщення без дублювання коду
+- Легко додавати нові обробники
 
 ---
 
@@ -410,7 +409,7 @@ Request → SecurityMiddleware
 
 ---
 
-## Використані архітектурні патерни
+## Використані патерни проектування
 
 | Патерн | Реалізація | Файл |
 |--------|------------|------|
@@ -419,16 +418,11 @@ Request → SecurityMiddleware
 | **Service Layer + Singleton** | `EventArchiveService` | `events/services.py` |
 | **Specification** | Фільтрація подій через об'єкти-специфікації | `events/specifications.py` |
 | **Strategy** | Стратегії сортування списку подій | `events/strategies.py` |
-| **Factory** | Створення подій різних типів | `events/factories.py` |
-| **Builder** | Поетапне створення складних подій | `events/builders.py` |
-| **Decorator** | Декоратори доступу до подій | `events/decorators.py` |
-| **Proxy** | Менеджер сесій користувача | `users/session_manager.py` |
-| **Repository** | Абстракція доступу до даних | `events/repositories.py` |
+| **Observer** | Django Signals для сповіщень | `events/signals.py` |
+| **Decorator** | Декоратори контролю доступу | `events/decorators.py` |
 | **REST API / Facade** | DRF ViewSets як фасад до доменного шару | `events/views.py` |
 | **Front Controller** | URLconf | `event_organizer/urls.py` |
 | **Template Method** | Class-Based Views | `events/ui_views.py` |
-| **Middleware / Chain of Responsibility** | Django Middleware | `event_organizer/settings.py` |
-| **Dependency Injection** | Settings, Apps | `event_organizer/settings.py` |
 
 ---
 

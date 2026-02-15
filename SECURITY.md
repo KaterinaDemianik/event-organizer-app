@@ -103,32 +103,6 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 python manage.py clearsessions
 ```
 
-### Патерн: Proxy для управління сесіями
-
-```python
-# users/session_manager.py
-class SessionManager:
-    """Proxy патерн для управління користувацькими сесіями"""
-    
-    def __init__(self, request):
-        self.session = request.session
-    
-    def set_user_preference(self, key: str, value):
-        """Зберігає налаштування користувача"""
-        self.session[f'pref_{key}'] = value
-        self.session.modified = True
-    
-    def get_user_preference(self, key: str, default=None):
-        """Отримує налаштування користувача"""
-        return self.session.get(f'pref_{key}', default)
-    
-    def clear_preferences(self):
-        """Очищає всі налаштування"""
-        keys = [k for k in self.session.keys() if k.startswith('pref_')]
-        for key in keys:
-            del self.session[key]
-```
-
 ---
 
 ## CSRF захист

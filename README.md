@@ -65,26 +65,22 @@ python manage.py runserver
 
 ##  Патерни проєктування
 
-### Реалізовано 11 патернів:
+### Реалізовано 7 патернів (всі активно використовуються в runtime):
 
 #### Поведінкові патерни:
 - **Specification Pattern** – гнучка фільтрація подій (`events/specifications.py`)
 - **Strategy Pattern** – стратегії сортування (`events/strategies.py`)
-- **Observer Pattern** – Django Signals для подій системи
+- **Observer Pattern** – Django Signals для сповіщень (`events/signals.py`)
 
 #### Креаційні патерни:
-- **Factory Pattern** – створення подій різних типів (`events/factories.py`)
-- **Builder Pattern** – поетапне створення складних подій (`events/builders.py`)
 - **Singleton Pattern** – сервіс архівування (`events/services.py`)
 
 #### Структурні патерни:
-- **Decorator Pattern** – декоратори доступу (`events/decorators.py`)
-- **Proxy Pattern** – управління сесіями (`users/session_manager.py`)
+- **Decorator Pattern** – декоратори контролю доступу (`events/decorators.py`)
 - **Facade Pattern** – спрощений інтерфейс API/UI (`events/views.py`, `events/ui_views.py`)
 
 #### Архітектурні патерни:
-- **Repository Pattern** – абстракція доступу до даних (`events/repositories.py`)
-- **Service Layer Pattern** – бізнес-логіка в сервісах (`events/services.py`)
+- **Service Layer Pattern** – бізнес-логіка в сервісах (`events/services.py`, `notifications/services.py`)
 
 ### Детальна документація:
 Див. [DESIGN_PATTERNS.md](DESIGN_PATTERNS.md) для повного опису кожного патерну з прикладами коду.

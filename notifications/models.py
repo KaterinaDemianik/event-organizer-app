@@ -10,12 +10,16 @@ class Notification(models.Model):
     EVENT_CANCELLED = 'event_cancelled'
     EVENT_TIME_CHANGED = 'event_time_changed'
     EVENT_LOCATION_CHANGED = 'event_location_changed'
+    RSVP_CONFIRMED = 'rsvp_confirmed'
+    RSVP_CANCELLED = 'rsvp_cancelled'
     
     NOTIFICATION_TYPES = [
         (EVENT_UPDATED, 'Подію оновлено'),
         (EVENT_CANCELLED, 'Подію скасовано'),
         (EVENT_TIME_CHANGED, 'Час події змінено'),
         (EVENT_LOCATION_CHANGED, 'Локацію змінено'),
+        (RSVP_CONFIRMED, 'Нова реєстрація'),
+        (RSVP_CANCELLED, 'Реєстрацію скасовано'),
     ]
     
     user = models.ForeignKey(

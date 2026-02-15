@@ -26,7 +26,7 @@ class SortByDateStrategy(SortStrategy):
 
 
 class SortByPopularityStrategy(SortStrategy):
-    slug = "popularity"
+    slug = "popular"
     label = "Найпопулярніші"
 
     def sort(self, queryset: QuerySet) -> QuerySet:
@@ -42,10 +42,28 @@ class SortByAlphabetStrategy(SortStrategy):
         return queryset.order_by("title")
 
 
+class SortByEventDateStrategy(SortStrategy):
+    slug = "event_date"
+    label = "За датою події"
+
+    def sort(self, queryset: QuerySet) -> QuerySet:
+        return queryset.order_by("starts_at")
+
+
+class SortByRsvpCountStrategy(SortStrategy):
+    slug = "rsvp_count"
+    label = "За кількістю учасників"
+
+    def sort(self, queryset: QuerySet) -> QuerySet:
+        return queryset.order_by("-rsvp_count")
+
+
 AVAILABLE_STRATEGIES: List[SortStrategy] = [
     SortByDateStrategy(),
     SortByPopularityStrategy(),
     SortByAlphabetStrategy(),
+    SortByEventDateStrategy(),
+    SortByRsvpCountStrategy(),
 ]
 
 STRATEGIES: Dict[str, SortStrategy] = {s.slug: s for s in AVAILABLE_STRATEGIES}

@@ -19,6 +19,12 @@ from .specifications import (
     EventByLocationSpecification,
     apply_specifications,
 )
+from .decorators import (
+    organizer_required,
+    event_not_archived,
+    event_not_cancelled,
+    event_not_started,
+)  # Всі декоратори реально використовуються в цьому файлі
 from tickets.models import RSVP
 from django.contrib.auth import get_user_model
 
@@ -346,15 +352,7 @@ class EventListView(ListView):
 
         sort_slug = self.request.GET.get("sort", "date")
         
-        if sort_slug == "popular":
-            return filtered_qs.order_by('-rsvp_count', '-created_at')
-        elif sort_slug == "alphabet":
-            return filtered_qs.order_by('title')
-        elif sort_slug == "event_date":
-            return filtered_qs.order_by('starts_at')
-        elif sort_slug == "rsvp_count":
-            return filtered_qs.order_by('-rsvp_count')
-        
+        # Централізоване сортування через Strategy Pattern
         strategy = get_sort_strategy(sort_slug)
         self._current_sort = strategy.slug
         return strategy.sort(filtered_qs)
@@ -561,17 +559,12 @@ class EventUpdateView(LoginRequiredMixin, UpdateView):
 
 
 @login_required
+@event_not_archived
+@event_not_cancelled
+@event_not_started
 def rsvp_view(request, pk: int):
-    event = get_object_or_404(Event, pk=pk)
-
-    if event.status in {Event.CANCELLED, Event.ARCHIVED}:
-        messages.info(request, "Реєстрація недоступна для цієї події.")
-        return redirect("event_detail", pk=pk)
-
-    from django.utils import timezone
-    if event.starts_at <= timezone.now():
-        messages.info(request, "Реєстрація недоступна: подія вже розпочалась.")
-        return redirect("event_detail", pk=pk)
+    """Реєстрація на подію (RSVP)"""
+    event = request.event  # Отримуємо з декоратора
 
     existing = RSVP.objects.filter(user=request.user, event=event)
     if existing.exists():
@@ -590,13 +583,11 @@ def rsvp_view(request, pk: int):
 
 
 @login_required
+@event_not_archived
 def rsvp_cancel_view(request, pk: int):
+    """Скасування реєстрації на подію"""
     if request.method == "POST":
-        event = get_object_or_404(Event, pk=pk)
-
-        if event.status == Event.ARCHIVED:
-            messages.info(request, "Неможливо скасувати участь у архівній події")
-            return redirect("event_detail", pk=pk)
+        event = request.event  # Отримуємо з декоратора
 
         deleted_count, _ = RSVP.objects.filter(user=request.user, event=event).delete()
         if deleted_count > 0:
@@ -607,18 +598,12 @@ def rsvp_cancel_view(request, pk: int):
 
 
 @login_required
+@organizer_required
+@event_not_archived
 def event_cancel_view(request, pk: int):
     """Скасування події організатором або адміном"""
     if request.method == "POST":
-        event = get_object_or_404(Event, pk=pk)
-        
-        if event.organizer != request.user and not request.user.is_staff:
-            messages.error(request, "Ви не можете скасувати цю подію")
-            return redirect("event_detail", pk=pk)
-        
-        if event.status == Event.ARCHIVED:
-            messages.error(request, "Архівну подію не можна скасувати")
-            return redirect("event_detail", pk=pk)
+        event = request.event  # Отримуємо з декоратора
         
         if event.status == Event.CANCELLED:
             messages.info(request, "Ця подія вже скасована")
@@ -626,14 +611,9 @@ def event_cancel_view(request, pk: int):
         
         event.status = Event.CANCELLED
         event.save()
+        # Сповіщення створюються автоматично через Django Signal (events/signals.py)
         
-        # Створити сповіщення для учасників про скасування
-        from notifications.services import NotificationService
-        notifications_count = NotificationService.create_event_cancelled_notification(event)
-        
-        messages.success(request, f"Подію '{event.title}' скасовано")
-        if notifications_count > 0:
-            messages.info(request, f"Сповіщення про скасування надіслано {notifications_count} учасникам")
+        messages.success(request, f"Подію '{event.title}' скасовано. Учасники отримають сповіщення.")
         
         return redirect("event_detail", pk=pk)
     
@@ -641,13 +621,10 @@ def event_cancel_view(request, pk: int):
 
 
 @login_required
+@organizer_required
 def event_participants_view(request, pk: int):
     """Список учасників події"""
-    event = get_object_or_404(Event, pk=pk)
-    
-    if event.organizer != request.user and not request.user.is_staff:
-        messages.error(request, "Ви не маєте доступу до списку учасників")
-        return redirect("event_detail", pk=pk)
+    event = request.event  # Отримуємо з декоратора
     
     participants = RSVP.objects.filter(event=event).select_related('user').order_by('-created_at')
     
