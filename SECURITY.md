@@ -247,27 +247,7 @@ class OwnershipValidator(ValidationStrategy):
         return event.organizer == self.user
 ```
 
-### 2. Proxy Pattern для логування доступу
-
-```python
-# events/audit.py
-class AuditProxy:
-    """Логує всі операції з подіями"""
-    
-    def __init__(self, event_service):
-        self._service = event_service
-    
-    def create_event(self, user, data):
-        result = self._service.create_event(user, data)
-        logger.info(f"User {user.id} created event {result.id}")
-        return result
-    
-    def delete_event(self, user, event):
-        logger.warning(f"User {user.id} deleted event {event.id}")
-        return self._service.delete_event(user, event)
-```
-
-### 3. Singleton для Security Manager
+### 2. Singleton для Security Manager
 
 ```python
 # core/security.py

@@ -55,20 +55,6 @@ notifications/
 └── services.py          # Service Layer Pattern
 ```
 
----
-
-## Що було змінено
-
-### Видалено (не використовувались в runtime):
-- ❌ `events/factories.py` — Factory Pattern
-- ❌ `events/builders.py` — Builder Pattern
-- ❌ `events/repositories.py` — Repository Pattern
-- ❌ `users/session_manager.py` — Proxy Pattern
-
-### Додано/Покращено:
-- ✅ `events/signals.py` — Observer Pattern (реальна реалізація)
-- ✅ `events/decorators.py` — тепер реально використовується в ui_views.py
-- ✅ `events/strategies.py` — додано нові стратегії, централізовано сортування
 
 ---
 

@@ -80,7 +80,7 @@ class EventListView(ListView):
 ├─────────────────────────────────────┤
 │   Domain Layer (Models, Services)   │  ← Моделі, сервіси
 ├─────────────────────────────────────┤
-│   Data Access Layer (ORM)           │  ← Django ORM, Repository
+│   Data Access Layer (ORM)           │  ← Django ORM
 ├─────────────────────────────────────┤
 │   Database (MySQL)                  │  ← Збереження даних
 └─────────────────────────────────────┘

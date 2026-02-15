@@ -84,7 +84,7 @@
           <label style="font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; min-height: 20px;">Сортування</label>
           {% if view == 'archived' %}
             <select name="sort" style="width: 100%; max-width: 260px;">
-              <option value="date" {% if sort == 'date' or not sort %}selected{% endif %}>За датою створення</option>
+              <option value="date" {% if sort == 'date' or not sort %}selected{% endif %}>За датою початку</option>
               <option value="popular" {% if sort == 'popular' %}selected{% endif %}>По популярності</option>
               <option value="alphabet" {% if sort == 'alphabet' %}selected{% endif %}>За алфавітом</option>
               <option value="event_date" {% if sort == 'event_date' %}selected{% endif %}>По даті події</option>
@@ -93,7 +93,7 @@
           {% else %}
             <div style="display: flex; gap: 8px; align-items: stretch;">
               <select name="sort" style="flex: 2; min-width: 260px;">
-                <option value="date" {% if sort == 'date' or not sort %}selected{% endif %}>За датою створення</option>
+                <option value="date" {% if sort == 'date' or not sort %}selected{% endif %}>За датою початку</option>
                 <option value="popular" {% if sort == 'popular' %}selected{% endif %}>По популярності</option>
                 <option value="alphabet" {% if sort == 'alphabet' %}selected{% endif %}>За алфавітом</option>
                 <option value="event_date" {% if sort == 'event_date' %}selected{% endif %}>По даті події</option>
