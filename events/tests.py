@@ -3,6 +3,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Q
+from rest_framework.test import APITestCase
+from rest_framework import status
+import json
 
 from .models import Event, Review
 from .strategies import get_sort_strategy, STRATEGIES
@@ -268,3 +271,128 @@ class DecoratorPatternTests(TestCase):
         # Статус не змінився
         self.archived_event.refresh_from_db()
         self.assertEqual(self.archived_event.status, Event.ARCHIVED)
+
+
+class APIRSVPTimeConflictTests(APITestCase):
+    """API тести для перевірки конфлікту часу RSVP"""
+    
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="testuser", 
+            password="testpass"
+        )
+        self.other_user = get_user_model().objects.create_user(
+            username="organizer", 
+            password="testpass"
+        )
+        
+        # Базова подія: завтра 10:00-12:00
+        self.base_event = Event.objects.create(
+            title="Base Event",
+            starts_at=timezone.now() + timezone.timedelta(days=1, hours=10),
+            ends_at=timezone.now() + timezone.timedelta(days=1, hours=12),
+            status=Event.PUBLISHED,
+            organizer=self.other_user,
+        )
+        
+        # Подія з перетином: завтра 11:00-13:00
+        self.overlapping_event = Event.objects.create(
+            title="Overlapping Event",
+            starts_at=timezone.now() + timezone.timedelta(days=1, hours=11),
+            ends_at=timezone.now() + timezone.timedelta(days=1, hours=13),
+            status=Event.PUBLISHED,
+            organizer=self.other_user,
+        )
+        
+        # Подія без перетину: завтра 14:00-16:00
+        self.non_overlapping_event = Event.objects.create(
+            title="Non-overlapping Event",
+            starts_at=timezone.now() + timezone.timedelta(days=1, hours=14),
+            ends_at=timezone.now() + timezone.timedelta(days=1, hours=16),
+            status=Event.PUBLISHED,
+            organizer=self.other_user,
+        )
+
+    def test_api_rsvp_success_when_no_conflict(self):
+        """API RSVP успішний, якщо немає конфлікту часу"""
+        self.client.force_authenticate(user=self.user)
+        
+        url = f"/api/events/{self.base_event.id}/rsvp/"
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(RSVP.objects.filter(user=self.user, event=self.base_event).exists())
+
+    def test_api_rsvp_fails_with_time_conflict(self):
+        """API RSVP повертає 400, якщо є конфлікт часу"""
+        # Спочатку реєструємося на base_event
+        RSVP.objects.create(user=self.user, event=self.base_event)
+        
+        self.client.force_authenticate(user=self.user)
+        
+        # Намагаємося зареєструватися на overlapping_event
+        url = f"/api/events/{self.overlapping_event.id}/rsvp/"
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+        self.assertIn("Конфлікт часу", response.data["error"])
+        self.assertIn("Base Event", response.data["error"])
+        
+        # RSVP не створено
+        self.assertFalse(RSVP.objects.filter(user=self.user, event=self.overlapping_event).exists())
+
+    def test_api_rsvp_success_when_no_time_overlap(self):
+        """API RSVP успішний для подій без перетину часу"""
+        # Реєструємося на base_event
+        RSVP.objects.create(user=self.user, event=self.base_event)
+        
+        self.client.force_authenticate(user=self.user)
+        
+        # Намагаємося зареєструватися на non_overlapping_event
+        url = f"/api/events/{self.non_overlapping_event.id}/rsvp/"
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(RSVP.objects.filter(user=self.user, event=self.non_overlapping_event).exists())
+
+    def test_api_rsvp_fails_when_already_registered(self):
+        """API RSVP повертає 400, якщо вже зареєстрований"""
+        # Спочатку реєструємося
+        RSVP.objects.create(user=self.user, event=self.base_event)
+        
+        self.client.force_authenticate(user=self.user)
+        
+        # Намагаємося зареєструватися знову
+        url = f"/api/events/{self.base_event.id}/rsvp/"
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+        self.assertIn("вже зареєстровані", response.data["error"])
+
+    def test_api_rsvp_fails_when_capacity_full(self):
+        """API RSVP повертає 400, якщо місця закінчились"""
+        # Встановлюємо capacity = 1
+        self.base_event.capacity = 1
+        self.base_event.save()
+        
+        # Інший користувач займає єдине місце
+        RSVP.objects.create(user=self.other_user, event=self.base_event)
+        
+        self.client.force_authenticate(user=self.user)
+        
+        url = f"/api/events/{self.base_event.id}/rsvp/"
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+        self.assertIn("місця зайняті", response.data["error"])
+
+    def test_api_rsvp_requires_authentication(self):
+        """API RSVP вимагає автентифікації"""
+        url = f"/api/events/{self.base_event.id}/rsvp/"
+        response = self.client.post(url)
+        
+        # DRF з permission_classes повертає 403, а не 401
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

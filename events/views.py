@@ -55,7 +55,17 @@ class EventViewSet(viewsets.ModelViewSet):
 
     @decorators.action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated])
     def rsvp(self, request, pk=None):
+        from .services import RSVPService
+        
         event = self.get_object()
+        
+        can_create, error_message = RSVPService.can_create_rsvp(request.user, event)
+        if not can_create:
+            return response.Response(
+                {"error": error_message}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         rsvp, created = RSVP.objects.get_or_create(user=request.user, event=event)
         ser = RSVPSerializer(rsvp)
         return response.Response(ser.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
