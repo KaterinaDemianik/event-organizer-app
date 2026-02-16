@@ -44,27 +44,37 @@ def event_post_save(sender, instance, created, **kwargs):
 @receiver(post_save, sender=RSVP)
 def rsvp_created(sender, instance, created, **kwargs):
     """Обробляє створення нового RSVP"""
+    from notifications.factories import NotificationFactoryRegistry
     from notifications.models import Notification
     
     if created:
-        # Сповіщення організатору про нову реєстрацію
-        Notification.objects.create(
+        # Сповіщення організатору про нову реєстрацію через фабрику
+        context = {
+            'event': instance.event,
+            'participant': instance.user
+        }
+        NotificationFactoryRegistry.create_notification(
+            notification_type=Notification.RSVP_CONFIRMED,
             user=instance.event.organizer,
             event=instance.event,
-            notification_type=Notification.RSVP_CONFIRMED,
-            message=f"Користувач {instance.user.username} зареєструвався на подію '{instance.event.title}'"
+            context=context
         )
 
 
 @receiver(post_delete, sender=RSVP)
 def rsvp_deleted(sender, instance, **kwargs):
     """Обробляє видалення RSVP (скасування реєстрації)"""
+    from notifications.factories import NotificationFactoryRegistry
     from notifications.models import Notification
     
-    # Сповіщення організатору про скасування реєстрації
-    Notification.objects.create(
+    # Сповіщення організатору про скасування реєстрації через фабрику
+    context = {
+        'event': instance.event,
+        'participant': instance.user
+    }
+    NotificationFactoryRegistry.create_notification(
+        notification_type=Notification.RSVP_CANCELLED,
         user=instance.event.organizer,
         event=instance.event,
-        notification_type=Notification.RSVP_CANCELLED,
-        message=f"Користувач {instance.user.username} скасував реєстрацію на подію '{instance.event.title}'"
+        context=context
     )
