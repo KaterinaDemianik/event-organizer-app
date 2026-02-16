@@ -153,11 +153,14 @@ class EventArchiveService(metaclass=SingletonMeta):
 
 ## 5. Decorator Pattern (Патерн Декоратор)
 
-**Файл:** `events/decorators.py`
+**Файли:** `events/decorators.py`, `events/schedule_services.py`
 
-**Використання:** `events/ui_views.py` (rsvp_view, rsvp_cancel_view, event_cancel_view, event_participants_view)
+**Використання:** 
+- `events/ui_views.py` (rsvp_view, event_cancel_view, CalendarView)
 
-**Призначення:** Динамічне додавання перевірок доступу до функцій без зміни їх коду.
+**Призначення:** Динамічне додавання функціональності без зміни базового коду.
+
+### 5.1 Декоратори функцій (Access Control)
 
 **Реалізовані декоратори:**
 - `@organizer_required` — перевірка, чи користувач є організатором
@@ -165,21 +168,34 @@ class EventArchiveService(metaclass=SingletonMeta):
 - `@event_not_cancelled` — заборона дій зі скасованими подіями
 - `@event_not_started` — заборона дій з подіями, що вже розпочались
 
-**Приклад використання:**
+### 5.2 Декоратори розкладу (Schedule Wrappers)
+
+**Реалізовані обгортки:**
+- `BaseScheduleProvider` — базовий провайдер (адаптер до PersonalScheduleService)
+- `FilteredScheduleDecorator` — фільтрація за параметрами (upcoming, organized, published)
+- `HighlightedScheduleDecorator` — підсвічування подій (soon, organizer, popular)
+
+**Приклад використання (CalendarView):**
 
 ```python
-@login_required
-@organizer_required
-@event_not_archived
-def event_cancel_view(request, pk: int):
-    event = request.event  # Отримуємо з декоратора
-    # Логіка скасування
+# Побудова ланцюжка декораторів
+provider = BaseScheduleProvider()
+provider = FilteredScheduleDecorator(provider, only_upcoming=True)
+provider = HighlightedScheduleDecorator(provider, highlight_mode="soon")
+
+entries = provider.get_entries(user)  # Відфільтровані та підсвічені
 ```
 
+**GET-параметри календаря:**
+- `?schedule_filter=upcoming` — тільки майбутні події
+- `?schedule_filter=organized` — тільки мої організовані
+- `?highlight=soon` — підсвітити події в межах 24 годин
+- `?highlight=organizer` — підсвітити де я організатор
+
 **Переваги:**
-- Чистий код: логіка перевірок відокремлена
-- Повторне використання: декоратори можна комбінувати
-- DRY: немає дублювання перевірок у кожній функції
+- Чистий код: логіка фільтрації/підсвічування відокремлена
+- Повторне використання: декоратори можна комбінувати в ланцюжок
+- Open/Closed: базовий сервіс не змінюється
 
 ---
 

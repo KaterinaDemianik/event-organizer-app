@@ -78,7 +78,7 @@ python manage.py runserver
 - **Factory Pattern** – централізоване створення нотифікацій (`notifications/factories.py`)
 
 #### Структурні патерни:
-- **Decorator Pattern** – декоратори контролю доступу (`events/decorators.py`)
+- **Decorator Pattern** – декоратори контролю доступу та обгортки розкладу (`events/decorators.py`, `events/schedule_services.py`)
 - **Facade Pattern** – спрощений інтерфейс API/UI (`events/views.py`, `events/ui_views.py`)
 - **DTO Pattern** – передача даних для календаря (`events/schedule_services.py`)
 

@@ -26,6 +26,29 @@
       <button onclick="goToToday()" class="calendar-nav-btn">Сьогодні</button>
     </div>
 
+    {% if user.is_authenticated %}
+    <div class="schedule-filters" style="margin:12px 0; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <label for="schedule-filter" style="font-size:13px; color:var(--muted);">Фільтр:</label>
+        <select id="schedule-filter" onchange="applyScheduleFilters()" style="font-size:13px; padding:4px 8px; border-radius:4px; border:1px solid var(--border);">
+          <option value="all" {% if schedule_filter == 'all' %}selected{% endif %}>Всі події</option>
+          <option value="upcoming" {% if schedule_filter == 'upcoming' %}selected{% endif %}>Майбутні</option>
+          <option value="organized" {% if schedule_filter == 'organized' %}selected{% endif %}>Мої організовані</option>
+          <option value="published" {% if schedule_filter == 'published' %}selected{% endif %}>Опубліковані</option>
+        </select>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <label for="highlight-mode" style="font-size:13px; color:var(--muted);">Підсвічування:</label>
+        <select id="highlight-mode" onchange="applyScheduleFilters()" style="font-size:13px; padding:4px 8px; border-radius:4px; border:1px solid var(--border);">
+          <option value="none" {% if highlight == 'none' %}selected{% endif %}>Без підсвічування</option>
+          <option value="soon" {% if highlight == 'soon' %}selected{% endif %}>Скоро (24 год)</option>
+          <option value="organizer" {% if highlight == 'organizer' %}selected{% endif %}>Я організатор</option>
+          <option value="popular" {% if highlight == 'popular' %}selected{% endif %}>Популярні (5+ RSVP)</option>
+        </select>
+      </div>
+    </div>
+    {% endif %}
+
     <div id="calendar-container" style="margin-bottom: 12px;">
       
     </div>
@@ -191,6 +214,28 @@
       transform: translateY(-1px);
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
+    
+    /* Стилі для підсвічування (Decorator Pattern) */
+    .highlight-badge {
+      font-size: 8px;
+      margin-right: 2px;
+    }
+    
+    .event-highlight-soon {
+      box-shadow: 0 0 0 2px #FF5722, 0 2px 4px rgba(255, 87, 34, 0.3);
+    }
+    
+    .event-highlight-organizer {
+      box-shadow: 0 0 0 2px #2196F3, 0 2px 4px rgba(33, 150, 243, 0.3);
+    }
+    
+    .event-highlight-popular {
+      box-shadow: 0 0 0 2px #9C27B0, 0 2px 4px rgba(156, 39, 176, 0.3);
+    }
+    
+    .highlight-soon { color: #FF5722; }
+    .highlight-organizer { color: #2196F3; }
+    .highlight-popular { color: #9C27B0; }
     
     .event-multiday {
       background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
@@ -413,7 +458,9 @@
           const statusClass = `event-${event.status}`;
           const isMultiDay = isMultiDayEvent(event);
           const multiDayClass = isMultiDay ? 'event-multiday' : '';
-          html += `<div class="event-item ${statusClass} ${multiDayClass}" onclick="goToEvent(${event.id})" title="${event.title}">${event.title}</div>`;
+          const highlightClass = event.highlight_reason ? `event-highlight-${event.highlight_reason}` : '';
+          const highlightBadge = event.highlight_reason ? `<span class="highlight-badge highlight-${event.highlight_reason}">★</span>` : '';
+          html += `<div class="event-item ${statusClass} ${multiDayClass} ${highlightClass}" onclick="goToEvent(${event.id})" title="${event.title}">${highlightBadge}${event.title}</div>`;
         });
         
         html += '</div>';
@@ -461,9 +508,11 @@
             const statusClass = `event-${event.status}`;
             const isMultiDay = isMultiDayEvent(event);
             const multiDayClass = isMultiDay ? 'event-multiday' : '';
+            const highlightClass = event.highlight_reason ? `event-highlight-${event.highlight_reason}` : '';
+            const highlightBadge = event.highlight_reason ? `<span class="highlight-badge highlight-${event.highlight_reason}">★</span>` : '';
             const time = new Date(event.starts_at).toLocaleTimeString('uk-UA', {hour: '2-digit', minute: '2-digit'});
             const eventTitle = `${time} ${event.title}`;
-            html += `<div class="event-item ${statusClass} ${multiDayClass}" onclick="goToEvent(${event.id})" title="${eventTitle}">${eventTitle}</div>`;
+            html += `<div class="event-item ${statusClass} ${multiDayClass} ${highlightClass}" onclick="goToEvent(${event.id})" title="${eventTitle}">${highlightBadge}${eventTitle}</div>`;
           });
           html += '</div>';
         }
@@ -553,6 +602,18 @@
       
       ical += 'END:VCALENDAR';
       return ical;
+    }
+
+    // Застосування фільтрів розкладу (Decorator Pattern)
+    function applyScheduleFilters() {
+      const scheduleFilter = document.getElementById('schedule-filter')?.value || 'all';
+      const highlightMode = document.getElementById('highlight-mode')?.value || 'none';
+      
+      const url = new URL(window.location.href);
+      url.searchParams.set('schedule_filter', scheduleFilter);
+      url.searchParams.set('highlight', highlightMode);
+      
+      window.location.href = url.toString();
     }
 
     // Ініціалізація

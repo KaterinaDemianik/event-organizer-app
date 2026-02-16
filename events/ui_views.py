@@ -565,18 +565,14 @@ class EventUpdateView(LoginRequiredMixin, UpdateView):
 @event_not_started
 def rsvp_view(request, pk: int):
     """Реєстрація на подію (RSVP)"""
+    from .services import RSVPService
+    
     event = request.event  # Отримуємо з декоратора
 
-    existing = RSVP.objects.filter(user=request.user, event=event)
-    if existing.exists():
-        messages.info(request, "Ви вже підтвердили участь у цій події")
+    can_create, error_message = RSVPService.can_create_rsvp(request.user, event)
+    if not can_create:
+        messages.warning(request, error_message)
         return redirect("event_detail", pk=pk)
-
-    if event.capacity is not None:
-        current = RSVP.objects.filter(event=event, status="going").count()
-        if current >= event.capacity:
-            messages.warning(request, "Реєстрація недоступна: всі місця зайняті.")
-            return redirect("event_detail", pk=pk)
 
     RSVP.objects.create(user=request.user, event=event)
     messages.success(request, "Ваш RSVP збережено")
@@ -638,7 +634,13 @@ def event_participants_view(request, pk: int):
 
 
 class CalendarView(ListView):
-    """Календар подій з місячним та тижневим виглядом"""
+    """
+    Календар подій з місячним та тижневим виглядом
+    
+    Підтримує GET-параметри для фільтрації та підсвічування:
+    - schedule_filter: all|upcoming|organized|published
+    - highlight: none|soon|organizer|popular
+    """
     model = Event
     template_name = "events/calendar.html"
     context_object_name = "events"
@@ -649,13 +651,49 @@ class CalendarView(ListView):
         else:
             return Event.objects.filter(status=Event.PUBLISHED).order_by("starts_at")
 
+    def _build_schedule_provider(self):
+        """
+        Побудувати ланцюжок декораторів на основі GET-параметрів
+        
+        Decorator Pattern: обгортки для фільтрації та підсвічування
+        """
+        from .schedule_services import (
+            BaseScheduleProvider,
+            FilteredScheduleDecorator,
+            HighlightedScheduleDecorator,
+        )
+        
+        schedule_filter = self.request.GET.get("schedule_filter", "all")
+        highlight = self.request.GET.get("highlight", "none")
+        
+        provider = BaseScheduleProvider()
+        
+        if schedule_filter == "upcoming":
+            provider = FilteredScheduleDecorator(provider, only_upcoming=True)
+        elif schedule_filter == "organized":
+            provider = FilteredScheduleDecorator(provider, only_organizer=True)
+        elif schedule_filter == "published":
+            provider = FilteredScheduleDecorator(provider, only_published=True)
+        
+        if highlight and highlight != "none":
+            provider = HighlightedScheduleDecorator(provider, highlight_mode=highlight)
+        
+        return provider
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
+        schedule_filter = self.request.GET.get("schedule_filter", "all")
+        highlight = self.request.GET.get("highlight", "none")
+        
+        context["schedule_filter"] = schedule_filter
+        context["highlight"] = highlight
+        
         if self.request.user.is_authenticated:
-            context['events_json'] = PersonalScheduleService.get_schedule_json_data(
-                self.request.user
-            )
+            provider = self._build_schedule_provider()
+            entries = provider.get_entries(self.request.user)
+            events_data = [entry.to_dict() for entry in entries]
+            context['events_json'] = json.dumps(events_data)
         else:
             events_data = []
             for event in self.get_queryset():

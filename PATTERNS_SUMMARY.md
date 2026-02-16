@@ -30,7 +30,7 @@
 
 | Патерн | Файл | Використання |
 |--------|------|--------------|
-| **Decorator** | `events/decorators.py` | `events/ui_views.py` (rsvp_view, event_cancel_view) |
+| **Decorator** | `events/decorators.py`, `events/schedule_services.py` | `events/ui_views.py` (rsvp_view, CalendarView) |
 | **Facade** | `events/views.py`, `events/ui_views.py` | API та UI endpoints |
 | **DTO** | `events/schedule_services.py` | `events/ui_views.py` (CalendarView) |
 

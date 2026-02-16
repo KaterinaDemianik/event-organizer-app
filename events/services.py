@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import Dict
+from typing import Dict, List, Tuple, Optional
 
+from django.db.models import Q
 from django.utils import timezone
 
 from .models import Event
@@ -49,4 +50,77 @@ class EventArchiveService(metaclass=SingletonMeta):
         
         event.status = Event.ARCHIVED
         event.save(update_fields=["status"])
+        return True, None
+
+
+class RSVPService:
+    """Сервіс для роботи з RSVP (реєстрацією на події)"""
+
+    @staticmethod
+    def get_conflicting_events(user, event: Event) -> List[Event]:
+        """
+        Повертає список подій, на які користувач вже зареєстрований
+        і які перетинаються в часі з вказаною подією.
+        
+        Конфлікт часу: події перетинаються, якщо:
+        - event.starts_at < other.ends_at AND event.ends_at > other.starts_at
+        """
+        from tickets.models import RSVP
+        
+        user_rsvp_event_ids = RSVP.objects.filter(
+            user=user,
+            status="going"
+        ).values_list("event_id", flat=True)
+        
+        if not user_rsvp_event_ids:
+            return []
+        
+        conflicting = Event.objects.filter(
+            id__in=user_rsvp_event_ids
+        ).filter(
+            starts_at__lt=event.ends_at,
+            ends_at__gt=event.starts_at
+        ).exclude(
+            id=event.id
+        )
+        
+        return list(conflicting)
+
+    @staticmethod
+    def check_time_conflict(user, event: Event) -> Tuple[bool, Optional[Event]]:
+        """
+        Перевіряє чи є конфлікт часу для RSVP.
+        
+        Returns:
+            Tuple (has_conflict, conflicting_event)
+            - has_conflict: True якщо є конфлікт
+            - conflicting_event: перша подія з конфліктом (або None)
+        """
+        conflicts = RSVPService.get_conflicting_events(user, event)
+        if conflicts:
+            return True, conflicts[0]
+        return False, None
+
+    @staticmethod
+    def can_create_rsvp(user, event: Event) -> Tuple[bool, Optional[str]]:
+        """
+        Комплексна перевірка чи можна створити RSVP.
+        
+        Returns:
+            Tuple (can_create, error_message)
+        """
+        from tickets.models import RSVP
+        
+        if RSVP.objects.filter(user=user, event=event).exists():
+            return False, "Ви вже зареєстровані на цю подію"
+        
+        if event.capacity is not None:
+            current = RSVP.objects.filter(event=event, status="going").count()
+            if current >= event.capacity:
+                return False, "Реєстрація недоступна: всі місця зайняті"
+        
+        has_conflict, conflicting_event = RSVPService.check_time_conflict(user, event)
+        if has_conflict:
+            return False, f"Конфлікт часу: ви вже зареєстровані на подію \"{conflicting_event.title}\", яка перетинається в часі"
+        
         return True, None
