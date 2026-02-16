@@ -43,8 +43,15 @@ class EventListView(ListView):
     template_name = "events/list.html"
     
     def get_queryset(self):
-        # Логіка фільтрації та сортування
-        pass
+        EventArchiveService().archive_past_events()
+        
+        qs = (
+            Event.objects
+            .annotate(rsvp_count=Count("rsvps", filter=Q(rsvps__status="going"), distinct=True))
+            .filter(status=Event.PUBLISHED)
+            .order_by("-starts_at")
+        )
+        return qs
 ```
 
 **Відповідальність:**
@@ -165,32 +172,6 @@ class EventArchiveService(metaclass=SingletonMeta):
 
 **Призначення:** Реагування на зміни в системі без жорстких залежностей.
 
-### Реалізовано:
-
-```python
-# events/signals.py
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
-
-@receiver(post_save, sender=Event)
-def event_post_save(sender, instance, created, **kwargs):
-    """Обробляє зміни в події після збереження"""
-    if not created:
-        # Перевіряємо зміну статусу на CANCELLED
-        if instance.status == Event.CANCELLED:
-            NotificationService.create_event_cancelled_notification(instance)
-
-@receiver(post_save, sender=RSVP)
-def rsvp_created(sender, instance, created, **kwargs):
-    """Сповіщає організатора про нову реєстрацію"""
-    if created:
-        Notification.objects.create(
-            user=instance.event.organizer,
-            notification_type=Notification.RSVP_CONFIRMED,
-            message=f"Новий учасник: {instance.user.username}"
-        )
-```
-
 **Переваги:**
 - Слабке зчеплення компонентів
 - Автоматичне сповіщення без дублювання коду
@@ -274,6 +255,10 @@ MIDDLEWARE = [
 
 ---
 
+# Архітектурний контекст Django
+
+*Наступні патерни є частиною архітектури Django framework і не входять до 10 реалізованих патернів проекту.*
+
 ## 7. Front Controller Pattern
 
 **Django URLconf** виступає як Front Controller:
@@ -303,15 +288,19 @@ class EventListView(ListView):
     
     def get_queryset(self):
         # Крок 1: Отримати дані
-        pass
+        EventArchiveService().archive_past_events()
+        return Event.objects.filter(status=Event.PUBLISHED).order_by("-starts_at")
     
     def get_context_data(self, **kwargs):
         # Крок 2: Підготувати контекст
-        pass
+        ctx = super().get_context_data(**kwargs)
+        ctx["sort"] = self.request.GET.get("sort", "date")
+        ctx["category"] = self.request.GET.get("category", "")
+        return ctx
     
     def render_to_response(self, context):
         # Крок 3: Відрендерити відповідь
-        pass
+        return super().render_to_response(context)
 ```
 
 ---
@@ -321,16 +310,27 @@ class EventListView(ListView):
 Django Signals - реалізація Observer:
 
 ```python
-# events/signals.py (концепт)
+# events/signals.py (реальна реалізація)
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-@receiver(post_save, sender=Event)
-def event_created(sender, instance, created, **kwargs):
+@receiver(post_save, sender=RSVP)
+def rsvp_created(sender, instance, created, **kwargs):
+    from notifications.factories import NotificationFactoryRegistry
+    from notifications.models import Notification
+    
     if created:
-        # Відправити email організатору
-        # Створити notification
-        pass
+        # Сповіщення організатору про нову реєстрацію через фабрику
+        context = {
+            'event': instance.event,
+            'participant': instance.user
+        }
+        NotificationFactoryRegistry.create_notification(
+            notification_type=Notification.RSVP_CONFIRMED,
+            user=instance.event.organizer,
+            event=instance.event,
+            context=context
+        )
 ```
 
 ---
@@ -424,7 +424,7 @@ Request → SecurityMiddleware
 | **State** | Управління станами подій | `events/states.py` |
 | **DTO** | Передача даних для календаря | `events/schedule_services.py` |
 | **Factory** | Централізоване створення нотифікацій | `notifications/factories.py` |
-| **Decorator** | Декоратори контролю доступу | `events/decorators.py` |
+| **Decorator** | Декоратори контролю доступу + обгортки розкладу | `events/decorators.py`, `events/schedule_services.py` |
 | **REST API / Facade** | DRF ViewSets як фасад до доменного шару | `events/views.py` |
 | **Front Controller** | URLconf | `event_organizer/urls.py` |
 | **Template Method** | Class-Based Views | `events/ui_views.py` |

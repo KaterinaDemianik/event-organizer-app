@@ -10,11 +10,11 @@
 
 **Файл:** `events/specifications.py`
 
-**Використання:** `events/ui_views.py` (EventListView, рядки 286-300)
+**Використання:** `events/ui_views.py` (EventListView.get_queryset)
 
-**Призначення:** Інкапсулює бізнес-правила фільтрації у окремі об'єкти, які можна комбінувати через логічні операції (AND, OR, NOT).
+**Призначення:** Інкапсулює бізнес-правила фільтрації у окремі об'єкти, які можна комбінувати через функцію `apply_specifications()`.
 
-**Примітка:** У поточній реалізації активно використовується метод `to_queryset_filter()` для інтеграції з Django ORM. Методи `is_satisfied_by()`, `And()`, `Or()`, `Not()` реалізовані для розширюваності та можуть бути використані для in-memory фільтрації об'єктів у майбутньому.
+**Реалізація:** Кожна специфікація має метод `to_queryset_filter()` що повертає Django Q-об'єкт. Комбінування специфікацій відбувається через функцію `apply_specifications()` яка об'єднує їх через логічне AND.
 
 **Приклад використання:**
 
@@ -50,7 +50,7 @@ filtered_qs = apply_specifications(qs, *specs)
 
 **Файл:** `events/strategies.py`
 
-**Використання:** `events/ui_views.py` (EventListView.get_queryset, рядки 353-358)
+**Використання:** `events/ui_views.py` (EventListView.get_queryset)
 
 **Призначення:** Визначає сімейство алгоритмів сортування і робить їх взаємозамінними.
 
@@ -122,7 +122,7 @@ def rsvp_created(sender, instance, created, **kwargs):
 
 **Файл:** `events/services.py`
 
-**Використання:** `events/ui_views.py` (EventListView.get_queryset, рядок 242)
+**Використання:** `events/ui_views.py` (EventListView.get_queryset)
 
 **Призначення:** Забезпечує єдиний екземпляр сервісу архівування подій.
 
@@ -140,8 +140,16 @@ class SingletonMeta(type):
 
 class EventArchiveService(metaclass=SingletonMeta):
     def archive_past_events(self) -> int:
-        # Архівує завершені події
-        pass
+        """Переводить завершені опубліковані події в архів"""
+        now = timezone.now()
+        queryset = Event.objects.filter(
+            status=Event.PUBLISHED,
+            ends_at__lt=now,
+        )
+        count = queryset.count()
+        if count:
+            queryset.update(status=Event.ARCHIVED)
+        return count
 ```
 
 **Переваги:**
@@ -216,8 +224,11 @@ class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
     
     def get_queryset(self):
-        # Внутрішня логіка фільтрації, сортування, анотацій
-        pass
+        """Додаємо анотацію з кількістю RSVP до кожної події"""
+        from django.db.models import Q
+        return Event.objects.annotate(
+            rsvp_count=Count('rsvps', filter=Q(rsvps__status='going'), distinct=True)
+        ).order_by("-starts_at")
 ```
 
 **Переваги:**

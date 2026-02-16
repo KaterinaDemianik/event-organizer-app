@@ -47,6 +47,7 @@ argon2$argon2id$v=19$m=102400,t=2,p=8$c29tZXNhbHQ$hash...
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',  # Основний
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',  # Fallback
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',  # Fallback
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',  # Fallback
 ]
 
@@ -230,7 +231,7 @@ SECURE_BROWSER_XSS_FILTER = True
 
 ## 📊 Моніторинг безпеки
 
-Проект використовує стандартні механізми логування Django.
+Проект використовує базові механізми логування Django (без додаткової конфігурації логерів).
 - Створення/видалення подій
 - RSVP реєстрації
 
