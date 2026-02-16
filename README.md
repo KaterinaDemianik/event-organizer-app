@@ -58,19 +58,20 @@ python manage.py runserver
 ## Документація
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Архітектурні патерни (MVT, Layered, Service Layer)
-- [DESIGN_PATTERNS.md](DESIGN_PATTERNS.md) - Патерни проєктування (8 патернів, включно з Factory)
+- [DESIGN_PATTERNS.md](DESIGN_PATTERNS.md) - Патерни проєктування (10 патернів)
 - [SECURITY.md](SECURITY.md) - Безпека та автентифікація (Argon2, Sessions, CSRF)
 - [DATABASE_SETUP.md](DATABASE_SETUP.md) - Налаштування MySQL
 - [ARCHIVE_INFO.md](ARCHIVE_INFO.md) - Система архівування подій
 
 ##  Патерни проєктування
 
-### Реалізовано 8 патернів (всі активно використовуються в runtime):
+### Реалізовано 10 патернів (всі активно використовуються в runtime):
 
 #### Поведінкові патерни:
 - **Specification Pattern** – гнучка фільтрація подій (`events/specifications.py`)
 - **Strategy Pattern** – стратегії сортування (`events/strategies.py`)
 - **Observer Pattern** – Django Signals для сповіщень (`events/signals.py`)
+- **State Pattern** – управління станами подій (`events/states.py`)
 
 #### Креаційні патерни:
 - **Singleton Pattern** – сервіс архівування (`events/services.py`)
@@ -79,6 +80,7 @@ python manage.py runserver
 #### Структурні патерни:
 - **Decorator Pattern** – декоратори контролю доступу (`events/decorators.py`)
 - **Facade Pattern** – спрощений інтерфейс API/UI (`events/views.py`, `events/ui_views.py`)
+- **DTO Pattern** – передача даних для календаря (`events/schedule_services.py`)
 
 #### Архітектурні патерни:
 - **Service Layer Pattern** – бізнес-логіка в сервісах (`events/services.py`, `notifications/services.py`)

@@ -2,9 +2,9 @@
 
 ## Загальна статистика
 
-- **Всього реалізовано:** 8 патернів проектування
+- **Всього реалізовано:** 10 патернів проектування
 - **Всі патерни активно використовуються в runtime-коді**
-- **Категорії:** Поведінкові (3), Креаційні (2), Структурні (2), Архітектурні (1)
+- **Категорії:** Поведінкові (4), Креаційні (2), Структурні (3), Архітектурні (1)
 
 ---
 
@@ -17,6 +17,7 @@
 | **Specification** | `events/specifications.py` | `events/ui_views.py` (EventListView) |
 | **Strategy** | `events/strategies.py` | `events/ui_views.py` (сортування) |
 | **Observer** | `events/signals.py` | Автоматично через `events/apps.py` |
+| **State** | `events/states.py` | `events/ui_views.py`, `events/services.py` |
 
 ### Креаційні патерни (Creational)
 
@@ -31,6 +32,7 @@
 |--------|------|--------------|
 | **Decorator** | `events/decorators.py` | `events/ui_views.py` (rsvp_view, event_cancel_view) |
 | **Facade** | `events/views.py`, `events/ui_views.py` | API та UI endpoints |
+| **DTO** | `events/schedule_services.py` | `events/ui_views.py` (CalendarView) |
 
 ### Архітектурні патерни (Architectural)
 
@@ -44,17 +46,19 @@
 
 ```
 events/
-├── specifications.py    # Specification Pattern
-├── strategies.py        # Strategy Pattern
-├── signals.py           # Observer Pattern
-├── services.py          # Singleton + Service Layer
-├── decorators.py        # Decorator Pattern
-├── views.py             # Facade Pattern (API)
-└── ui_views.py          # Facade Pattern (UI)
+├── specifications.py      # Specification Pattern
+├── strategies.py          # Strategy Pattern
+├── signals.py             # Observer Pattern
+├── states.py              # State Pattern
+├── services.py            # Singleton + Service Layer
+├── schedule_services.py   # DTO Pattern + Service Layer
+├── decorators.py          # Decorator Pattern
+├── views.py               # Facade Pattern (API)
+└── ui_views.py            # Facade Pattern (UI)
 
 notifications/
-├── factories.py         # Factory Pattern (NEW)
-└── services.py          # Service Layer Pattern
+├── factories.py           # Factory Pattern
+└── services.py            # Service Layer Pattern
 ```
 
 
@@ -85,7 +89,7 @@ notifications/
 
 ## Висновок
 
-Event Organizer демонструє практичне застосування 8 патернів проектування, які **реально використовуються в коді**. Кожен патерн має конкретну реалізацію та вирішує реальну проблему в архітектурі додатку.
+Event Organizer демонструє практичне застосування 10 патернів проектування, які **реально використовуються в коді**. Кожен патерн має конкретну реалізацію та вирішує реальну проблему в архітектурі додатку.
 
 Архітектура проекту побудована на принципах:
 - **SOLID** — кожен клас має одну відповідальність

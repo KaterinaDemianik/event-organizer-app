@@ -59,13 +59,20 @@ class EventForm(forms.ModelForm):
         if "category" in self.fields:
             self.fields["category"].label = "Категорія події"
 
-        if "status" in self.fields and not getattr(self.instance, "pk", None):
-            allowed_statuses = {Event.DRAFT, Event.PUBLISHED}
-            self.fields["status"].choices = [
-                (value, label)
-                for value, label in self.fields["status"].choices
-                if value in allowed_statuses
-            ]
+        # Статус можна змінювати тільки для нових подій
+        if "status" in self.fields:
+            if not getattr(self.instance, "pk", None):
+                # Нова подія: дозволяємо тільки draft/published
+                allowed_statuses = {Event.DRAFT, Event.PUBLISHED}
+                self.fields["status"].choices = [
+                    (value, label)
+                    for value, label in self.fields["status"].choices
+                    if value in allowed_statuses
+                ]
+            else:
+                # Існуюча подія: видаляємо поле статусу з форми
+                # Зміна статусу має відбуватись через State Pattern
+                del self.fields["status"]
 
         if user and user.is_staff:
             self.fields['organizer'] = forms.ModelChoiceField(

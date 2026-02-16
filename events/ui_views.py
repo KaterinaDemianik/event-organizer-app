@@ -6,13 +6,14 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib import messages
 from django.db.models import Count, Q, F
 from django.utils import timezone
-from django.core.exceptions import PermissionDenied
 from datetime import timedelta, date
 import json
 
 from .models import Event, Review
 from .forms import EventForm, ReviewForm
 from .services import EventArchiveService
+from .states import EventStateManager
+from .schedule_services import PersonalScheduleService
 from .specifications import (
     EventByStatusSpecification,
     EventByTitleSpecification,
@@ -525,8 +526,9 @@ class EventUpdateView(LoginRequiredMixin, UpdateView):
         if event.organizer != request.user and not request.user.is_staff:
             messages.error(request, "Ви не можете редагувати цю подію")
             return redirect("event_detail", pk=event.pk)
-        if event.status == Event.ARCHIVED:
-            messages.error(request, "Архівну подію не можна редагувати")
+        
+        if not EventStateManager.can_edit(event):
+            messages.error(request, "Цю подію не можна редагувати в поточному стані")
             return redirect("event_detail", pk=event.pk)
         
         # Зберегти попередні значення для порівняння
@@ -604,8 +606,8 @@ def event_cancel_view(request, pk: int):
     if request.method == "POST":
         event = request.event  # Отримуємо з декоратора
         
-        if event.status == Event.CANCELLED:
-            messages.info(request, "Ця подія вже скасована")
+        if not EventStateManager.can_cancel(event):
+            messages.error(request, "Цю подію не можна скасувати в поточному стані")
             return redirect("event_detail", pk=pk)
         
         event.status = Event.CANCELLED
@@ -643,35 +645,29 @@ class CalendarView(ListView):
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            from tickets.models import RSVP
-            
-            user_events = Q(organizer=self.request.user)
-            
-            registered_events = Q(
-                status=Event.PUBLISHED,
-                rsvps__user=self.request.user
-            )
-            
-            return Event.objects.filter(
-                user_events | registered_events
-            ).distinct().order_by("starts_at")
+            return PersonalScheduleService.get_user_events_queryset(self.request.user)
         else:
             return Event.objects.filter(status=Event.PUBLISHED).order_by("starts_at")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        events_data = []
-        for event in self.get_queryset():
-            events_data.append({
-                'id': event.id,
-                'title': event.title,
-                'starts_at': event.starts_at.isoformat(),
-                'ends_at': event.ends_at.isoformat(),
-                'status': event.status,
-                'location': event.location,
-                'description': event.description,
-            })
+        if self.request.user.is_authenticated:
+            context['events_json'] = PersonalScheduleService.get_schedule_json_data(
+                self.request.user
+            )
+        else:
+            events_data = []
+            for event in self.get_queryset():
+                events_data.append({
+                    'id': event.id,
+                    'title': event.title,
+                    'starts_at': event.starts_at.isoformat(),
+                    'ends_at': event.ends_at.isoformat(),
+                    'status': event.status,
+                    'location': event.location or '',
+                    'description': event.description or '',
+                })
+            context['events_json'] = json.dumps(events_data)
         
-        context['events_json'] = json.dumps(events_data)
         return context

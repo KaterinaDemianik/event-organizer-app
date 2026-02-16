@@ -112,12 +112,14 @@ events/
 #### **Domain Layer**
 ```
 events/
-├── models.py        # Доменні моделі
-├── services.py      # Бізнес-логіка (Singleton + Service Layer)
-├── specifications.py # Бізнес-правила (Specification)
-├── strategies.py    # Алгоритми (Strategy)
-├── signals.py       # Реакція на події (Observer)
-└── decorators.py    # Контроль доступу (Decorator)
+├── models.py            # Доменні моделі
+├── services.py          # Бізнес-логіка (Singleton + Service Layer)
+├── states.py            # Стани подій (State Pattern)
+├── schedule_services.py # Розклад (DTO + Service Layer)
+├── specifications.py    # Бізнес-правила (Specification)
+├── strategies.py        # Алгоритми (Strategy)
+├── signals.py           # Реакція на події (Observer)
+└── decorators.py        # Контроль доступу (Decorator)
 ```
 
 #### **Data Access Layer**
@@ -419,6 +421,8 @@ Request → SecurityMiddleware
 | **Specification** | Фільтрація подій через об'єкти-специфікації | `events/specifications.py` |
 | **Strategy** | Стратегії сортування списку подій | `events/strategies.py` |
 | **Observer** | Django Signals для сповіщень | `events/signals.py` |
+| **State** | Управління станами подій | `events/states.py` |
+| **DTO** | Передача даних для календаря | `events/schedule_services.py` |
 | **Factory** | Централізоване створення нотифікацій | `notifications/factories.py` |
 | **Decorator** | Декоратори контролю доступу | `events/decorators.py` |
 | **REST API / Facade** | DRF ViewSets як фасад до доменного шару | `events/views.py` |

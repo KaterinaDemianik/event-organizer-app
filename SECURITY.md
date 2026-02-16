@@ -222,82 +222,15 @@ SECURE_BROWSER_XSS_FILTER = True
 
 ---
 
-## Патерни безпеки
+## Реалізовані патерни безпеки
 
-### 1. Strategy Pattern для валідації
-
-```python
-# events/validators.py
-from abc import ABC, abstractmethod
-
-class ValidationStrategy(ABC):
-    @abstractmethod
-    def validate(self, value) -> bool:
-        pass
-
-class DateValidator(ValidationStrategy):
-    def validate(self, value) -> bool:
-        return value >= timezone.now()
-
-class OwnershipValidator(ValidationStrategy):
-    def __init__(self, user):
-        self.user = user
-    
-    def validate(self, event) -> bool:
-        return event.organizer == self.user
-```
-
-### 2. Singleton для Security Manager
-
-```python
-# core/security.py
-class SecurityManager(metaclass=SingletonMeta):
-    """Централізований менеджер безпеки"""
-    
-    def check_rate_limit(self, user, action):
-        """Перевіряє ліміт запитів"""
-        pass
-    
-    def log_suspicious_activity(self, user, action):
-        """Логує підозрілу активність"""
-        pass
-    
-    def validate_permissions(self, user, resource, action):
-        """Перевіряє права доступу"""
-        pass
-```
+Проект використовує стандартні механізми безпеки Django без додаткових патернів проектування для безпеки.
 
 ---
 
 ## 📊 Моніторинг безпеки
 
-### Логування
-
-```python
-# settings.py
-LOGGING = {
-    'version': 1,
-    'handlers': {
-        'security': {
-            'level': 'WARNING',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/security.log',
-        },
-    },
-    'loggers': {
-        'django.security': {
-            'handlers': ['security'],
-            'level': 'WARNING',
-        },
-    },
-}
-```
-
-### Події для логування
-
-- Невдалі спроби входу
-- Зміна пароля
-- Спроби несанкціонованого доступу
+Проект використовує стандартні механізми логування Django.
 - Створення/видалення подій
 - RSVP реєстрації
 

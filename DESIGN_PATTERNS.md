@@ -2,7 +2,7 @@
 
 ## Огляд
 
-Цей проект демонструє практичне застосування **8 патернів проектування**, які **реально використовуються в runtime-коді** для створення масштабованого та підтримуваного веб-додатку.
+Цей проект демонструє практичне застосування **10 патернів проектування**, які **реально використовуються в runtime-коді** для створення масштабованого та підтримуваного веб-додатку.
 
 ---
 
@@ -285,21 +285,107 @@ NotificationFactoryRegistry.create_notification(
 
 ---
 
+## 9. State Pattern (Патерн Стан)
+
+**Файл:** `events/states.py`
+
+**Використання:** `events/ui_views.py` (EventUpdateView, event_cancel_view), `events/services.py` (archive_event)
+
+**Призначення:** Управління переходами між станами події (draft → published → cancelled/archived) з валідацією бізнес-правил.
+
+**Реалізовані стани:**
+- `DraftState` — чернетка (можна редагувати, публікувати)
+- `PublishedState` — опублікована (можна редагувати, скасувати, архівувати)
+- `CancelledState` — скасована (жодних дій)
+- `ArchivedState` — архівована (жодних дій)
+
+**Приклад використання:**
+
+```python
+from events.states import EventStateManager
+
+# Перевірка можливості редагування
+if not EventStateManager.can_edit(event):
+    messages.error(request, "Цю подію не можна редагувати")
+
+# Валідація переходу з бізнес-правилами
+is_valid, error = EventStateManager.validate_transition(event, "archived")
+if not is_valid:
+    return False, error
+
+# Отримання доступних дій
+actions = EventStateManager.get_available_actions(event)
+# ['edit', 'cancel', 'archive'] для завершеної опублікованої події
+```
+
+**Переваги:**
+- Інкапсуляція логіки станів у окремих класах
+- Валідація переходів з бізнес-правилами
+- Легке додавання нових станів
+- Чистий код без розгалужень if/elif
+
+---
+
+## 10. DTO Pattern (Data Transfer Object)
+
+**Файл:** `events/schedule_services.py`
+
+**Використання:** `events/ui_views.py` (CalendarView)
+
+**Призначення:** Інкапсуляція даних для передачі між шарами додатку, уникаючи передачі ORM-об'єктів.
+
+**Реалізовані компоненти:**
+- `ScheduleEntry` — dataclass для запису в розкладі
+- `PersonalScheduleService` — сервіс для формування персонального розкладу
+
+**Приклад використання:**
+
+```python
+from events.schedule_services import PersonalScheduleService, ScheduleEntry
+
+# Отримання розкладу користувача
+entries = PersonalScheduleService.get_user_schedule_entries(user)
+for entry in entries:
+    print(f"{entry.title} - {entry.starts_at}")
+    print(f"Організатор: {entry.is_organizer}")
+
+# JSON для календаря
+json_data = PersonalScheduleService.get_schedule_json_data(user)
+```
+
+**Оптимізація N+1:**
+```python
+# Один запит для подій, один для RSVP IDs
+rsvp_event_ids = PersonalScheduleService.get_user_rsvp_event_ids(user)
+# Замість .exists() в циклі — перевірка в множині
+has_rsvp = event.id in rsvp_event_ids
+```
+
+**Переваги:**
+- Відокремлення доменного шару від presentation
+- Оптимізація запитів (уникнення N+1)
+- Типізовані дані через dataclass
+- Проста серіалізація в JSON
+
+---
+
 ## Структура файлів з патернами
 
 ```
 events/
-├── specifications.py    # Specification Pattern
-├── strategies.py        # Strategy Pattern
-├── signals.py           # Observer Pattern
-├── services.py          # Singleton + Service Layer
-├── decorators.py        # Decorator Pattern
-├── views.py             # Facade Pattern (API)
-└── ui_views.py          # Facade Pattern (UI)
+├── specifications.py      # Specification Pattern
+├── strategies.py          # Strategy Pattern
+├── signals.py             # Observer Pattern
+├── services.py            # Singleton + Service Layer
+├── states.py              # State Pattern
+├── schedule_services.py   # DTO Pattern + Service Layer
+├── decorators.py          # Decorator Pattern
+├── views.py               # Facade Pattern (API)
+└── ui_views.py            # Facade Pattern (UI)
 
 notifications/
-├── factories.py         # Factory Pattern
-└── services.py          # Service Layer Pattern
+├── factories.py           # Factory Pattern
+└── services.py            # Service Layer Pattern
 ```
 
 ---
@@ -311,6 +397,7 @@ notifications/
 3. **Гнучкість** — легко додавати нові функції без зміни існуючого коду
 4. **Підтримуваність** — код легше читати і розуміти
 5. **Масштабованість** — архітектура готова до розширення
+6. **Оптимізація** — уникнення N+1 проблеми через DTO
 
 ---
 
@@ -319,4 +406,6 @@ notifications/
 - [Specification Pattern](https://en.wikipedia.org/wiki/Specification_pattern)
 - [Strategy Pattern](https://refactoring.guru/design-patterns/strategy)
 - [Observer Pattern](https://refactoring.guru/design-patterns/observer)
+- [State Pattern](https://refactoring.guru/design-patterns/state)
+- [DTO Pattern](https://martinfowler.com/eaaCatalog/dataTransferObject.html)
 - [Django Signals](https://docs.djangoproject.com/en/5.2/topics/signals/)

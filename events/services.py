@@ -34,9 +34,19 @@ class EventArchiveService(metaclass=SingletonMeta):
             queryset.update(status=Event.ARCHIVED)
         return count
 
-    def archive_event(self, event: Event) -> bool:
-        if event.status == Event.PUBLISHED and event.ends_at < timezone.now():
-            event.status = Event.ARCHIVED
-            event.save(update_fields=["status"])
-            return True
-        return False
+    def archive_event(self, event: Event) -> tuple[bool, str | None]:
+        """
+        Архівує окрему подію з валідацією через State Pattern
+        
+        Returns:
+            Tuple (success, error_message)
+        """
+        from .states import EventStateManager
+        
+        is_valid, error_message = EventStateManager.validate_transition(event, Event.ARCHIVED)
+        if not is_valid:
+            return False, error_message
+        
+        event.status = Event.ARCHIVED
+        event.save(update_fields=["status"])
+        return True, None

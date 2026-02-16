@@ -74,8 +74,3 @@ def get_sort_strategy(slug: str) -> SortStrategy:
 
     return STRATEGIES.get(slug, STRATEGIES["date"])
 
-
-def get_sort_choices() -> List[SortStrategy]:
-    """Повертає відсортований список стратегій для UI"""
-
-    return AVAILABLE_STRATEGIES
