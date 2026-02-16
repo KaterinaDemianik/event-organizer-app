@@ -118,18 +118,10 @@
   {% if popular_tags %}
     <div class="popular-tags" style="margin: 12px 0 20px 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
       <span style="font-size: 13px; color: var(--muted);">Популярні теги:</span>
-      <form method="get" style="display: flex; flex-wrap: wrap; gap: 8px; margin: 0;">
-        <input type="hidden" name="view" value="{{ view }}" />
-        {% if q %}<input type="hidden" name="q" value="{{ q }}" />{% endif %}
-        {% if status %}<input type="hidden" name="status" value="{{ status }}" />{% endif %}
-        {% if date_filter %}<input type="hidden" name="date_filter" value="{{ date_filter }}" />{% endif %}
-        {% if popularity %}<input type="hidden" name="popularity" value="{{ popularity }}" />{% endif %}
-        {% if availability %}<input type="hidden" name="availability" value="{{ availability }}" />{% endif %}
-        {% if sort %}<input type="hidden" name="sort" value="{{ sort }}" />{% endif %}
-        {% for tag in popular_tags %}
-          <button type="submit" name="category" value="{{ tag.slug }}" class="tag-pill{% if category == tag.slug %} active{% endif %}"># {{ tag.label }} ({{ tag.count }})</button>
-        {% endfor %}
-      </form>
+      {% for tag in popular_tags|slice:":3" %}
+        <a href="/events/?view={{ view }}&category={{ tag.slug }}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if date_filter %}&date_filter={{ date_filter }}{% endif %}{% if popularity %}&popularity={{ popularity }}{% endif %}{% if availability %}&availability={{ availability }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
+           class="tag-pill{% if category == tag.slug %} active{% endif %}"># {{ tag.label }} ({{ tag.count }})</a>
+      {% endfor %}
       {% if category %}
         <a href="/events/?view={{ view }}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if date_filter %}&date_filter={{ date_filter }}{% endif %}{% if popularity %}&popularity={{ popularity }}{% endif %}{% if availability %}&availability={{ availability }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
            style="font-size: 13px; color: var(--link); text-decoration: none; white-space: nowrap; font-weight: 500;">

@@ -566,3 +566,41 @@ input[type="search"]::-webkit-search-results-decoration { -webkit-appearance: no
     font-size: 1.1rem;
   }
 }
+
+/* Стилі для тегів */
+.tag-pill {
+  font-size: 13px !important;
+  height: 32px !important;
+  padding: 0 12px !important;
+  border-radius: 16px !important;
+  background: var(--link) !important;
+  border: 1px solid var(--link) !important;
+  color: white !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.tag-pill:hover {
+  background: #0d47a1 !important;
+  border-color: #0d47a1 !important;
+  color: white !important;
+}
+
+.tag-pill.active {
+  background: var(--brand) !important;
+  border-color: var(--brand) !important;
+  color: white !important;
+}
+
+/* Контейнер для тегів - горизонтальне розташування */
+.popular-tags {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
