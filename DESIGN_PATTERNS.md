@@ -2,7 +2,7 @@
 
 ## Огляд
 
-Цей проект демонструє практичне застосування **7 патернів проектування**, які **реально використовуються в runtime-коді** для створення масштабованого та підтримуваного веб-додатку.
+Цей проект демонструє практичне застосування **8 патернів проектування**, які **реально використовуються в runtime-коді** для створення масштабованого та підтримуваного веб-додатку.
 
 ---
 
@@ -13,6 +13,8 @@
 **Використання:** `events/ui_views.py` (EventListView, рядки 286-300)
 
 **Призначення:** Інкапсулює бізнес-правила фільтрації у окремі об'єкти, які можна комбінувати через логічні операції (AND, OR, NOT).
+
+**Примітка:** У поточній реалізації активно використовується метод `to_queryset_filter()` для інтеграції з Django ORM. Методи `is_satisfied_by()`, `And()`, `Or()`, `Not()` реалізовані для розширюваності та можуть бути використані для in-memory фільтрації об'єктів у майбутньому.
 
 **Приклад використання:**
 
@@ -96,11 +98,16 @@ sorted_qs = strategy.sort(queryset)
 @receiver(post_save, sender=RSVP)
 def rsvp_created(sender, instance, created, **kwargs):
     if created:
-        Notification.objects.create(
+        # Сповіщення організатору про нову реєстрацію через фабрику
+        context = {
+            'event': instance.event,
+            'participant': instance.user
+        }
+        NotificationFactoryRegistry.create_notification(
+            notification_type=Notification.RSVP_CONFIRMED,
             user=instance.event.organizer,
             event=instance.event,
-            notification_type=Notification.RSVP_CONFIRMED,
-            message=f"Користувач {instance.user.username} зареєструвався"
+            context=context
         )
 ```
 
@@ -223,9 +230,11 @@ class NotificationService:
     @staticmethod
     def create_event_cancelled_notification(event):
         """Створює сповіщення про скасування події"""
-        message = f"Подія '{event.title}' була скасована."
-        return NotificationService.notify_event_participants(
-            event, Notification.EVENT_CANCELLED, message
+        context = {'event': event}
+        return NotificationService.notify_event_participants_with_factory(
+            event, 
+            Notification.EVENT_CANCELLED, 
+            context
         )
 ```
 
@@ -233,6 +242,46 @@ class NotificationService:
 - Менше дублювання логіки
 - Краще структурування коду
 - Легше тестувати бізнес-логіку
+
+---
+
+## 8. Factory Pattern (Патерн Фабрика)
+
+**Файли:** `notifications/factories.py`
+
+**Використання:** `events/signals.py`, `notifications/services.py`
+
+**Призначення:** Централізоване створення об'єктів нотифікацій з уніфікованими шаблонами повідомлень.
+
+**Реалізовані фабрики:**
+- `EventUpdatedNotificationFactory` — загальні оновлення події
+- `EventTimeChangedNotificationFactory` — зміна часу події
+- `EventLocationChangedNotificationFactory` — зміна локації події
+- `EventCancelledNotificationFactory` — скасування події
+- `RSVPConfirmedNotificationFactory` — підтвердження реєстрації
+- `RSVPCancelledNotificationFactory` — скасування реєстрації
+
+**Приклад:**
+
+```python
+# Створення нотифікації через фабрику
+context = {
+    'event': event,
+    'participant': user
+}
+NotificationFactoryRegistry.create_notification(
+    notification_type=Notification.RSVP_CONFIRMED,
+    user=organizer,
+    event=event,
+    context=context
+)
+```
+
+**Переваги:**
+- Централізація шаблонів повідомлень
+- Зменшення дублювання коду
+- Легкість додавання нових типів нотифікацій
+- Уніфіковане форматування повідомлень
 
 ---
 
@@ -249,6 +298,7 @@ events/
 └── ui_views.py          # Facade Pattern (UI)
 
 notifications/
+├── factories.py         # Factory Pattern
 └── services.py          # Service Layer Pattern
 ```
 

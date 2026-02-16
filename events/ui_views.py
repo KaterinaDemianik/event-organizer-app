@@ -30,7 +30,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-from .strategies import get_sort_strategy, get_sort_choices
+from .strategies import get_sort_strategy
 
 
 def home_view(request):
@@ -367,7 +367,6 @@ class EventListView(ListView):
         ctx["popularity"] = self.request.GET.get("popularity", "")
         ctx["availability"] = self.request.GET.get("availability", "")
         ctx["sort"] = getattr(self, "_current_sort", self.request.GET.get("sort", "date"))
-        ctx["sort_choices"] = get_sort_choices()
         ctx["category"] = self.request.GET.get("category", "")
 
         ctx["category_choices"] = (

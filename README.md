@@ -58,14 +58,14 @@ python manage.py runserver
 ## Документація
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Архітектурні патерни (MVT, Layered, Service Layer)
-- [DESIGN_PATTERNS.md](DESIGN_PATTERNS.md) - Патерни проєктування (Specification, Strategy, Singleton)
+- [DESIGN_PATTERNS.md](DESIGN_PATTERNS.md) - Патерни проєктування (8 патернів, включно з Factory)
 - [SECURITY.md](SECURITY.md) - Безпека та автентифікація (Argon2, Sessions, CSRF)
 - [DATABASE_SETUP.md](DATABASE_SETUP.md) - Налаштування MySQL
 - [ARCHIVE_INFO.md](ARCHIVE_INFO.md) - Система архівування подій
 
 ##  Патерни проєктування
 
-### Реалізовано 7 патернів (всі активно використовуються в runtime):
+### Реалізовано 8 патернів (всі активно використовуються в runtime):
 
 #### Поведінкові патерни:
 - **Specification Pattern** – гнучка фільтрація подій (`events/specifications.py`)
@@ -74,6 +74,7 @@ python manage.py runserver
 
 #### Креаційні патерни:
 - **Singleton Pattern** – сервіс архівування (`events/services.py`)
+- **Factory Pattern** – централізоване створення нотифікацій (`notifications/factories.py`)
 
 #### Структурні патерни:
 - **Decorator Pattern** – декоратори контролю доступу (`events/decorators.py`)

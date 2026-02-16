@@ -419,6 +419,7 @@ Request → SecurityMiddleware
 | **Specification** | Фільтрація подій через об'єкти-специфікації | `events/specifications.py` |
 | **Strategy** | Стратегії сортування списку подій | `events/strategies.py` |
 | **Observer** | Django Signals для сповіщень | `events/signals.py` |
+| **Factory** | Централізоване створення нотифікацій | `notifications/factories.py` |
 | **Decorator** | Декоратори контролю доступу | `events/decorators.py` |
 | **REST API / Facade** | DRF ViewSets як фасад до доменного шару | `events/views.py` |
 | **Front Controller** | URLconf | `event_organizer/urls.py` |

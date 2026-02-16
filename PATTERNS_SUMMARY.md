@@ -2,9 +2,9 @@
 
 ## Загальна статистика
 
-- **Всього реалізовано:** 7 патернів проектування
+- **Всього реалізовано:** 8 патернів проектування
 - **Всі патерни активно використовуються в runtime-коді**
-- **Категорії:** Поведінкові (3), Креаційні (1), Структурні (2), Архітектурні (1)
+- **Категорії:** Поведінкові (3), Креаційні (2), Структурні (2), Архітектурні (1)
 
 ---
 
@@ -23,6 +23,7 @@
 | Патерн | Файл | Використання |
 |--------|------|--------------|
 | **Singleton** | `events/services.py` | `events/ui_views.py` (EventArchiveService) |
+| **Factory** | `notifications/factories.py` | `events/signals.py`, `notifications/services.py` |
 
 ### Структурні патерни (Structural)
 
@@ -45,13 +46,14 @@
 events/
 ├── specifications.py    # Specification Pattern
 ├── strategies.py        # Strategy Pattern
-├── signals.py           # Observer Pattern (NEW)
+├── signals.py           # Observer Pattern
 ├── services.py          # Singleton + Service Layer
 ├── decorators.py        # Decorator Pattern
 ├── views.py             # Facade Pattern (API)
 └── ui_views.py          # Facade Pattern (UI)
 
 notifications/
+├── factories.py         # Factory Pattern (NEW)
 └── services.py          # Service Layer Pattern
 ```
 
@@ -83,7 +85,7 @@ notifications/
 
 ## Висновок
 
-Event Organizer демонструє практичне застосування 7 патернів проектування, які **реально використовуються в коді**. Кожен патерн має конкретну реалізацію та вирішує реальну проблему в архітектурі додатку.
+Event Organizer демонструє практичне застосування 8 патернів проектування, які **реально використовуються в коді**. Кожен патерн має конкретну реалізацію та вирішує реальну проблему в архітектурі додатку.
 
 Архітектура проекту побудована на принципах:
 - **SOLID** — кожен клас має одну відповідальність

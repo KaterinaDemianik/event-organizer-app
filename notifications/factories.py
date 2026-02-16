@@ -2,7 +2,7 @@
 Factory для створення нотифікацій з уніфікованими шаблонами повідомлень
 """
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from django.contrib.auth import get_user_model
 from notifications.models import Notification
 

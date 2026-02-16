@@ -82,11 +82,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ```python
 # settings.py
 SESSION_COOKIE_AGE = 1209600  # 2 тижні
-SESSION_COOKIE_SECURE = True  # HTTPS only (production)
 SESSION_COOKIE_HTTPONLY = True  # Захист від XSS
 SESSION_COOKIE_SAMESITE = 'Lax'  # Захист від CSRF
 SESSION_SAVE_EVERY_REQUEST = False
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+# SESSION_COOKIE_SECURE = True  # Увімкнути для HTTPS в production
 ```
 
 ### Зберігання сесій
@@ -116,9 +116,9 @@ python manage.py clearsessions
 
 **Налаштування:**
 ```python
-CSRF_COOKIE_SECURE = True  # HTTPS only
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Strict'
+# CSRF_COOKIE_SECURE = True  # Увімкнути для HTTPS в production
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     'http://127.0.0.1:8000',
@@ -307,7 +307,7 @@ LOGGING = {
 
 ### Development
 - [x] CSRF токени у всіх формах
-- [x] Хешування паролів (PBKDF2)
+- [x] Хешування паролів (Argon2, PBKDF2 fallback)
 - [x] Валідація паролів
 - [x] Session management
 - [x] LoginRequiredMixin для захищених views
