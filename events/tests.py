@@ -396,3 +396,79 @@ class APIRSVPTimeConflictTests(APITestCase):
         
         # DRF з permission_classes повертає 403, а не 401
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_api_rsvp_fails_for_draft_event(self):
+        """API RSVP повертає 400 для draft події"""
+        draft_event = Event.objects.create(
+            title="Draft Event",
+            starts_at=timezone.now() + timezone.timedelta(days=1, hours=10),
+            ends_at=timezone.now() + timezone.timedelta(days=1, hours=12),
+            status=Event.DRAFT,
+            organizer=self.other_user,
+        )
+        
+        self.client.force_authenticate(user=self.user)
+        
+        url = f"/api/events/{draft_event.id}/rsvp/"
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+        self.assertIn("не опублікована", response.data["error"])
+
+    def test_api_rsvp_fails_for_cancelled_event(self):
+        """API RSVP повертає 400 для скасованої події"""
+        cancelled_event = Event.objects.create(
+            title="Cancelled Event",
+            starts_at=timezone.now() + timezone.timedelta(days=1, hours=10),
+            ends_at=timezone.now() + timezone.timedelta(days=1, hours=12),
+            status=Event.CANCELLED,
+            organizer=self.other_user,
+        )
+        
+        self.client.force_authenticate(user=self.user)
+        
+        url = f"/api/events/{cancelled_event.id}/rsvp/"
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+        self.assertIn("скасовано", response.data["error"])
+
+    def test_api_rsvp_fails_for_archived_event(self):
+        """API RSVP повертає 400 для архівованої події"""
+        archived_event = Event.objects.create(
+            title="Archived Event",
+            starts_at=timezone.now() - timezone.timedelta(days=2),
+            ends_at=timezone.now() - timezone.timedelta(days=1),
+            status=Event.ARCHIVED,
+            organizer=self.other_user,
+        )
+        
+        self.client.force_authenticate(user=self.user)
+        
+        url = f"/api/events/{archived_event.id}/rsvp/"
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+        self.assertIn("архівована", response.data["error"])
+
+    def test_api_rsvp_fails_for_started_event(self):
+        """API RSVP повертає 400 для вже розпочатої події"""
+        started_event = Event.objects.create(
+            title="Started Event",
+            starts_at=timezone.now() - timezone.timedelta(hours=1),
+            ends_at=timezone.now() + timezone.timedelta(hours=1),
+            status=Event.PUBLISHED,
+            organizer=self.other_user,
+        )
+        
+        self.client.force_authenticate(user=self.user)
+        
+        url = f"/api/events/{started_event.id}/rsvp/"
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+        self.assertIn("вже розпочалась", response.data["error"])

@@ -73,8 +73,9 @@ class EventTimeChangedNotificationFactory(NotificationFactory):
         new_start = context.get('new_start')
         
         if old_start and new_start:
-            old_formatted = old_start.strftime('%d.%m.%Y %H:%M')
-            new_formatted = new_start.strftime('%d.%m.%Y %H:%M')
+            from django.utils import timezone
+            old_formatted = timezone.localtime(old_start).strftime('%d.%m.%Y %H:%M')
+            new_formatted = timezone.localtime(new_start).strftime('%d.%m.%Y %H:%M')
             return f"Час події '{event.title}' змінено з {old_formatted} на {new_formatted}"
         
         return f"Час події '{event.title}' було змінено"

@@ -1,16 +1,9 @@
-from django.shortcuts import render
 from django.db.models import Count
 from rest_framework import viewsets, permissions, decorators, response, status
 from rest_framework.pagination import PageNumberPagination
 from django_filters import rest_framework as filters
 from .models import Event
 from .serializers import EventSerializer
-from .specifications import (
-    EventByStatusSpecification,
-    EventByTitleSpecification,
-    EventByLocationSpecification,
-    apply_specifications,
-)
 from tickets.models import RSVP
 from tickets.serializers import RSVPSerializer
 

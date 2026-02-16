@@ -111,6 +111,20 @@ class RSVPService:
         """
         from tickets.models import RSVP
         
+        # Перевірка статусу події
+        if event.status == Event.DRAFT:
+            return False, "Реєстрація недоступна: подія ще не опублікована"
+        
+        if event.status == Event.CANCELLED:
+            return False, "Реєстрація недоступна: подію скасовано"
+        
+        if event.status == Event.ARCHIVED:
+            return False, "Реєстрація недоступна: подія архівована"
+        
+        # Перевірка чи подія вже розпочалась
+        if event.starts_at <= timezone.now():
+            return False, "Реєстрація недоступна: подія вже розпочалась"
+        
         if RSVP.objects.filter(user=user, event=event).exists():
             return False, "Ви вже зареєстровані на цю подію"
         

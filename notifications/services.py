@@ -1,6 +1,7 @@
 """
 Сервіси для роботи зі сповіщеннями
 """
+from django.utils import timezone
 from notifications.models import Notification
 
 
@@ -29,7 +30,7 @@ class NotificationService:
             old_start = old_event_data.get('starts_at')
             new_start = event.starts_at
             if old_start and new_start:
-                changes.append(f"Час події змінено з {old_start.strftime('%d.%m.%Y %H:%M')} на {new_start.strftime('%d.%m.%Y %H:%M')}")
+                changes.append(f"Час події змінено з {timezone.localtime(old_start).strftime('%d.%m.%Y %H:%M')} на {timezone.localtime(new_start).strftime('%d.%m.%Y %H:%M')}")
                 context.update({'old_start': old_start, 'new_start': new_start})
         
         # Перевірити зміну локації

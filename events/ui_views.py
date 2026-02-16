@@ -402,6 +402,18 @@ class EventDetailView(DetailView):
     template_name = "events/detail.html"
     context_object_name = "event"
     
+    def get_object(self, queryset=None):
+        """Перевіряє доступ до draft-подій"""
+        event = super().get_object(queryset)
+        
+        # Draft події можуть бачити тільки їх організатори
+        if event.status == Event.DRAFT:
+            if not self.request.user.is_authenticated or event.organizer != self.request.user:
+                from django.http import Http404
+                raise Http404("Подія не знайдена")
+        
+        return event
+    
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         event = self.object
@@ -441,9 +453,10 @@ class EventDetailView(DetailView):
         ctx["can_review"] = can_review
         
         from urllib.parse import urlencode
+        from datetime import timezone as dt_timezone
         
-        start_utc = event.starts_at.strftime('%Y%m%dT%H%M%SZ')
-        end_utc = event.ends_at.strftime('%Y%m%dT%H%M%SZ')
+        start_utc = event.starts_at.astimezone(dt_timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+        end_utc = event.ends_at.astimezone(dt_timezone.utc).strftime('%Y%m%dT%H%M%SZ')
         
         google_params = {
             'action': 'TEMPLATE',
