@@ -632,6 +632,28 @@ def event_cancel_view(request, pk: int):
 
 @login_required
 @organizer_required
+@event_not_archived
+def event_archive_view(request, pk: int):
+    """Архівування події організатором або адміном"""
+    if request.method == "POST":
+        event = request.event  # Отримуємо з декоратора
+        
+        # Використовуємо archive_event() з EventArchiveService
+        archive_service = EventArchiveService()
+        success, error_message = archive_service.archive_event(event)
+        
+        if success:
+            messages.success(request, f"Подію '{event.title}' архівовано.")
+        else:
+            messages.error(request, f"Помилка архівування: {error_message}")
+        
+        return redirect("event_detail", pk=pk)
+    
+    return redirect("event_detail", pk=pk)
+
+
+@login_required
+@organizer_required
 def event_participants_view(request, pk: int):
     """Список учасників події"""
     event = request.event  # Отримуємо з декоратора
