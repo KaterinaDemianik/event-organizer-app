@@ -1,5 +1,8 @@
 # Event Organizer App 
 
+![Tests and Coverage](https://github.com/KaterinaDemianik/event-organizer-app/actions/workflows/tests-and-coverage.yml/badge.svg)
+[![codecov](https://codecov.io/gh/KaterinaDemianik/event-organizer-app/branch/main/graph/badge.svg)](https://codecov.io/gh/KaterinaDemianik/event-organizer-app)
+
 Веб-додаток для організації та управління подіями з використанням патернів проєктування.
 
 ##  Про проект
