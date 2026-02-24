@@ -82,7 +82,7 @@ def admin_users_list(request):
     """Список всіх користувачів для адміна"""
     users = User.objects.annotate(
         events_count=Count('organized_events'),
-        rsvps_count=Count('rsvp_set')
+        rsvps_count=Count('rsvps')
     ).order_by('-date_joined')
     
     context = {
