@@ -28,7 +28,7 @@ jobs:
         env:
           DJANGO_SETTINGS_MODULE: event_organizer.settings_ci
         run: |
-          coverage run --source=. manage.py test events.tests notifications.tests -v 1
+          coverage run --source=. manage.py test events.tests notifications.tests events.test_strategies events.test_schedule_services_coverage events.test_forms_coverage events.test_decorators_coverage events.test_signals_coverage events.test_serializers_coverage events.test_states_coverage events.test_services_coverage events.test_ui_views_full_coverage users.test_models_coverage tickets.test_models_coverage -v 1
 
       - name: Coverage report
         run: |
