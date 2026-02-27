@@ -28,7 +28,7 @@ jobs:
         env:
           DJANGO_SETTINGS_MODULE: event_organizer.settings_ci
         run: |
-          coverage run --source=. manage.py test events.tests notifications.tests events.test_strategies events.test_schedule_services_coverage events.test_forms_coverage events.test_decorators_coverage events.test_signals_coverage events.test_serializers_coverage events.test_states_coverage events.test_services_coverage events.test_ui_views_full_coverage events.test_ui_views_extended events.test_ui_views_final events.test_ui_views_100 events.test_schedule_services_final events.test_archive_command users.test_models_coverage users.test_views_coverage users.test_admin_views_coverage tickets.test_models_coverage tickets.test_fix_rsvp_duplicates notifications.test_views_coverage -v 1
+          coverage run --source=. manage.py test events.tests notifications.tests events.test_strategies events.test_schedule_services_coverage events.test_forms_coverage events.test_decorators_coverage events.test_signals_coverage events.test_serializers_coverage events.test_serializers_state_validation events.test_states_coverage events.test_services_coverage events.test_ui_views_full_coverage events.test_ui_views_extended events.test_ui_views_final events.test_ui_views_100 events.test_schedule_services_final events.test_archive_command users.test_models_coverage users.test_views_coverage users.test_admin_views_coverage tickets.test_models_coverage tickets.test_fix_rsvp_duplicates notifications.test_views_coverage tests_full_coverage tests_100_coverage tests_final_100 -v 1
 
       - name: Coverage report
         run: |

@@ -87,10 +87,12 @@ sorted_qs = strategy.sort(queryset)
 **Призначення:** Реагування на зміни в подіях та RSVP без жорстких залежностей між компонентами.
 
 **Реалізовані сигнали:**
-- `event_pre_save` — зберігає попередній стан події
-- `event_post_save` — обробляє зміни статусу (скасування, архівування)
+- `event_pre_save` — зберігає попередній стан події для порівняння
+- `event_post_save` — обробляє зміну статусу на `cancelled` (створює сповіщення учасникам про скасування)
 - `rsvp_created` — сповіщає організатора про нову реєстрацію
 - `rsvp_deleted` — сповіщає організатора про скасування реєстрації
+
+**Важливо:** Сигнал `event_post_save` реагує саме на перехід до статусу `cancelled`, а не `archived`. Архівування подій відбувається через `EventArchiveService` без автоматичних сповіщень.
 
 **Приклад:**
 
@@ -314,11 +316,16 @@ NotificationFactoryRegistry.create_notification(
 
 ## 9. State Pattern (Патерн Стан)
 
-**Файл:** `events/states.py`
+**Файли:** `events/states.py`, `events/serializers.py`
 
-**Використання:** `events/ui_views.py` (EventUpdateView, event_cancel_view), `events/services.py` (archive_event)
+**Використання:** 
+- `events/ui_views.py` (EventUpdateView, event_cancel_view)
+- `events/services.py` (archive_event)
+- `events/serializers.py` (валідація переходів через API)
 
-**Призначення:** Управління переходами між станами події (draft → published → cancelled/archived) з валідацією бізнес-правил.
+**Призначення:** Управління переходами між станами події (draft → published → cancelled/archived) з валідацією бізнес-правил як в UI, так і в API.
+
+**Уніфікація для API:** Валідація переходів статусів реалізована в `EventSerializer` через методи `validate_status()` та `validate()`, які викликають `EventStateManager.validate_transition()`. Це блокує прямі зміни статусу через API, забезпечуючи дотримання правил State Pattern.
 
 **Реалізовані стани:**
 - `DraftState` — чернетка (можна редагувати, публікувати)
@@ -326,7 +333,7 @@ NotificationFactoryRegistry.create_notification(
 - `CancelledState` — скасована (жодних дій)
 - `ArchivedState` — архівована (жодних дій)
 
-**Приклад використання:**
+**Приклад використання (UI):**
 
 ```python
 from events.states import EventStateManager
@@ -344,6 +351,30 @@ if not is_valid:
 actions = EventStateManager.get_available_actions(event)
 # ['edit', 'cancel', 'archive'] для завершеної опублікованої події
 ```
+
+**Приклад використання (API через Serializer):**
+
+```python
+# events/serializers.py
+def validate_status(self, value):
+    if self.instance is None:
+        return value
+    
+    is_valid, error_message = EventStateManager.validate_transition(
+        self.instance, value
+    )
+    
+    if not is_valid:
+        raise serializers.ValidationError(error_message)
+    
+    return value
+```
+
+**Дозволені переходи:**
+- `draft` → `published`, `cancelled`
+- `published` → `cancelled`, `archived`
+- `cancelled` → (жодних переходів)
+- `archived` → (жодних переходів)
 
 **Переваги:**
 - Інкапсуляція логіки станів у окремих класах
