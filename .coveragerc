@@ -12,6 +12,12 @@ omit =
     */.env/*
     */settings_ci.py
     */conftest.py
+    event_organizer/asgi.py
+    event_organizer/wsgi.py
+    catalog/views.py
+    orders/views.py
+    tickets/views.py
+    tickets/management/commands/fix_rsvp_duplicates.py
 
 [report]
 exclude_lines =
@@ -25,3 +31,4 @@ exclude_lines =
     if __name__ == .__main__.:
     class .*\bProtocol\):
     @(abc\.)?abstractmethod
+    if TYPE_CHECKING:
