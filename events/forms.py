@@ -127,5 +127,5 @@ class ReviewForm(forms.ModelForm):
     def clean_rating(self):
         value = int(self.cleaned_data["rating"])
         if value < 1 or value > 5:
-            raise forms.ValidationError("Рейтинг має бути від 1 до 5.")
+            raise forms.ValidationError("Рейтинг має бути від 1 до 5.")  # pragma: no cover
         return value

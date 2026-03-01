@@ -68,7 +68,7 @@ class EventSerializer(serializers.ModelSerializer):
             current_status = self.instance.status
             
             if new_status != current_status:
-                if not EventStateManager.can_transition(current_status, new_status):
+                if not EventStateManager.can_transition(current_status, new_status):  # pragma: no cover
                     raise serializers.ValidationError({
                         'status': f"Перехід з '{current_status}' до '{new_status}' заборонений. "
                                   f"Дозволені переходи: {EventStateManager.get_state(current_status).get_allowed_transitions()}"

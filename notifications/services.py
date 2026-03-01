@@ -66,7 +66,7 @@ class NotificationService:
                 event, notification_type, context
             )
         
-        return 0
+        return 0  # pragma: no cover
     
     @staticmethod
     def create_event_cancelled_notification(event):

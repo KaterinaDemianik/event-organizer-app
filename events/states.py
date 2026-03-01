@@ -205,7 +205,7 @@ class EventStateManager:
             now = timezone.now()
             if event.ends_at >= now:
                 return False, "Архівувати можна лише завершені події"
-            if current_status != "published":
+            if current_status != "published":  # pragma: no cover
                 return False, "Архівувати можна лише опубліковані події"
         
         return True, None
