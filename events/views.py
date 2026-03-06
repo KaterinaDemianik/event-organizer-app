@@ -8,6 +8,21 @@ from tickets.models import RSVP
 from tickets.serializers import RSVPSerializer
 
 
+class IsOrganizerOrReadOnly(permissions.BasePermission):
+    """
+    Object-level permission: дозволяє редагування/видалення тільки організатору події.
+    Читання дозволено всім.
+    """
+    
+    def has_object_permission(self, request, view, obj):
+        # Читання дозволено всім
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        
+        # Запис дозволено тільки організатору
+        return obj.organizer == request.user
+
+
 class IsAuthenticatedOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
     pass
 
@@ -34,7 +49,7 @@ class EventFilter(filters.FilterSet):
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOrganizerOrReadOnly]
     pagination_class = EventPagination
     filterset_class = EventFilter
     

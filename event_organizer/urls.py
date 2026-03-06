@@ -52,10 +52,11 @@ urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
-    path("api/users/", include("users.urls")),
+    # REST API endpoints
     path("api/events/", include("events.urls")),
-    path("api/tickets/", include("tickets.urls")),
-    path("api/orders/", include("orders.urls")),
-    path("api/notifications/", include("notifications.urls")),
-    path("api/catalog/", include("catalog.urls")),
+    # Примітка: /api/users/ та /api/notifications/ ведуть на web views, не REST API
+    # Для повноцінного REST API цих модулів потрібна окрема реалізація
+    # path("api/tickets/", include("tickets.urls")),  # Порожній - не підключено
+    # path("api/orders/", include("orders.urls")),    # Порожній - не підключено
+    # path("api/catalog/", include("catalog.urls")),  # Порожній - не підключено
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

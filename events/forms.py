@@ -81,7 +81,8 @@ class EventForm(forms.ModelForm):
                 initial=user,
                 required=True
             )
-            self.Meta.fields.insert(0, 'organizer')
+            # Переміщуємо organizer на початок через order_fields (без мутації Meta.fields)
+            self.order_fields(['organizer'] + [f for f in self.fields if f != 'organizer'])
     
     def clean_starts_at(self):
         starts_at = self.cleaned_data.get('starts_at')

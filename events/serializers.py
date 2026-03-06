@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import serializers
 from .models import Event
 from .states import EventStateManager
@@ -28,6 +29,18 @@ class EventSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at", "organizer", "rsvp_count"]
+
+    def validate_starts_at(self, value):
+        """
+        Валідація дати початку події.
+        
+        При створенні нової події перевіряє, що дата початку не в минулому.
+        """
+        if self.instance is None and value < timezone.now():
+            raise serializers.ValidationError(
+                "Дата початку події не може бути в минулому."
+            )
+        return value
 
     def validate_status(self, value):
         """
@@ -63,6 +76,16 @@ class EventSerializer(serializers.ModelSerializer):
         """
         attrs = super().validate(attrs)
         
+        # Валідація дат: ends_at має бути пізніше starts_at
+        starts_at = attrs.get('starts_at') or (self.instance.starts_at if self.instance else None)
+        ends_at = attrs.get('ends_at') or (self.instance.ends_at if self.instance else None)
+        
+        if starts_at and ends_at and ends_at <= starts_at:
+            raise serializers.ValidationError({
+                'ends_at': "Дата закінчення має бути пізніше дати початку події."
+            })
+        
+        # Валідація переходів статусів
         if self.instance and 'status' in attrs:
             new_status = attrs['status']
             current_status = self.instance.status

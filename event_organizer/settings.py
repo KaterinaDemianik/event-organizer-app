@@ -16,10 +16,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 
+# SECURITY WARNING: keep the secret key used in production secret!
+# Для продакшну використовуйте: SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 SECRET_KEY = "django-insecure-4ohwifp83w*+q)g^eulw3729zen1ad_2vv@5f$#$(3gbj%#pc="
 
+# SECURITY WARNING: don't run with debug turned on in production!
+# Для продакшну: DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 DEBUG = True
 
+# SECURITY WARNING: update this for production!
+# Для продакшну: ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [

@@ -1,6 +1,6 @@
 [run]
 source = .
-omit = 
+omit =
     */tests.py
     */test_*.py
     */*test*.py
@@ -18,6 +18,9 @@ omit =
     orders/views.py
     tickets/views.py
     tickets/management/commands/fix_rsvp_duplicates.py
+    catalog/urls.py
+    orders/urls.py
+    tickets/urls.py
 
 [report]
 exclude_lines =
