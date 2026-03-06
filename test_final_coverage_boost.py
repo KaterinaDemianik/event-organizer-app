@@ -69,10 +69,10 @@ class FinalCoverageBoostTestCase(TestCase):
             comment="Great event!"
         )
         
-        # Тест __str__ методу
+        # Тест __str__ методу - актуальний формат: Review(user_id -> event_id, rating=X)
         str_result = str(review)
-        self.assertIn("Test Event", str_result)
-        self.assertIn("testuser", str_result)
+        self.assertIn("Review(", str_result)
+        self.assertIn("rating=5", str_result)
 
     def test_notification_model_complete(self):
         """Тест повної функціональності Notification моделі"""
@@ -199,15 +199,15 @@ class FinalCoverageBoostTestCase(TestCase):
             
             self.assertEqual(event.category, category)
 
-    def test_event_image_field(self):
-        """Тест поля image події"""
-        # Подія без зображення
-        self.assertFalse(self.event.image)
+    def test_event_category_field(self):
+        """Тест поля category події"""
+        # Подія без категорії
+        self.assertEqual(self.event.category, "")
         
-        # Можна встановити image як порожнє
-        self.event.image = ""
+        # Можна встановити категорію
+        self.event.category = "conference"
         self.event.save()
-        self.assertFalse(self.event.image)
+        self.assertEqual(self.event.category, "conference")
 
     def test_review_image_field(self):
         """Тест поля image відгуку"""
@@ -294,16 +294,17 @@ class FinalCoverageBoostTestCase(TestCase):
 
     def test_model_field_validations(self):
         """Тест валідації полів моделей"""
-        # Event title не може бути порожнім
-        with self.assertRaises(Exception):
-            Event.objects.create(
-                title="",  # Порожня назва
-                description="Description",
-                starts_at=timezone.now() + timedelta(days=1),
-                ends_at=timezone.now() + timedelta(days=1, hours=2),
-                organizer=self.organizer,
-                status=Event.PUBLISHED
-            )
+        # Event може бути створений з порожнім title на рівні моделі
+        # (валідація відбувається в формах, не в objects.create)
+        event = Event.objects.create(
+            title="",
+            description="Description",
+            starts_at=timezone.now() + timedelta(days=1),
+            ends_at=timezone.now() + timedelta(days=1, hours=2),
+            organizer=self.organizer,
+            status=Event.PUBLISHED
+        )
+        self.assertEqual(event.title, "")
 
     def test_related_managers(self):
         """Тест related managers"""
@@ -327,7 +328,7 @@ class FinalCoverageBoostTestCase(TestCase):
             rating=4,
             comment="Nice event"
         )
-        user_reviews = self.user.reviews.all()
+        user_reviews = self.user.event_reviews.all()
         self.assertIn(review, user_reviews)
         
         # event.reviews

@@ -63,7 +63,7 @@ class ScheduleServicesCoverageTestCase(TestCase):
         service = PersonalScheduleService()
         
         # Тест з валідним користувачем
-        entries = service.get_user_schedule_entries(self.user, year=2024, month=1)
+        entries = service.get_user_schedule_entries(self.user)
         self.assertIsInstance(entries, list)
 
     def test_schedule_service_methods(self):
@@ -71,12 +71,12 @@ class ScheduleServicesCoverageTestCase(TestCase):
         service = PersonalScheduleService()
         
         # Тест get_user_events_queryset
-        queryset = service.get_user_events_queryset(self.user, year=2024, month=1)
+        queryset = service.get_user_events_queryset(self.user)
         self.assertIsNotNone(queryset)
         
         # Тест get_user_rsvp_event_ids
         rsvp_ids = service.get_user_rsvp_event_ids(self.user)
-        self.assertIsInstance(rsvp_ids, list)
+        self.assertIsInstance(rsvp_ids, set)
 
 
 class NotificationFactoriesCoverageTestCase(TestCase):
