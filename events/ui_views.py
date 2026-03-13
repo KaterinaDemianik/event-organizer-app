@@ -269,25 +269,30 @@ class EventListView(ListView):
         
         view = self.request.GET.get("view", "all")
         
-        if view == "my" and self.request.user.is_authenticated:
+        # Захист: анонімні користувачі бачать тільки published події
+        if not self.request.user.is_authenticated:
+            # Ігноруємо всі view параметри для анонімів
+            qs = qs.filter(status=Event.PUBLISHED)
+        elif view == "my":
             qs = qs.filter(
                 organizer=self.request.user
             ).exclude(status=Event.ARCHIVED)
-        elif view == "upcoming" and self.request.user.is_authenticated:
+        elif view == "upcoming":
             now = timezone.now()
             qs = qs.filter(
                 starts_at__gte=now,
                 status=Event.PUBLISHED,
                 rsvps__user=self.request.user
             ).distinct()
-        elif view == "archived" and self.request.user.is_authenticated:
+        elif view == "archived":
             if self.request.user.is_staff:
                 qs = qs.filter(status=Event.ARCHIVED)
             else:
                 qs = qs.filter(status=Event.ARCHIVED).filter(
                     Q(organizer=self.request.user) | Q(rsvps__user=self.request.user)
                 ).distinct()
-        elif view == "all":
+        else:
+            # Дефолт для авторизованих: published події
             qs = qs.filter(status=Event.PUBLISHED)
         
         specs = []
@@ -579,6 +584,11 @@ class EventUpdateView(LoginRequiredMixin, UpdateView):
 def rsvp_view(request, pk: int):
     """Реєстрація на подію (RSVP)"""
     from .services import RSVPService
+    
+    # CSRF захист: дозволяємо створення RSVP тільки через POST
+    if request.method != "POST":
+        messages.warning(request, "Реєстрація на подію можлива тільки через форму")
+        return redirect("event_detail", pk=pk)
     
     event = request.event  # Отримуємо з декоратора
 

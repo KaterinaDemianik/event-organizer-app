@@ -14,7 +14,22 @@ from datetime import datetime, timedelta
 
 User = get_user_model()
 
-print("Створюємо користувачів...")
+print("Створюємо суперкористувача...")
+admin, created = User.objects.get_or_create(
+    username='admin',
+    defaults={
+        'email': 'admin@example.com',
+        'is_staff': True,
+        'is_superuser': True
+    }
+)
+admin.set_password('admin123')
+admin.is_staff = True
+admin.is_superuser = True
+admin.save()
+print(f"✓ Суперкористувач {'створений' if created else 'оновлений'}: {admin.username}")
+
+print("\nСтворюємо користувачів...")
 katerina, _ = User.objects.get_or_create(
     username='Katerina_demianik',
     defaults={'email': 'katerina@example.com'}

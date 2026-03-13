@@ -56,23 +56,33 @@ python manage.py runserver
 
 ## Тестові облікові записи
 
-| Користувач | Пароль | Роль |
-|------------|--------|------|
-| admin | admin123 | Суперкористувач |
-| Katerina_demianik | password123 | Організатор |
-| ivan_petrov | password123 | Учасник |
+Після запуску `python load_test_data.py` будуть створені наступні акаунти:
+
+| Користувач | Пароль | Роль | Email |
+|------------|--------|------|-------|
+| admin | admin123 | Суперкористувач (staff + superuser) | admin@example.com |
+| Katerina_demianik | password123 | Організатор | katerina@example.com |
+| ivan_petrov | password123 | Учасник | ivan@example.com |
 
 ## Структура бази даних
 
-### Таблиці:
-- **auth_user** - Користувачі
+### Основні таблиці:
+- **auth_user** - Користувачі (Django)
 - **events_event** - Події
-- **tickets_rsvp** - Реєстрації на події
+- **events_review** - Відгуки на події
+- **tickets_rsvp** - Реєстрації на події (RSVP)
+- **notifications_notification** - Сповіщення користувачів
+- **users_userprofile** - Розширені профілі користувачів
+
+*Примітка: Це основні таблиці. Повний список включає також допоміжні таблиці Django (sessions, migrations, тощо).*
 
 ### Зв'язки:
 ```
 User (1) ──── (N) Event (організатор)
 User (N) ──── (N) Event (через RSVP)
+User (1) ──── (N) Review (автор відгуку)
+Event (1) ──── (N) Review (відгуки на подію)
+User (1) ──── (N) Notification (отримувач)
 ```
 
 ## 🔧 Корисні команди

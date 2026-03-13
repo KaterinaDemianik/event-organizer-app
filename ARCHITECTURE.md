@@ -2,7 +2,7 @@
 
 ## Огляд архітектури
 
-Event Organizer використовує багаторівневу архітектуру з чіткою відповідальністю кожного шару.
+Event Organizer використовує багаторівневу архітектуру з чіткою відповідальністю кожного шару
 
 ---
 
@@ -179,6 +179,7 @@ GET    /api/events/          # Список подій
 POST   /api/events/          # Створити подію
 GET    /api/events/{id}/     # Деталі події
 PUT    /api/events/{id}/     # Оновити подію
+PATCH  /api/events/{id}/     # Часткове оновлення події
 DELETE /api/events/{id}/     # Видалити подію
 POST   /api/events/{id}/rsvp/ # RSVP на подію
 ```
@@ -257,8 +258,8 @@ MIDDLEWARE = [
 ```python
 # event_organizer/urls.py
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include('events.urls')),
+    path('admin/', admin_site.urls),
+    path('api/events/', include('events.urls')),
     path('accounts/', include('users.urls')),
     path('', include('events.ui_urls')),
 ]

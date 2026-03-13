@@ -96,7 +96,7 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 **Структура:**
 - `session_key` - Унікальний ідентифікатор
-- `session_data` - Зашифровані дані (JSON)
+- `session_data` - Підписані серіалізовані дані (signed serialized data)
 - `expire_date` - Дата закінчення
 
 **Автоматичне очищення:**
@@ -123,6 +123,7 @@ CSRF_COOKIE_SAMESITE = 'Strict'
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     'http://127.0.0.1:8000',
+    'http://0.0.0.0:8000',
 ]
 ```
 
@@ -131,6 +132,20 @@ CSRF_TRUSTED_ORIGINS = [
 <form method="post">
     {% csrf_token %}
     <!-- form fields -->
+</form>
+```
+
+**Критичні операції з CSRF:**
+- ✅ **RSVP реєстрація** - тільки через POST з CSRF токеном
+- ✅ **Скасування RSVP** - тільки через POST з CSRF токеном
+- ✅ **Скасування події** - тільки через POST з CSRF токеном
+- ✅ **Створення відгуку** - тільки через POST з CSRF токеном
+
+**Приклад RSVP форми:**
+```html
+<form method="post" action="/events/{{ event.id }}/rsvp/">
+    {% csrf_token %}
+    <button type="submit">Зареєструватися</button>
 </form>
 ```
 
@@ -147,14 +162,15 @@ from django.shortcuts import redirect
 from django.contrib import messages
 
 def organizer_required(view_func):
-    """Декоратор для перевірки, чи користувач є організатором події"""
+    """Декоратор для перевірки, чи користувач є організатором події або staff"""
     
     @wraps(view_func)
     def wrapper(request, pk, *args, **kwargs):
         event = get_object_or_404(Event, pk=pk)
-        if event.organizer != request.user:
-            messages.error(request, "Ви не маєте прав для цієї дії")
+        if event.organizer != request.user and not request.user.is_staff:
+            messages.error(request, "Ви не маєте прав для виконання цієї дії")
             return redirect('event_detail', pk=pk)
+        request.event = event  # Передаємо event у request для повторного використання
         return view_func(request, pk, *args, **kwargs)
     
     return wrapper
@@ -168,13 +184,13 @@ def event_cancel_view(request, pk):
 
 ### Рівні доступу
 
-| Дія | Анонім | Користувач | Організатор |
-|-----|--------|------------|-------------|
-| Перегляд подій | ✅ | ✅ | ✅ |
-| RSVP | ❌ | ✅ | ✅ |
-| Створення події | ❌ | ✅ | ✅ |
-| Редагування події | ❌ | ❌ | ✅ (своєї) |
-| Скасування події | ❌ | ❌ | ✅ (своєї) |
+| Дія | Анонім | Користувач | Організатор | Staff |
+|-----|--------|------------|-------------|-------|
+| Перегляд подій | ✅ | ✅ | ✅ | ✅ |
+| RSVP | ❌ | ✅ | ✅ | ✅ |
+| Створення події | ❌ | ✅ | ✅ | ✅ |
+| Редагування події | ❌ | ❌ | ✅ (своєї) | ✅ (будь-якої) |
+| Скасування події | ❌ | ❌ | ✅ (своєї) | ✅ (будь-якої) |
 
 ---
 
@@ -231,9 +247,12 @@ SECURE_BROWSER_XSS_FILTER = True
 
 ## 📊 Моніторинг безпеки
 
-Проект використовує базові механізми логування Django (без додаткової конфігурації логерів).
-- Створення/видалення подій
-- RSVP реєстрації
+> ⚠️ **Примітка:** Детальне логування операцій (створення/видалення подій, RSVP) не реалізовано в поточній версії.
+> 
+> Для production середовища рекомендується налаштувати:
+> - Django LOGGING конфігурацію
+> - Зовнішні сервіси моніторингу (Sentry, Logstash)
+> - Alerts для критичних операцій
 
 ---
 
