@@ -1,6 +1,6 @@
 """
-Комплексні тести для досягнення 100% coverage
-Покриває залишкові непокриті рядки у всіх файлах
+Комплексні тести 
+Покриття залишкових непокритих рядків
 """
 from django.test import TestCase, Client, RequestFactory
 from django.contrib.auth.models import User

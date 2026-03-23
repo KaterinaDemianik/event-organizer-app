@@ -1,5 +1,5 @@
 """
-Фінальні тести для досягнення 100% coverage
+Фінальні тести 
 """
 from django.test import TestCase, Client, RequestFactory
 from django.contrib.auth.models import User

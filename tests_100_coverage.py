@@ -1,5 +1,5 @@
 """
-Додаткові тести для досягнення 100% coverage
+Додаткові тести 
 Покриває залишкові непокриті рядки
 """
 from django.test import TestCase, Client, RequestFactory

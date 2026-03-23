@@ -1,5 +1,4 @@
 """
-Тести для досягнення 100% coverage
 Покриває рядки: forms.py:130, serializers.py:72, states.py:209, services.py:69
 """
 from django.test import TestCase

@@ -1,6 +1,5 @@
 """
-Фінальні тести для досягнення 80% coverage
-Покриває різні непокриті частини коду для швидкого підвищення coverage
+80% coverage
 """
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
